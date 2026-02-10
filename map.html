@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Заказ трансфера</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+<base target="_blank">
+    <link rel="stylesheet" href="https://YOUR-USERNAME.github.io/YOUR-REPO/styles.css">
+</head>
+<body>
+    <!-- Обертка для работы в Tilda -->
+    <div id="tilda-calculator-wrapper">
+<!-- Верхняя панель (визуал как на референсе, без функционала) -->
+    <div class="topbar-wrap">
+        <div class="topbar">
+            <div class="topbar-logo">Timofeyev</div>
+
+            <nav class="topbar-nav" aria-label="Навигация">
+                <a class="topbar-link" href="javascript:void(0)">Пользователям <span style="font-size:12px; opacity:.65;">▾</span></a>
+                <a class="topbar-link" href="javascript:void(0)">Водителям <span style="font-size:12px; opacity:.65;">▾</span></a>
+                <a class="topbar-link" href="javascript:void(0)">Бизнесу <span style="font-size:12px; opacity:.65;">▾</span></a>
+                <a class="topbar-link" href="javascript:void(0)">Партнёрам <span style="font-size:12px; opacity:.65;">▾</span></a>
+
+            </nav>
+
+            <div class="topbar-actions">
+                <a class="topbar-login" href="javascript:void(0)">
+                    <i class="fas fa-arrow-right-to-bracket"></i>
+                    Войти
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div id="calculator">
+        <!-- Красная метка на карте -->
+        <div class="map-marker" id="mapMarker">
+            <div class="marker-pin"></div>
+            <div class="marker-shadow"></div>
+        </div>
+
+        <div class="location-loading" id="locationLoading">
+            <i class="fas fa-location-crosshairs"></i>
+            <div class="loading-text">Определяем ваше местоположение</div>
+            <div class="loading-subtext">Разрешите доступ для автоматического заполнения адреса</div>
+        </div>
+
+        <!-- Панель телефона -->
+        <div class="phone-panel">
+            <i class="fas fa-phone-alt phone-icon"></i>
+            <div>
+                <div class="phone-number">+7 (777) 779-64-44</div>
+                <div class="phone-label">Заказ трансфера по телефону</div>
+            </div>
+        </div>
+
+        <!-- Основная панель заказа -->
+        <div class="panel" id="panel">
+
+            <div class="panel-top">
+                <div class="panel-header" id="panelHeader">
+                    <div class="panel-handle"></div>
+                    <div class="panel-header-title">Заказ трансфера</div>
+                </div>
+                <!-- Поля ввода адресов -->
+                <div class="address-selector">
+                    <div class="address-field" id="fromField">
+                        <div class="address-icon from-icon">
+                            <svg width="24" height="24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="12" cy="12" r="7" fill="#fc3f1e"></circle>
+                                <circle cx="12" cy="12" r="4" fill="#fff"></circle>
+                            </svg>
+                        </div>
+                        <div class="address-input-container">
+                            <input type="text" class="address-input" id="fromInput" placeholder="Откуда" autocomplete="off">
+                            <span class="address-hint">Адрес точки А</span>
+                        </div>
+                        <button class="clear-button" id="clearFrom" style="display: none;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        <button class="map-select-button" id="fromMapButton" onclick="startSelectingPoint('from')" title="Выбрать на карте">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </button>
+                    </div>
+
+                    <div class="address-field" id="toField">
+                        <div class="address-icon to-icon">
+                            <svg width="24" height="24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="12" cy="12" r="9" fill="rgba(255, 216, 77, 0.16)"></circle>
+                                <circle cx="12" cy="12" r="6" fill="#ffd84d"></circle>
+                                <circle cx="12" cy="12" r="3" fill="#141414"></circle>
+                            </svg>
+                        </div>
+                        <div class="address-input-container">
+                            <input type="text" class="address-input" id="toInput" placeholder="Куда?" autocomplete="off">
+                            <span class="address-hint">Адрес точки Б</span>
+                        </div>
+                        <button class="clear-button" id="clearTo" style="display: none;">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        <button class="map-select-button" id="toMapButton" onclick="startSelectingPoint('to')" title="Выбрать на карте">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-content">
+                <div class="address-field add-stop" id="addStopField">
+                    <div class="add-stop-icon">
+                        <i class="fas fa-plus"></i>
+                    </div>
+                    <div class="add-stop-text">Добавить остановку</div>
+                </div>
+
+                <!-- Тарифы -->
+                <div class="tariff-section">
+
+                    <div class="tariff-grid" id="tariffGrid">
+                        <!-- Тарифы будут сгенерированы JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Класс транспорта -->
+                <div class="transport-class-section">
+                    <div class="transport-class-title">Выберите класс транспорта:</div>
+                    <div class="transport-class-options">
+                        <div class="transport-class-option active" data-class="comfort">
+                            <div class="transport-class-label">comfort</div>
+                        </div>
+                        <div class="transport-class-option" data-class="business">
+                            <div class="transport-class-label">business</div>
+                        </div>
+                        <div class="transport-class-option" data-class="premium">
+                            <div class="transport-class-label">premium</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Цена -->
+                <div class="price-section">
+
+                    <div>
+                        <span class="price-amount" id="priceAmount">—</span>
+                        <span class="price-currency">₸</span>
+                    </div>
+                </div>
+
+                <!-- Дополнительные опции -->
+                <div class="options-section">
+
+
+                    <div class="option-item">
+                        <div class="option-info">
+                            <div class="option-icon">
+                                <i class="fas fa-paw"></i>
+                            </div>
+                            <div class="option-text">
+                                <div class="option-name">Перевозка животного</div>
+                            </div>
+                        </div>
+                        <label class="yandex-toggle">
+                            <input type="checkbox" id="animalOption" onchange="updatePrice()">
+                            <span class="yandex-toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="option-item">
+                        <div class="option-info">
+                            <div class="option-icon">
+                                <i class="fas fa-skiing"></i>
+                            </div>
+                            <div class="option-text">
+                                <div class="option-name">Лыжи / сноуборд</div>
+                            </div>
+                        </div>
+                        <label class="yandex-toggle">
+                            <input type="checkbox" id="skiOption" onchange="updatePrice()">
+                            <span class="yandex-toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="option-item">
+                        <div class="option-info">
+                            <div class="option-icon">
+                                <i class="fas fa-wheelchair"></i>
+                            </div>
+                            <div class="option-text">
+                                <div class="option-name">Инвалидное кресло</div>
+                            </div>
+                        </div>
+                        <label class="yandex-toggle">
+                            <input type="checkbox" id="wheelchairOption" onchange="updatePrice()">
+                            <span class="yandex-toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <!-- Новые дополнительные опции -->
+                    <div class="option-item">
+                        <div class="option-info">
+                            <div class="option-icon">
+                                <i class="fas fa-baby-carriage"></i>
+                            </div>
+                            <div class="option-text">
+                                <div class="option-name">Детское кресло</div>
+                            </div>
+                        </div>
+                        <label class="yandex-toggle">
+                            <input type="checkbox" id="childSeatOption" onchange="updatePrice()">
+                            <span class="yandex-toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="option-item">
+                        <div class="option-info">
+                            <div class="option-icon">
+                                <i class="fas fa-car"></i>
+                            </div>
+                            <div class="option-text">
+                                <div class="option-name">Помогите найти машину</div>
+                            </div>
+                        </div>
+                        <label class="yandex-toggle">
+                            <input type="checkbox" id="findCarOption" onchange="updatePrice()">
+                            <span class="yandex-toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="option-item">
+                        <div class="option-info">
+                            <div class="option-icon">
+                                <i class="fas fa-comment-alt"></i>
+                            </div>
+                            <div class="option-text">
+                                <div class="option-name">Общаюсь только текстом</div>
+                            </div>
+                        </div>
+                        <label class="yandex-toggle">
+                            <input type="checkbox" id="textOnlyOption" onchange="updatePrice()">
+                            <span class="yandex-toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="option-item">
+                        <div class="option-info">
+                            <div class="option-icon">
+                                <i class="fas fa-ear-deaf"></i>
+                            </div>
+                            <div class="option-text">
+                                <div class="option-name">Не говорю, но слышу</div>
+                            </div>
+                        </div>
+                        <label class="yandex-toggle">
+                            <input type="checkbox" id="dontSpeakOption" onchange="updatePrice()">
+                            <span class="yandex-toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="option-item">
+                        <div class="option-info">
+                            <div class="option-icon">
+                                <i class="fas fa-bicycle"></i>
+                            </div>
+                            <div class="option-text">
+                                <div class="option-name">Велосипед</div>
+                            </div>
+                        </div>
+                        <label class="yandex-toggle">
+                            <input type="checkbox" id="bicycleOption" onchange="updatePrice()">
+                            <span class="yandex-toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Способ оплаты -->
+                <div class="payment-section">
+
+                    <div class="payment-button" onclick="openPaymentModal()">
+                        <div class="payment-info">
+                            <div class="payment-icon">
+                                <i class="fas fa-money-bill-wave"></i>
+                            </div>
+                            <div class="payment-text">
+                                <div class="payment-label">Оплата</div>
+                                <div class="payment-value" id="paymentValue">Наличными</div>
+                            </div>
+                        </div>
+                        <div class="payment-arrow">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Номер телефона -->
+                <div class="phone-input-section">
+                    <div class="phone-label">Номер телефона</div>
+                    <div class="phone-input-wrapper">
+                        <i class="fas fa-phone phone-input-icon"></i>
+                        <input
+                            type="tel"
+                            id="phoneInput"
+                            class="phone-input"
+                            placeholder="+7 (777) 779-64-44"
+                            maxlength="18"
+                        >
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-bottom">
+                <!-- Кнопка заказа -->
+                <div class="order-section">
+                    <button class="order-button" onclick="orderTaxi()">
+                        <i class="fas fa-check"></i>
+                        Заказать трансфер
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Индикатор выбора точки на карте -->
+        <div class="map-select-mode" id="mapSelectMode">
+            <div class="title">Выберите точку на карте</div>
+            <div class="hint">Кликните в нужном месте на карте<br>или нажмите ESC для отмены</div>
+        </div>
+
+        <div id="map"></div>
+
+        <!-- Кастомные контролы карты -->
+        <div class="map-controls" id="mapControls">
+            <div class="map-zoom-capsule">
+                <button type="button" id="zoomIn" title="Приблизить">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                        <line x1="12" y1="5" x2="12" y2="19"/>
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                </button>
+                <div class="zoom-divider"></div>
+                <button type="button" id="zoomOut" title="Отдалить">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                </button>
+            </div>
+            <button type="button" class="map-geo-btn" id="geoBtn" title="Моё местоположение">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Модальное окно выбора способа оплаты -->
+    <div class="payment-overlay" id="paymentOverlay">
+        <div class="payment-modal" id="paymentModal">
+            <div class="payment-modal-header">
+                <div class="payment-modal-title">Способ оплаты</div>
+                <button class="payment-modal-close" onclick="closePaymentModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="payment-methods" id="paymentMethodsList">
+                <!-- Способы оплаты будут сгенерированы JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно добавления карты -->
+    <div class="payment-overlay" id="addCardOverlay">
+        <div class="payment-modal">
+            <div class="payment-modal-header">
+                <div class="payment-modal-title">Добавить карту</div>
+                <button class="payment-modal-close" onclick="closeAddCardModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="add-card-form">
+                <div class="form-title">Введите данные карты</div>
+
+                <div class="form-group">
+                    <label class="form-label">Номер карты</label>
+                    <input type="text" class="form-input" id="cardNumber" placeholder="0000 0000 0000 0000" maxlength="19">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-col">
+                        <label class="form-label">Действует до</label>
+                        <input type="text" class="form-input" id="cardExpiry" placeholder="ММ/ГГ" maxlength="5">
+                    </div>
+                    <div class="form-col">
+                        <label class="form-label">CVC</label>
+                        <input type="text" class="form-input" id="cardCvc" placeholder="000" maxlength="3">
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button class="form-button secondary" onclick="closeAddCardModal()">Отмена</button>
+                    <button class="form-button primary" onclick="saveCard()">Добавить карту</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script src="https://api-maps.yandex.ru/2.1/?apikey=69c18fe9-15b1-4391-b4e7-2a005a4fb22d&lang=ru_RU"></script>
+    
+    </div>
+    <script src="https://YOUR-USERNAME.github.io/YOUR-REPO/script.js"></script>
+</body>
+</html>
