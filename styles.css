@@ -130,6 +130,11 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             height: 100%;
         }
 
+        /* Темная карта как в Яндекс Такси - серый фон, белый текст, цветные элементы */
+        body:not(.light-theme) #map {
+            filter: invert(0.9) hue-rotate(180deg) brightness(1.1) contrast(0.9);
+        }
+
         /* Светлая тема карты */
         body.light-theme #map {
             filter: none;
