@@ -223,6 +223,18 @@ document.addEventListener('DOMContentLoaded', function() {
             requestUserLocation();
         });
 
+        // Отрисовка маленькой машинки для карточки тарифа (как на скриншоте)
+        function getTariffCarIcon(tariffId) {
+            return `
+                <div class="tariff-car tariff-car-${tariffId}">
+                    <div class="tariff-car-body"></div>
+                    <div class="tariff-car-window"></div>
+                    <div class="tariff-car-wheel left"></div>
+                    <div class="tariff-car-wheel right"></div>
+                </div>
+            `;
+        }
+
         function initInterface() {
             const tariffGrid = document.getElementById('tariffGrid');
             tariffs.forEach(tariff => {
@@ -230,13 +242,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 card.className = 'tariff-card';
                 if (tariff.id === selectedTariff) card.classList.add('active');
 
-                const imageUrl = tariff.image || '';
-
                 card.innerHTML = `
                     ${tariff.id === 'suv' ? '<div class="tariff-badge">Популярный</div>' : ''}
                     <div class="tariff-header">
                         <div class="tariff-image-wrap">
-                            ${imageUrl ? `<img src="${imageUrl}" alt="${tariff.name}" class="tariff-image">` : ''}
+                            ${getTariffCarIcon(tariff.id)}
                         </div>
                         <div class="tariff-name">${tariff.name}</div>
                     </div>
