@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 price: 10000,
                 perKm: 200,
                 // Чёрный премиальный седан (Mercedes Maybach / S‑класс), PNG без фона
-                image: 'https://pngimg.com/uploads/mercedes/mercedes_PNG80181.png'
+                image: 'https://images.netdirector.co.uk/gforces-auto/image/upload/q_auto,c_fill,f_auto,fl_lossy/auto-client/db34bc6d7896380da1d7befaffde9a7a/sclassmaybach.png'
             },
             {
                 id: 'suv',
