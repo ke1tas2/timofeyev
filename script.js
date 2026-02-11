@@ -242,9 +242,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 card.innerHTML = `
                     ${tariff.id === 'suv' ? '<div class="tariff-badge">Популярный</div>' : ''}
                     <div class="tariff-header">
-                        <div class="tariff-image-wrap">
-                            ${imageUrl ? `<img src="${imageUrl}" alt="${tariff.name}" class="tariff-image">` : ''}
-                        </div>
+                        ${imageUrl ? `<img src="${imageUrl}" alt="${tariff.name}" class="tariff-image">` : ''}
                         <div class="tariff-name">${tariff.name}</div>
                     </div>
                     <div class="tariff-price">${formatPrice(tariff.price)} ₸</div>
