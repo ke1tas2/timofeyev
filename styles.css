@@ -134,8 +134,10 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
         body:not(.light-theme) #map {
             filter:
                 grayscale(1)
-                brightness(0.35)
-                contrast(1.4);
+                brightness(0.25)
+                contrast(1.5)
+                sepia(0.15)
+                hue-rotate(190deg);
         }
 
 
