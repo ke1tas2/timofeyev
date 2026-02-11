@@ -596,296 +596,31 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             margin-bottom: 6px;
         }
 
-        /* Обёртка под отрисованную машинку в карточке тарифа */
+        /* Обёртка под фото машины в карточке тарифа */
         .tariff-image-wrap {
             width: 100%;
             height: 40px;
             border-radius: 999px;
-            overflow: visible;
-            background: transparent;
+            overflow: hidden;
+            /* Фон максимально сливается с карточкой, чтобы был виден только силуэт авто */
+            background: #11131b;
             position: relative;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
+        .tariff-image {
+            max-width: 90%;
+            max-height: 80%;
+            object-fit: contain;
+            display: block;
+            filter: saturate(0.6) contrast(1.05) brightness(0.9);
+        }
+
         .tariff-card.active .tariff-image-wrap {
-            background: transparent;
-        }
-
-        /* Базовый силуэт машины (седан Maybach, по умолчанию чёрный премиум) */
-        .tariff-car {
-            position: relative;
-            width: 80px;
-            height: 28px;
-        }
-
-        .tariff-car-body {
-            position: absolute;
-            left: 0;
-            right: 0;
-            bottom: 4px;
-            height: 16px;
-            border-radius: 14px 14px 10px 10px;
-            background: linear-gradient(180deg, #3a3d45, #050609);
-        }
-
-        .tariff-car-window {
-            position: absolute;
-            left: 14px;
-            right: 20px;
-            bottom: 14px;
-            height: 8px;
-            border-radius: 10px 10px 6px 6px;
-            background: linear-gradient(180deg, #5f6470, #2f343c);
-        }
-
-        .tariff-car-wheel {
-            position: absolute;
-            bottom: 0;
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: #111217;
-            box-shadow: 0 0 0 3px #3e4148;
-        }
-
-        .tariff-car-wheel.left {
-            left: 11px;
-        }
-
-        .tariff-car-wheel.right {
-            right: 11px;
-        }
-
-        .tariff-card.active .tariff-car-body {
-            background: linear-gradient(180deg, #555a64, #14161c);
-        }
-
-        /* Седан Maybach (чёрный удлинённый) */
-        .tariff-car-sedan .tariff-car-body {
-            height: 15px;
-            bottom: 4px;
-            border-radius: 16px 16px 10px 10px;
-        }
-
-        .tariff-car-sedan .tariff-car-window {
-            left: 18px;
-            right: 18px;
-        }
-
-        /* Внедорожник — выше клиренс, более высокий кузов */
-        .tariff-car-suv .tariff-car-body {
-            bottom: 5px;
-            height: 18px;
-            border-radius: 12px 12px 8px 8px;
-        }
-
-        .tariff-car-suv .tariff-car-window {
-            bottom: 16px;
-            height: 9px;
-        }
-
-        .tariff-car-suv .tariff-car-wheel {
-            width: 11px;
-            height: 11px;
-        }
-
-        /* Спорткар — ниже и шире, колёса чуть вынесены */
-        .tariff-car-sport .tariff-car-body {
-            bottom: 3px;
-            height: 14px;
-            border-radius: 14px 14px 12px 12px;
-        }
-
-        .tariff-car-sport .tariff-car-window {
-            bottom: 14px;
-            height: 7px;
-            left: 18px;
-            right: 22px;
-        }
-
-        .tariff-car-sport .tariff-car-wheel.left {
-            left: 9px;
-        }
-
-        .tariff-car-sport .tariff-car-wheel.right {
-            right: 9px;
-        }
-
-        /* Автобус — длинный прямоугольный кузов */
-        .tariff-car-bus .tariff-car-body {
-            left: 2px;
-            right: 2px;
-            bottom: 5px;
-            height: 18px;
-            border-radius: 6px;
-        }
-
-        .tariff-car-bus .tariff-car-window {
-            left: 6px;
-            right: 10px;
-            bottom: 16px;
-            height: 8px;
-            border-radius: 5px;
-        }
-
-        .tariff-car-bus .tariff-car-wheel.left {
-            left: 8px;
-        }
-
-        .tariff-car-bus .tariff-car-wheel.right {
-            right: 8px;
-        }
-
-        /* Микроавтобус — короче автобуса, чуть выше седана */
-        .tariff-car-minibus .tariff-car-body {
-            left: 4px;
-            right: 6px;
-            bottom: 5px;
-            height: 17px;
-            border-radius: 10px 10px 8px 8px;
-        }
-
-        .tariff-car-minibus .tariff-car-window {
-            left: 10px;
-            right: 14px;
-            bottom: 16px;
-            height: 8px;
-        }
-
-        /* Вертолёт — используем кузов как фюзеляж и колёса как опоры */
-        .tariff-car-helicopter .tariff-car-body {
-            left: 10px;
-            right: 12px;
-            bottom: 8px;
-            height: 12px;
-            border-radius: 12px 14px 10px 10px;
-        }
-
-        .tariff-car-helicopter .tariff-car-window {
-            left: 16px;
-            right: 26px;
-            bottom: 13px;
-            height: 7px;
-            border-radius: 8px;
-        }
-
-        .tariff-car-helicopter .tariff-car-body::after {
-            content: "";
-            position: absolute;
-            left: 50%;
-            top: -4px;
-            width: 40px;
-            height: 3px;
-            transform: translateX(-50%);
-            border-radius: 999px;
-            background: #4c515b;
-        }
-
-        .tariff-car-helicopter .tariff-car-wheel {
-            bottom: 2px;
-            width: 16px;
-            height: 3px;
-            border-radius: 999px;
-            box-shadow: none;
-            background: #3b3f46;
-        }
-
-        .tariff-car-helicopter .tariff-car-wheel.left {
-            left: 8px;
-        }
-
-        .tariff-car-helicopter .tariff-car-wheel.right {
-            right: 8px;
-        }
-
-        /* Бизнес‑джет — узкий корпус с крыльями */
-        .tariff-car-jet .tariff-car-body {
-            left: 12px;
-            right: 10px;
-            bottom: 8px;
-            height: 10px;
-            border-radius: 10px 14px 8px 10px;
-        }
-
-        .tariff-car-jet .tariff-car-window {
-            left: 18px;
-            right: 20px;
-            bottom: 12px;
-            height: 4px;
-            border-radius: 999px;
-        }
-
-        .tariff-car-jet .tariff-car-body::before,
-        .tariff-car-jet .tariff-car-body::after {
-            content: "";
-            position: absolute;
-            width: 12px;
-            height: 4px;
-            background: #41454f;
-            border-radius: 999px;
-        }
-
-        .tariff-car-jet .tariff-car-body::before {
-            left: 6px;
-            bottom: 2px;
-            transform: rotate(8deg);
-        }
-
-        .tariff-car-jet .tariff-car-body::after {
-            right: 2px;
-            top: 0;
-            transform: rotate(-18deg);
-        }
-
-        .tariff-car-jet .tariff-car-wheel {
-            width: 7px;
-            height: 7px;
-            box-shadow: 0 0 0 2px #3e4148;
-        }
-
-        .tariff-car-jet .tariff-car-wheel.left {
-            left: 20px;
-        }
-
-        .tariff-car-jet .tariff-car-wheel.right {
-            right: 20px;
-        }
-
-        /* Перегон авто — связка ключей вместо машины */
-        .tariff-car-trailer .tariff-car-body,
-        .tariff-car-trailer .tariff-car-window {
-            background: transparent;
-        }
-
-        .tariff-car-trailer .tariff-car-wheel {
-            display: none;
-        }
-
-        .tariff-car-trailer .tariff-car-body::before {
-            content: "";
-            position: absolute;
-            left: 10px;
-            top: 3px;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            box-shadow: 0 0 0 3px #d7dadf;
-        }
-
-        .tariff-car-trailer .tariff-car-body::after {
-            content: "";
-            position: absolute;
-            left: 23px;
-            top: 9px;
-            width: 24px;
-            height: 8px;
-            border-radius: 4px;
-            background: #d7dadf;
-            box-shadow:
-                6px 2px 0 0 #b3b7bf,
-                12px 4px 0 0 #8e939b;
+            box-shadow: 0 0 0 1px rgba(255, 216, 77, 0.8);
+            background: linear-gradient(135deg, rgba(255, 216, 77, 0.16), #141722);
         }
 
         .tariff-name {

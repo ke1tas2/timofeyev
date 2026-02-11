@@ -38,57 +38,64 @@ document.addEventListener('DOMContentLoaded', function() {
                 name: 'Седан',
                 price: 10000,
                 perKm: 200,
-                // BMW премиум‑класса, PNG с прозрачным фоном
-                image: 'https://www.freeiconspng.com/uploads/bmw-7-series-car-png-image-33.png'
+                // Чёрный премиальный седан (Mercedes Maybach / S‑класс), PNG без фона
+                image: 'https://pngimg.com/uploads/mercedes/mercedes_PNG80181.png'
             },
             {
                 id: 'suv',
                 name: 'Внедорожник',
                 price: 15000,
                 perKm: 260,
-                image: 'https://images.pexels.com/photos/210019/pexels-photo-210019.jpeg?auto=compress&cs=tinysrgb&w=600'
+                // Чёрный премиальный внедорожник Land Rover, PNG без фона
+                image: 'https://pngimg.com/uploads/land_rover/land_rover_PNG64.png'
             },
             {
                 id: 'sport',
                 name: 'Спорткар',
                 price: 30000,
                 perKm: 400,
-                image: 'https://images.pexels.com/photos/1402787/pexels-photo-1402787.jpeg?auto=compress&cs=tinysrgb&w=600'
+                // Чёрный спорткар Porsche, PNG без фона
+                image: 'https://pngimg.com/uploads/porsche/porsche_PNG10624.png'
             },
             {
                 id: 'bus',
                 name: 'Автобус',
                 price: 40000,
                 perKm: 350,
-                image: 'https://images.pexels.com/photos/460633/pexels-photo-460633.jpeg?auto=compress&cs=tinysrgb&w=600'
+                // Премиум‑автобус, PNG без фона
+                image: 'https://pngimg.com/uploads/bus/bus_PNG8602.png'
             },
             {
                 id: 'minibus',
                 name: 'Микроавтобус',
                 price: 30000,
                 perKm: 300,
-                image: 'https://images.pexels.com/photos/97075/pexels-photo-97075.jpeg?auto=compress&cs=tinysrgb&w=600'
+                // Чёрный микроавтобус/минивэн (можно заменить позже на свой PNG)
+                image: 'https://pngimg.com/uploads/bus/bus_PNG8615.png'
             },
             {
                 id: 'helicopter',
                 name: 'Вертолёт',
                 price: 2160000,
                 perKm: 500000,
-                image: 'https://images.pexels.com/photos/46148/aircraft-helicopter-huey-military-46148.jpeg?auto=compress&cs=tinysrgb&w=600'
+                // Чёрный вертолёт, PNG без фона
+                image: 'https://pngimg.com/d/helicopter_PNG541.png'
             },
             {
                 id: 'jet',
                 name: 'Бизнес джет',
                 price: 10000000,
                 perKm: 1500000,
-                image: 'https://images.pexels.com/photos/46148/aircraft-helicopter-huey-military-46148.jpeg?auto=compress&cs=tinysrgb&w=600'
+                // Бизнес‑джет, PNG без фона
+                image: 'https://pngimg.com/uploads/plane/plane_PNG5228.png'
             },
             {
                 id: 'trailer',
                 name: 'Перегон авто',
                 price: 20000,
                 perKm: 200,
-                image: 'https://images.pexels.com/photos/2449452/pexels-photo-2449452.jpeg?auto=compress&cs=tinysrgb&w=600'
+                // Ключи от машины, PNG без фона
+                image: 'https://pngimg.com/uploads/key/key_PNG1177.png'
             }
         ];
 
@@ -223,18 +230,6 @@ document.addEventListener('DOMContentLoaded', function() {
             requestUserLocation();
         });
 
-        // Отрисовка маленькой машинки для карточки тарифа (как на скриншоте)
-        function getTariffCarIcon(tariffId) {
-            return `
-                <div class="tariff-car tariff-car-${tariffId}">
-                    <div class="tariff-car-body"></div>
-                    <div class="tariff-car-window"></div>
-                    <div class="tariff-car-wheel left"></div>
-                    <div class="tariff-car-wheel right"></div>
-                </div>
-            `;
-        }
-
         function initInterface() {
             const tariffGrid = document.getElementById('tariffGrid');
             tariffs.forEach(tariff => {
@@ -242,11 +237,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 card.className = 'tariff-card';
                 if (tariff.id === selectedTariff) card.classList.add('active');
 
+                const imageUrl = tariff.image || '';
+
                 card.innerHTML = `
                     ${tariff.id === 'suv' ? '<div class="tariff-badge">Популярный</div>' : ''}
                     <div class="tariff-header">
                         <div class="tariff-image-wrap">
-                            ${getTariffCarIcon(tariff.id)}
+                            ${imageUrl ? `<img src="${imageUrl}" alt="${tariff.name}" class="tariff-image">` : ''}
                         </div>
                         <div class="tariff-name">${tariff.name}</div>
                     </div>
