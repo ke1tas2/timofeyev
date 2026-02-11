@@ -151,11 +151,13 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
 
         .topbar {
             height: var(--topbar-height);
-            background: radial-gradient(circle at top left, rgba(255, 216, 77, 0.15), transparent 55%) ,
-                        rgba(5, 6, 10, 0.96);
-            backdrop-filter: blur(14px);
+            /* Более тёмный, ближе к общему фону панели */
+            background:
+                radial-gradient(circle at top left, rgba(255, 216, 77, 0.22), transparent 55%),
+                linear-gradient(135deg, #151821, #0e1017);
+            backdrop-filter: blur(18px);
             border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
             border: 1px solid var(--border-subtle);
             display: flex;
             align-items: center;
@@ -287,12 +289,14 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             position: fixed;
             top: calc(var(--topbar-gap) + var(--topbar-height) + var(--panel-vertical-gap));
             left: calc(var(--panel-left-gap) + var(--panel-width) + var(--panel-phone-gap));
-            background: radial-gradient(circle at top left, rgba(255, 216, 77, 0.2), rgba(10, 10, 16, 0.98));
-            border-radius: 16px;
+            background:
+                radial-gradient(circle at top left, rgba(255, 216, 77, 0.18), transparent 60%),
+                linear-gradient(135deg, #1b1f2a, #141822);
+            border-radius: 18px;
             padding: 12px 20px;
             z-index: 20;
             border: 1px solid var(--border-subtle);
-            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.8);
+            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.9);
             display: flex;
             align-items: center;
             gap: 10px;
