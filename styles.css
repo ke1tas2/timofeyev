@@ -618,6 +618,9 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             filter: saturate(0.6) contrast(1.05) brightness(0.9);
         }
 
+        .tariff-card.active .tariff-image-wrap {
+            background: transparent;
+        }
 
         .tariff-name {
             font-size: 14px;
