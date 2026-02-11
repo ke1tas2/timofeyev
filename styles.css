@@ -2082,6 +2082,10 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
                 margin-bottom: 6px;
             }
 
+            body.light-theme .panel-handle {
+                background: rgba(0, 0, 0, 0.15);
+                box-shadow: none;
+            }
 
             .panel.collapsed .panel-header {
                 display: flex;
