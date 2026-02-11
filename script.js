@@ -79,12 +79,24 @@ document.addEventListener('DOMContentLoaded', function() {
                 balloon: {
                     autoPan: false
                 },
-                openBalloonOnClick: false
+                openBalloonOnClick: false,
+                // Темная тема карты
+                copyrightLogoVisible: false,
+                copyrightProvidersVisible: false,
+                copyrightUaVisible: false
             });
 
             map.options.set('balloonAutoPan', false);
             map.options.set('openBalloonOnClick', false);
             map.behaviors.disable('scrollZoom');
+
+            // Устанавливаем схему карты в зависимости от сохраненной темы
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'light') {
+                map.options.set('scheme', 'light');
+            } else {
+                map.options.set('scheme', 'dark');
+            }
 
             const centerMarkerEl = document.getElementById('mapMarker');
             let moveEndTimer = null;
@@ -1345,13 +1357,17 @@ function toggleTheme() {
     // Переключаем класс
     body.classList.toggle('light-theme');
     
-    // Обновляем иконку
+    // Обновляем иконку и тему карты
     if (body.classList.contains('light-theme')) {
         themeIcon.textContent = '☀️';
         localStorage.setItem('theme', 'light');
+        // Светлая тема карты
+        if (map) map.options.set('scheme', 'light');
     } else {
         themeIcon.textContent = '🌙';
         localStorage.setItem('theme', 'dark');
+        // Тёмная тема карты
+        if (map) map.options.set('scheme', 'dark');
     }
 }
 

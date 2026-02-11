@@ -130,12 +130,9 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             height: 100%;
         }
 
-        /* В тёмной (основной) теме делаем карту по тону похожей на левую панель */
-        body:not(.light-theme) #map {
-            filter:
-                grayscale(1)
-                brightness(0.35)
-                contrast(1.4);
+        /* Светлая тема карты */
+        body.light-theme #map {
+            filter: none;
         }
 
 
