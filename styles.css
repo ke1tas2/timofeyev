@@ -1202,6 +1202,39 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             color: var(--text-muted);
         }
 
+        /* Когда цена рассчитана — убираем "от" и меняем стиль */
+        .tariff-price.calculated::before {
+            content: "";
+        }
+
+        .tariff-price.calculated {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--accent-primary);
+            animation: price-pop 0.3s ease;
+        }
+
+        /* Анимация счётчика — плавный переход цвета пока идёт подсчёт */
+        .tariff-price.price-counting {
+            color: #f5c518;
+            transition: color 0.15s ease;
+        }
+
+        .tariff-price.price-counting-done {
+            animation: price-settle 0.25s ease forwards;
+        }
+
+        @keyframes price-settle {
+            0% { color: #f5c518; transform: scale(1.05); }
+            100% { color: var(--accent-primary); transform: scale(1); }
+        }
+
+        @keyframes price-pop {
+            0% { transform: scale(0.85); opacity: 0.5; }
+            60% { transform: scale(1.08); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
         .tariff-badge {
             display: none;
             position: absolute;
@@ -2297,8 +2330,8 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
         }
 
         body.light-theme .marker-pin {
-            background: #ffc800 !important;
-            box-shadow: 0 4px 16px rgba(255, 200, 0, 0.4) !important;
+            background: #fc3f1e !important;
+            box-shadow: 0 4px 16px rgba(252, 63, 30, 0.4) !important;
         }
 
         @keyframes markerBounce {

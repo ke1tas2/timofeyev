@@ -257,11 +257,13 @@ document.addEventListener('DOMContentLoaded', function() {
                         ${imageUrl ? `<img src="${imageUrl}" alt="${tariff.name}" class="tariff-image">` : ''}
                     </div>
                     <div class="tariff-name">${tariff.name}</div>
-                    <div class="tariff-price">${formatPrice(tariff.price)} ₸</div>
+                    <div class="tariff-price" id="tariff-price-${tariff.id}">${formatPrice(tariff.price)} ₸</div>
                 `;
 
                 card.addEventListener('click', () => selectTariff(tariff.id));
                 tariffGrid.appendChild(card);
+                // init animation state with base price
+                initTariffAnimState(tariff.id, tariff.price);
             });
 
             document.querySelectorAll('.transport-class-option').forEach(option => {
@@ -798,29 +800,74 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
 
+            // Синхронизируем скрытый priceAmount с ценой выбранного тарифа
+            const priceEl = document.getElementById('tariff-price-' + tariffId);
+            const priceAmount = document.getElementById('priceAmount');
+            if (priceEl && priceAmount) {
+                if (priceEl.classList.contains('calculated')) {
+                    const numericText = priceEl.textContent.replace(/[^\d]/g, '');
+                    const numericValue = parseInt(numericText) || 0;
+                    currentAnimatedPrice = numericValue;
+                    priceAmount.textContent = formatPrice(numericValue);
+                } else {
+                    priceAmount.textContent = '—';
+                    currentAnimatedPrice = 0;
+                }
+            }
+
             updatePrice();
         }
 
         function calculatePrice(distanceKm = 0) {
-            const tariff = tariffs.find(t => t.id === selectedTariff);
-            if (!tariff) return;
+            let extras = 0;
+            if (document.getElementById('animalOption').checked) extras += 5000;
+            if (document.getElementById('skiOption').checked) extras += 3000;
+            if (document.getElementById('childSeatOption').checked) extras += 2000;
+            if (document.getElementById('bicycleOption').checked) extras += 3000;
 
-            let price = tariff.price + (distanceKm * tariff.perKm);
+            let selectedPrice = 0;
 
-            if (document.getElementById('animalOption').checked) price += 5000;
-            if (document.getElementById('skiOption').checked) price += 3000;
-            if (document.getElementById('childSeatOption').checked) price += 2000;
-            if (document.getElementById('bicycleOption').checked) price += 3000;
+            tariffs.forEach(tariff => {
+                let price = tariff.price + (distanceKm * tariff.perKm) + extras;
+                price = Math.round(price / 100) * 100;
 
-            price = Math.round(price / 100) * 100;
+                const priceEl = document.getElementById('tariff-price-' + tariff.id);
+                if (priceEl) {
+                    priceEl.classList.add('calculated');
+                    animateTariffPrice(tariff.id, price);
+                }
 
+                if (tariff.id === selectedTariff) {
+                    selectedPrice = price;
+                }
+            });
+
+            // Обновляем скрытый элемент для orderTaxi()
             const priceElement = document.getElementById('priceAmount');
+            if (priceElement) {
+                if (currentAnimatedPrice === 0 && priceElement.textContent === '—') {
+                    currentAnimatedPrice = selectedPrice;
+                    priceElement.textContent = formatPrice(selectedPrice);
+                } else {
+                    animateCounter(priceElement, selectedPrice);
+                }
+            }
+        }
 
-            if (currentAnimatedPrice === 0 && priceElement.textContent === '—') {
-                currentAnimatedPrice = price;
-                priceElement.textContent = formatPrice(price);
-            } else {
-                animateCounter(priceElement, price);
+        function resetTariffPrices() {
+            tariffs.forEach(tariff => {
+                const priceEl = document.getElementById('tariff-price-' + tariff.id);
+                if (priceEl) {
+                    priceEl.classList.remove('calculated');
+                    animateTariffPrice(tariff.id, tariff.price);
+                }
+            });
+            const priceElement = document.getElementById('priceAmount');
+            if (priceElement) priceElement.textContent = '—';
+            currentAnimatedPrice = 0;
+            if (animationFrame) {
+                cancelAnimationFrame(animationFrame);
+                animationFrame = null;
             }
         }
 
@@ -839,7 +886,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const directDistance = calculateDirectDistance(fromCoords, toCoords);
                 calculatePrice(directDistance);
             } else {
-                calculatePrice(0);
+                resetTariffPrices();
             }
         }
 
@@ -1194,6 +1241,54 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         let currentAnimatedPrice = 0;
         let animationFrame = null;
+
+        // Per-tariff animation state
+        const tariffAnimStates = {};
+        function initTariffAnimState(tariffId, initialValue) {
+            tariffAnimStates[tariffId] = {
+                currentValue: initialValue,
+                frameId: null
+            };
+        }
+        function animateTariffPrice(tariffId, targetValue, duration = 700) {
+            const priceEl = document.getElementById('tariff-price-' + tariffId);
+            if (!priceEl) return;
+
+            if (!tariffAnimStates[tariffId]) {
+                initTariffAnimState(tariffId, targetValue);
+                priceEl.textContent = formatPrice(targetValue) + ' ₸';
+                return;
+            }
+
+            const state = tariffAnimStates[tariffId];
+            if (state.frameId) {
+                cancelAnimationFrame(state.frameId);
+                state.frameId = null;
+            }
+
+            const startValue = state.currentValue;
+            if (startValue === targetValue) return;
+
+            const startTime = performance.now();
+            function easeOutQuart(x) { return 1 - Math.pow(1 - x, 4); }
+
+            function tick(now) {
+                const elapsed = now - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const eased = easeOutQuart(progress);
+                const val = startValue + (targetValue - startValue) * eased;
+                state.currentValue = val;
+                priceEl.textContent = formatPrice(Math.round(val)) + ' ₸';
+                if (progress < 1) {
+                    state.frameId = requestAnimationFrame(tick);
+                } else {
+                    state.currentValue = targetValue;
+                    state.frameId = null;
+                }
+            }
+            state.frameId = requestAnimationFrame(tick);
+        }
+
         function animateCounter(element, targetValue, duration = 800) {
             if (animationFrame) {
                 cancelAnimationFrame(animationFrame);
