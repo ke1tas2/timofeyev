@@ -619,7 +619,8 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
         }
 
         .tariff-card.active .tariff-image-wrap {
-            background: radial-gradient(circle at top, rgba(255, 216, 77, 0.22), #141722);
+            background: transparent;
+            border-radius: 0;
         }
 
         .tariff-name {
