@@ -40,11 +40,12 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             padding: 0;
             box-sizing: border-box;
             min-height: 100vh;
-            background: radial-gradient(circle at top, #10131d 0, #05060a 42%, #020308 100%);
+            background: radial-gradient(circle at top, #2a2d35 0, #1f2229 42%, #181b20 100%);
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             color: #f5f5f7;
             position: relative;
             width: 100%;
+            transition: background 0.3s ease, color 0.3s ease;
         }
 
         #tilda-calculator-wrapper * {
@@ -67,10 +68,10 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             --panel-vertical-gap: 12px;
             --panel-phone-gap: 16px;
 
-
-            --bg-main: #05060a;
-            --bg-surface: #070910;
-            --bg-card: #10131d;
+            /* Темная тема (СЕРАЯ) */
+            --bg-main: #1f2229;
+            --bg-surface: #2a2d35;
+            --bg-card: #33373f;
             --accent-primary: #ffd84d;
             --accent-primary-soft: rgba(255, 216, 77, 0.15);
             --accent-secondary: #c8a251;
@@ -87,6 +88,29 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             --panel-inset: 12px;
             --panel-top-h: 140px;
             --panel-bottom-h: 76px;
+        }
+
+        /* Светлая тема */
+        body.light-theme {
+            --bg-main: #f5f7fa;
+            --bg-surface: #ffffff;
+            --bg-card: #f8f9fb;
+            --accent-primary: #ffd84d;
+            --accent-primary-soft: rgba(255, 216, 77, 0.15);
+            --accent-secondary: #c8a251;
+            --text-primary: #1a1d24;
+            --text-muted: rgba(0, 0, 0, 0.6);
+            --border-subtle: rgba(0, 0, 0, 0.08);
+            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        body.light-theme #tilda-calculator-wrapper {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
+            color: #1a1d24;
+        }
+
+        body.light-theme #map {
+            filter: invert(0) hue-rotate(0deg) brightness(1) contrast(1) saturate(1);
         }
 
 
@@ -204,6 +228,49 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             background: #1b1f2a;
             box-shadow: 0 0 18px rgba(255, 216, 77, 0.35);
             transform: translateY(-1px);
+        }
+
+        body.light-theme .topbar-login {
+            background: rgba(0, 0, 0, 0.04);
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        body.light-theme .topbar-login:hover {
+            background: rgba(0, 0, 0, 0.08);
+            box-shadow: 0 0 12px rgba(255, 216, 77, 0.25);
+        }
+
+        /* Кнопка переключения темы */
+        .theme-toggle {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 42px;
+            height: 42px;
+            padding: 0;
+            border-radius: 12px;
+            border: 1px solid var(--border-subtle);
+            background: var(--bg-card);
+            color: var(--accent-primary);
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+        }
+
+        .theme-toggle:hover {
+            background: var(--accent-primary);
+            color: #141414;
+            transform: translateY(-1px) rotate(20deg);
+            box-shadow: 0 4px 12px rgba(255, 216, 77, 0.3);
+        }
+
+        .theme-toggle:active {
+            transform: translateY(0) rotate(0deg);
+        }
+
+        .theme-icon {
+            transition: transform 0.3s ease;
         }
 
 

@@ -1336,3 +1336,34 @@ document.addEventListener('DOMContentLoaded', function() {
                 closeAddCardModal();
             }
         });
+    
+// ========== ПЕРЕКЛЮЧЕНИЕ ТЕМЫ ==========
+function toggleTheme() {
+    const body = document.body;
+    const themeIcon = document.querySelector('.theme-icon');
+    
+    // Переключаем класс
+    body.classList.toggle('light-theme');
+    
+    // Обновляем иконку
+    if (body.classList.contains('light-theme')) {
+        themeIcon.textContent = '☀️';
+        localStorage.setItem('theme', 'light');
+    } else {
+        themeIcon.textContent = '🌙';
+        localStorage.setItem('theme', 'dark');
+    }
+}
+
+// Загружаем сохраненную тему при старте
+document.addEventListener('DOMContentLoaded', function() {
+    const savedTheme = localStorage.getItem('theme');
+    const themeIcon = document.querySelector('.theme-icon');
+    
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-theme');
+        if (themeIcon) themeIcon.textContent = '☀️';
+    } else {
+        if (themeIcon) themeIcon.textContent = '🌙';
+    }
+});
