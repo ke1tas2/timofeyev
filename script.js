@@ -38,64 +38,74 @@ document.addEventListener('DOMContentLoaded', function() {
                 name: 'Седан',
                 price: 10000,
                 perKm: 200,
-                // Чёрный премиальный седан (Mercedes Maybach / S‑класс), PNG без фона
-                image: 'https://images.netdirector.co.uk/gforces-auto/image/upload/q_auto,c_fill,f_auto,fl_lossy/auto-client/db34bc6d7896380da1d7befaffde9a7a/sclassmaybach.png'
+                // Чёрный Maybach S223 (Mercedes-Maybach S-Class), PNG без фона
+                image: 'assets/sedan.png'
             },
+
             {
                 id: 'suv',
                 name: 'Внедорожник',
                 price: 15000,
                 perKm: 260,
-                // Чёрный премиальный внедорожник Land Rover, PNG без фона
-                image: 'https://pngimg.com/uploads/land_rover/land_rover_PNG64.png'
+                // Чёрный премиум внедорожник Land Rover, PNG без фона
+                image: 'assets/suv.png'
             },
+
             {
                 id: 'sport',
                 name: 'Спорткар',
                 price: 30000,
                 perKm: 400,
-                // Чёрный спорткар Porsche, PNG без фона
-                image: 'https://pngimg.com/uploads/porsche/porsche_PNG10624.png'
+                // Чёрный премиум спорткар Porsche, PNG без фона
+                image: 'assets/sportcar.png'
+            },
+            {
+                id: 'limousine',
+                name: 'Лимузин',
+                price: 50000,
+                perKm: 350,
+                // Чёрный премиум лимузин, PNG без фона (локальный файл)
+                image: 'assets/limousine-black.png'
             },
             {
                 id: 'bus',
                 name: 'Автобус',
                 price: 40000,
                 perKm: 350,
-                // Премиум‑автобус, PNG без фона
-                image: 'https://pngimg.com/uploads/bus/bus_PNG8602.png'
+                // Чёрный премиум автобус, PNG без фона
+                image: 'assets/bus.png'
             },
             {
                 id: 'minibus',
                 name: 'Микроавтобус',
                 price: 30000,
                 perKm: 300,
-                // Чёрный микроавтобус/минивэн (можно заменить позже на свой PNG)
-                image: 'https://pngimg.com/uploads/bus/bus_PNG8615.png'
+                // Чёрный премиум микроавтобус/маршрутка, PNG без фона
+                image: 'assets/microbus.png'
             },
             {
                 id: 'helicopter',
                 name: 'Вертолёт',
                 price: 2160000,
                 perKm: 500000,
-                // Чёрный вертолёт, PNG без фона
-                image: 'https://pngimg.com/d/helicopter_PNG541.png'
+                // Чёрный вертолёт, PNG без фона (локальный файл)
+                image: 'assets/helicopter-black.png'
             },
             {
                 id: 'jet',
                 name: 'Бизнес джет',
                 price: 10000000,
                 perKm: 1500000,
-                // Бизнес‑джет, PNG без фона
-                image: 'https://pngimg.com/uploads/plane/plane_PNG5228.png'
+                // Чёрный премиум бизнес-джет, PNG без фона
+                image: 'assets/plane.png'
             },
             {
                 id: 'trailer',
                 name: 'Перегон авто',
                 price: 20000,
                 perKm: 200,
-                // Ключи от машины, PNG без фона
-                image: 'https://pngimg.com/uploads/key/key_PNG1177.png'
+                // Чёрный ключ от машины, PNG без фона (локальный файл)
+                image: 'assets/car-keys.png'
             }
         ];
 
@@ -235,16 +245,18 @@ document.addEventListener('DOMContentLoaded', function() {
             tariffs.forEach(tariff => {
                 const card = document.createElement('div');
                 card.className = 'tariff-card';
+                // Добавляем модификатор по ID тарифа, чтобы можно было тонко настраивать стили
+                card.classList.add(`tariff-card-${tariff.id}`);
                 if (tariff.id === selectedTariff) card.classList.add('active');
 
                 const imageUrl = tariff.image || '';
 
                 card.innerHTML = `
                     ${tariff.id === 'suv' ? '<div class="tariff-badge">Популярный</div>' : ''}
-                    <div class="tariff-header">
+                    <div class="tariff-image-box">
                         ${imageUrl ? `<img src="${imageUrl}" alt="${tariff.name}" class="tariff-image">` : ''}
-                        <div class="tariff-name">${tariff.name}</div>
                     </div>
+                    <div class="tariff-name">${tariff.name}</div>
                     <div class="tariff-price">${formatPrice(tariff.price)} ₸</div>
                 `;
 
