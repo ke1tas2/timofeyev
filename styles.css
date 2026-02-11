@@ -90,23 +90,23 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             --panel-bottom-h: 76px;
         }
 
-        /* Светлая тема */
+        /* Светлая тема - Яндекс Go стиль */
         body.light-theme {
-            --bg-main: #f5f7fa;
+            --bg-main: #ffffff;
             --bg-surface: #ffffff;
-            --bg-card: #f8f9fb;
-            --accent-primary: #ffd84d;
-            --accent-primary-soft: rgba(255, 216, 77, 0.15);
-            --accent-secondary: #c8a251;
-            --text-primary: #1a1d24;
-            --text-muted: rgba(0, 0, 0, 0.6);
-            --border-subtle: rgba(0, 0, 0, 0.08);
-            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --bg-card: #ffffff;
+            --accent-primary: #ffc800;
+            --accent-primary-soft: rgba(255, 200, 0, 0.1);
+            --accent-secondary: #e6b400;
+            --text-primary: #000000;
+            --text-muted: rgba(0, 0, 0, 0.5);
+            --border-subtle: rgba(0, 0, 0, 0.06);
+            --card-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
         }
 
         body.light-theme #tilda-calculator-wrapper {
-            background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
-            color: #1a1d24;
+            background: #ffffff;
+            color: #000000;
         }
 
         body.light-theme #map {
@@ -164,6 +164,26 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             padding: 0 20px;
             gap: 22px;
             color: var(--text-primary);
+        }
+
+        /* Светлый стиль топбара */
+        body.light-theme .topbar {
+            background: #ffffff !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+            border: 1px solid rgba(0, 0, 0, 0.06) !important;
+        }
+
+        body.light-theme .topbar-logo {
+            color: #000000 !important;
+        }
+
+        body.light-theme .topbar-link {
+            color: rgba(0, 0, 0, 0.6) !important;
+        }
+
+        body.light-theme .topbar-link:hover {
+            background: rgba(255, 200, 0, 0.08) !important;
+            color: #000000 !important;
         }
 
         .topbar-logo {
@@ -248,8 +268,501 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
 
         body.light-theme .topbar-login:hover {
             background: rgba(0, 0, 0, 0.08);
-            box-shadow: 0 0 12px rgba(255, 216, 77, 0.25);
+            box-shadow: 0 0 12px rgba(255, 200, 0, 0.25);
         }
+
+        /* Дополнительные стили для светлой темы */
+        body.light-theme .phone-panel {
+            background: linear-gradient(135deg, #ffd84d 0%, #ffc800 100%) !important;
+            box-shadow: 0 4px 16px rgba(255, 200, 0, 0.25) !important;
+            border: none !important;
+        }
+
+        body.light-theme .phone-number {
+            color: #000000 !important;
+        }
+
+        body.light-theme .phone-label {
+            color: rgba(0, 0, 0, 0.7) !important;
+        }
+
+        body.light-theme .phone-icon {
+            color: #000000 !important;
+        }
+
+        body.light-theme .panel {
+            background: #ffffff !important;
+            box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06) !important;
+            border: 1px solid rgba(0, 0, 0, 0.06) !important;
+        }
+
+        body.light-theme .panel-content {
+            background: #ffffff !important;
+        }
+
+        body.light-theme .panel-top {
+            background: #ffffff !important;
+        }
+
+        body.light-theme .panel-bottom {
+            background: #ffffff !important;
+        }
+
+        body.light-theme .address-selector {
+            background: #ffffff !important;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04) !important;
+            border: 1px solid rgba(0, 0, 0, 0.08) !important;
+        }
+
+        body.light-theme .transport-class-section {
+            background: #ffffff !important;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04) !important;
+            border: 1px solid rgba(0, 0, 0, 0.08) !important;
+        }
+
+        body.light-theme .transport-class-options {
+            background: #ffffff !important;
+            border: 1px solid rgba(0, 0, 0, 0.08) !important;
+        }
+
+        body.light-theme .transport-class-option + .transport-class-option::before {
+            background: rgba(0, 0, 0, 0.1) !important;
+        }
+
+        body.light-theme .map-zoom-capsule,
+        body.light-theme .map-geo-btn {
+            background: #ffffff !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+            border: 1px solid rgba(0, 0, 0, 0.08) !important;
+        }
+
+        body.light-theme .map-zoom-capsule button:hover {
+            background: rgba(255, 200, 0, 0.08) !important;
+        }
+
+        body.light-theme .map-geo-btn:hover {
+            background: #fafafa !important;
+            border-color: rgba(255, 200, 0, 0.4) !important;
+            box-shadow: 0 2px 12px rgba(255, 200, 0, 0.2) !important;
+        }
+
+        body.light-theme .tariff-card {
+            background: #ffffff !important;
+            border: 1px solid rgba(0, 0, 0, 0.08) !important;
+            border-radius: 12px !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+        }
+
+        body.light-theme .tariff-card:hover {
+            background: #ffffff !important;
+            border-color: rgba(255, 200, 0, 0.4) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+        }
+
+        body.light-theme .tariff-card.active {
+            background: rgba(255, 200, 0, 0.08) !important;
+            border-color: #ffc800 !important;
+            box-shadow: 0 2px 12px rgba(255, 200, 0, 0.2), 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+        }
+
+        body.light-theme .transport-class-option {
+            background: transparent !important;
+        }
+
+        body.light-theme .transport-class-option:hover {
+            background: rgba(255, 200, 0, 0.08) !important;
+        }
+
+        body.light-theme .transport-class-option.active {
+            background: #ffc800 !important;
+            color: #000000 !important;
+        }
+
+        body.light-theme .order-button {
+            background: #ffc800 !important;
+            color: #000000 !important;
+            box-shadow: 0 4px 16px rgba(255, 200, 0, 0.3) !important;
+        }
+
+        body.light-theme .order-button:hover {
+            background: #e6b400 !important;
+            box-shadow: 0 6px 20px rgba(255, 200, 0, 0.4) !important;
+        }
+
+        /* SVG индикатор точки А (from-icon) */
+        .from-icon-circle {
+            fill: #fc3f1e;
+        }
+
+        body.light-theme .from-icon-circle {
+            fill: #ffc800 !important;
+        }
+
+        body.light-theme .payment-button,
+        body.light-theme .option-item {
+            background: #ffffff !important;
+            border: 1px solid rgba(0, 0, 0, 0.06) !important;
+        }
+
+        body.light-theme .payment-overlay {
+            background: rgba(0, 0, 0, 0.5) !important;
+        }
+
+        body.light-theme .payment-modal {
+            background: #ffffff !important;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2) !important;
+        }
+
+        body.light-theme .payment-method {
+            background: #ffffff !important;
+            border: 1.5px solid rgba(0, 0, 0, 0.08) !important;
+        }
+
+        body.light-theme .payment-method.active {
+            background: rgba(255, 200, 0, 0.08) !important;
+            border-color: #ffc800 !important;
+        }
+
+        body.light-theme .add-card-form {
+            background: #ffffff !important;
+        }
+
+        body.light-theme .form-input {
+            background: #ffffff !important;
+            border: 1.5px solid rgba(0, 0, 0, 0.08) !important;
+            color: #000000 !important;
+        }
+
+        body.light-theme .form-button.primary {
+            background: #ffc800 !important;
+            color: #000000 !important;
+        }
+
+        body.light-theme .form-button.secondary {
+            background: #f0f0f0 !important;
+            color: #000000 !important;
+        }
+
+        body.light-theme .map-select-mode {
+            background: #ffffff !important;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15) !important;
+        }
+
+        body.light-theme .location-loading {
+            background: #ffffff !important;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08) !important;
+        }
+
+        body.light-theme .price-section {
+            background: #ffffff !important;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04) !important;
+            border: 1px solid rgba(0, 0, 0, 0.08) !important;
+        }
+
+        body.light-theme .options-section {
+            background: #ffffff !important;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04) !important;
+            border: 1px solid rgba(0, 0, 0, 0.08) !important;
+        }
+
+        body.light-theme .payment-section {
+            background: #ffffff !important;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04) !important;
+            border: 1px solid rgba(0, 0, 0, 0.08) !important;
+        }
+
+        body.light-theme .phone-input-section {
+            background: #ffffff !important;
+            border: 1px solid rgba(0, 0, 0, 0.06) !important;
+        }
+
+        body.light-theme .phone-input-wrapper {
+            background: #ffffff !important;
+            border: 1px solid rgba(0, 0, 0, 0.1) !important;
+        }
+
+        body.light-theme .payment-button {
+            background: #ffffff !important;
+            border: 1px solid rgba(0, 0, 0, 0.08) !important;
+        }
+
+        body.light-theme .payment-button:hover {
+            background: #f5f5f5 !important;
+            border-color: rgba(255, 200, 0, 0.3) !important;
+            box-shadow: 0 2px 8px rgba(255, 200, 0, 0.15) !important;
+        }
+
+        body.light-theme .option-item:not(:last-child) {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+        }
+
+        body.light-theme .yandex-toggle-slider {
+            background-color: rgba(0, 0, 0, 0.12) !important;
+        }
+
+        body.light-theme .yandex-toggle input:checked + .yandex-toggle-slider::before {
+            background: #ffffff !important;
+        }
+
+        body.light-theme .phone-input::placeholder {
+            color: rgba(0, 0, 0, 0.3) !important;
+        }
+
+        /* Модальные окна - полная перекраска */
+        body.light-theme .payment-modal {
+            background: #ffffff !important;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
+        }
+
+        body.light-theme .payment-modal-header {
+            background: #ffffff !important;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+        }
+
+        body.light-theme .payment-modal-close {
+            background: #f5f5f5 !important;
+            border: 1px solid rgba(0, 0, 0, 0.08) !important;
+            color: #000000 !important;
+        }
+
+        body.light-theme .payment-modal-close:hover {
+            background: #e8e8e8 !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+        }
+
+        body.light-theme .payment-methods {
+            background: #ffffff !important;
+        }
+
+        body.light-theme .payment-method-item {
+            background: #ffffff !important;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+        }
+
+        body.light-theme .payment-method-item:hover {
+            background: #fafafa !important;
+        }
+
+        body.light-theme .payment-method-item.active {
+            background: rgba(255, 200, 0, 0.06) !important;
+            border-left-color: #ffc800 !important;
+        }
+
+        body.light-theme .payment-method-icon {
+            background: rgba(255, 200, 0, 0.12) !important;
+            color: #ffc800 !important;
+        }
+
+        body.light-theme .payment-method-icon.card {
+            background: #f5f5f5 !important;
+            color: #000000 !important;
+        }
+
+        body.light-theme .add-card-button {
+            background: #ffffff !important;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+        }
+
+        body.light-theme .add-card-button:hover {
+            background: #fafafa !important;
+        }
+
+        body.light-theme .add-card-icon {
+            background: rgba(255, 200, 0, 0.12) !important;
+            color: #ffc800 !important;
+        }
+
+        body.light-theme .add-card-text {
+            color: #ffc800 !important;
+        }
+
+        body.light-theme .payment-method-details {
+            color: rgba(0, 0, 0, 0.5) !important;
+        }
+
+        body.light-theme .card-delete {
+            color: #ffc800 !important;
+        }
+
+        body.light-theme .card-delete:hover {
+            background: rgba(255, 200, 0, 0.1) !important;
+        }
+
+        /* Дополнительные стили для элементов панели */
+        body.light-theme .address-field:not(:last-child) {
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
+        body.light-theme .address-input {
+            color: #000000;
+        }
+
+        body.light-theme .address-input::placeholder {
+            color: rgba(0, 0, 0, 0.3);
+        }
+
+        body.light-theme .address-hint {
+            color: rgba(0, 0, 0, 0.5);
+            background: #ffffff;
+        }
+
+        body.light-theme .add-stop-icon {
+            border-color: rgba(0, 0, 0, 0.2);
+        }
+
+        body.light-theme .add-stop-text {
+            color: #000000;
+        }
+
+        body.light-theme .address-field.add-stop:hover .add-stop-icon {
+            background: rgba(255, 200, 0, 0.1);
+            border-color: rgba(255, 200, 0, 0.6);
+        }
+
+        body.light-theme .clear-button {
+            color: rgba(0, 0, 0, 0.4);
+        }
+
+        body.light-theme .clear-button:hover {
+            background: rgba(0, 0, 0, 0.08);
+            color: rgba(0, 0, 0, 0.7);
+        }
+
+        body.light-theme .map-select-button {
+            background: #f5f5f5 !important;
+            border-color: rgba(0, 0, 0, 0.08) !important;
+        }
+
+        body.light-theme .map-select-button:hover {
+            background: #eeeeee !important;
+            border-color: rgba(255, 200, 0, 0.3) !important;
+        }
+
+        body.light-theme .tariff-section {
+            background: #ffffff !important;
+        }
+
+        body.light-theme .tariff-name {
+            color: #000000;
+        }
+
+        body.light-theme .tariff-price {
+            color: #000000;
+        }
+
+        body.light-theme .transport-class-title {
+            color: #000000;
+        }
+
+        body.light-theme .transport-class-label {
+            color: #000000;
+        }
+
+        body.light-theme .price-amount {
+            color: #000000;
+        }
+
+        body.light-theme .price-currency {
+            color: rgba(0, 0, 0, 0.6);
+        }
+
+        body.light-theme .option-name {
+            color: #000000;
+        }
+
+        body.light-theme .option-description {
+            color: rgba(0, 0, 0, 0.5);
+        }
+
+        body.light-theme .yandex-toggle-slider {
+            background: rgba(0, 0, 0, 0.1);
+        }
+
+        body.light-theme .yandex-toggle input:checked + .yandex-toggle-slider {
+            background: #ffc800;
+        }
+
+        body.light-theme .payment-label {
+            color: rgba(0, 0, 0, 0.5);
+        }
+
+        body.light-theme .payment-value {
+            color: #000000;
+        }
+
+        body.light-theme .phone-label {
+            color: rgba(0, 0, 0, 0.5);
+        }
+
+        body.light-theme .phone-input {
+            background: #f7f7f7;
+            border: 1.5px solid rgba(0, 0, 0, 0.08);
+            color: #000000;
+        }
+
+        body.light-theme .phone-input::placeholder {
+            color: rgba(0, 0, 0, 0.3);
+        }
+
+        body.light-theme .phone-input:focus {
+            border-color: #ffc800;
+            background: #ffffff;
+        }
+
+        body.light-theme .panel-header-title {
+            color: rgba(0, 0, 0, 0.6);
+        }
+
+        body.light-theme .panel-handle {
+            background: rgba(0, 0, 0, 0.15);
+        }
+
+        body.light-theme .payment-modal-title {
+            color: #000000;
+        }
+
+        body.light-theme .payment-modal-close {
+            color: rgba(0, 0, 0, 0.5);
+        }
+
+        body.light-theme .payment-modal-close:hover {
+            background: rgba(0, 0, 0, 0.05);
+            color: #000000;
+        }
+
+        body.light-theme .payment-method-name {
+            color: #000000;
+        }
+
+        body.light-theme .payment-method-icon:not(.card) {
+            color: #ffc800 !important;
+        }
+
+        body.light-theme .form-label {
+            color: rgba(0, 0, 0, 0.6);
+        }
+
+        body.light-theme .form-title {
+            color: #000000;
+        }
+
+        body.light-theme .map-select-mode .title {
+            color: #000000;
+        }
+
+        body.light-theme .map-select-mode .hint {
+            color: rgba(0, 0, 0, 0.6);
+        }
+
+        body.light-theme .loading-text {
+            color: #000000;
+        }
+
+        body.light-theme .loading-subtext {
+            color: rgba(0, 0, 0, 0.5);
+        }
+
+
 
         /* Кнопка переключения темы */
         .theme-toggle {
@@ -931,6 +1444,11 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             font-size: 14px;
         }
 
+        body.light-theme .payment-icon {
+            background: rgba(255, 200, 0, 0.1) !important;
+            color: #ffc800 !important;
+        }
+
         .payment-text {
             display: flex;
             flex-direction: column;
@@ -1071,6 +1589,10 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             font-weight: 700;
             font-size: 15px;
             margin-bottom: 6px;
+        }
+
+        body.light-theme .map-select-mode .title {
+            color: #ffc800 !important;
         }
 
         .map-select-mode .hint {
@@ -1253,10 +1775,19 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             font-size: 14px;
         }
 
+        body.light-theme .add-card-icon {
+            background: rgba(255, 200, 0, 0.12) !important;
+            color: #ffc800 !important;
+        }
+
         .add-card-text {
             font-size: 14px;
             font-weight: 500;
             color: #ff5b47;
+        }
+
+        body.light-theme .add-card-text {
+            color: #ffc800 !important;
         }
 
 
@@ -1330,6 +1861,15 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
 
         .form-button.primary:hover {
             background: #e0381b;
+        }
+
+        body.light-theme .form-button.primary {
+            background: #ffc800 !important;
+            color: #000000 !important;
+        }
+
+        body.light-theme .form-button.primary:hover {
+            background: #e6b400 !important;
         }
 
         .form-button.secondary {
@@ -1709,6 +2249,11 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             position: relative;
             box-shadow: 0 4px 16px rgba(252, 63, 30, 0.4);
             animation: markerBounce 0.5s ease-out;
+        }
+
+        body.light-theme .marker-pin {
+            background: #ffc800 !important;
+            box-shadow: 0 4px 16px rgba(255, 200, 0, 0.4) !important;
         }
 
         @keyframes markerBounce {
