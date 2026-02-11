@@ -1414,16 +1414,17 @@ document.addEventListener('DOMContentLoaded', function() {
 function toggleTheme() {
     const body = document.body;
     const themeIcon = document.querySelector('.theme-icon');
-    
-    // Переключаем класс
+    if (!themeIcon) return;
+
     body.classList.toggle('light-theme');
-    
-    // Обновляем иконку
+
     if (body.classList.contains('light-theme')) {
-        themeIcon.textContent = '☀️';
+        themeIcon.classList.remove('fa-moon');
+        themeIcon.classList.add('fa-sun');
         localStorage.setItem('theme', 'light');
     } else {
-        themeIcon.textContent = '🌙';
+        themeIcon.classList.remove('fa-sun');
+        themeIcon.classList.add('fa-moon');
         localStorage.setItem('theme', 'dark');
     }
 }
@@ -1432,11 +1433,14 @@ function toggleTheme() {
 document.addEventListener('DOMContentLoaded', function() {
     const savedTheme = localStorage.getItem('theme');
     const themeIcon = document.querySelector('.theme-icon');
-    
+    if (!themeIcon) return;
+
     if (savedTheme === 'light') {
         document.body.classList.add('light-theme');
-        if (themeIcon) themeIcon.textContent = '☀️';
+        themeIcon.classList.remove('fa-moon');
+        themeIcon.classList.add('fa-sun');
     } else {
-        if (themeIcon) themeIcon.textContent = '🌙';
+        themeIcon.classList.remove('fa-sun');
+        themeIcon.classList.add('fa-moon');
     }
 });

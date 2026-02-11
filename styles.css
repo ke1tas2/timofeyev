@@ -166,9 +166,12 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             color: var(--text-primary);
         }
 
-        /* Светлый стиль топбара */
+        /* Светлый стиль топбара — полупрозрачный с градиентом (как в тёмной, но светлые цвета) */
         body.light-theme .topbar {
-            background: #ffffff !important;
+            background: radial-gradient(circle at top left, rgba(255, 216, 77, 0.15), transparent 55%),
+                        rgba(255, 255, 255, 0.96) !important;
+            backdrop-filter: blur(14px) !important;
+            -webkit-backdrop-filter: blur(14px) !important;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06) !important;
             border: 1px solid rgba(0, 0, 0, 0.06) !important;
         }
@@ -271,11 +274,12 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             box-shadow: 0 0 12px rgba(255, 200, 0, 0.25);
         }
 
-        /* Дополнительные стили для светлой темы */
+        /* Панель телефона в светлой теме — как в тёмной, но светлые цвета */
         body.light-theme .phone-panel {
-            background: linear-gradient(135deg, #ffd84d 0%, #ffc800 100%) !important;
-            box-shadow: 0 4px 16px rgba(255, 200, 0, 0.25) !important;
-            border: none !important;
+            background: radial-gradient(circle at top left, rgba(255, 220, 100, 0.4), rgba(255, 255, 255, 0.95)) !important;
+            border-radius: 16px !important;
+            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.15) !important;
+            border: 1px solid rgba(0, 0, 0, 0.08) !important;
         }
 
         body.light-theme .phone-number {
@@ -310,19 +314,19 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
 
         body.light-theme .address-selector {
             background: #ffffff !important;
-            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04) !important;
-            border: 1px solid rgba(0, 0, 0, 0.08) !important;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04) !important;
+            border: 1px solid rgba(0, 0, 0, 0.06) !important;
         }
 
         body.light-theme .transport-class-section {
             background: #ffffff !important;
             box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04) !important;
-            border: 1px solid rgba(0, 0, 0, 0.08) !important;
+            border: 1px solid rgba(0, 0, 0, 0.06) !important;
         }
 
         body.light-theme .transport-class-options {
             background: #ffffff !important;
-            border: 1px solid rgba(0, 0, 0, 0.08) !important;
+            border: 1px solid rgba(0, 0, 0, 0.06) !important;
         }
 
         body.light-theme .transport-class-option + .transport-class-option::before {
@@ -348,7 +352,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
 
         body.light-theme .tariff-card {
             background: #ffffff !important;
-            border: 1px solid rgba(0, 0, 0, 0.08) !important;
+            border: 1px solid rgba(0, 0, 0, 0.06) !important;
             border-radius: 12px !important;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
         }
@@ -398,10 +402,14 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             fill: #ffc800 !important;
         }
 
-        body.light-theme .payment-button,
-        body.light-theme .option-item {
+        body.light-theme .payment-button {
             background: #ffffff !important;
             border: 1px solid rgba(0, 0, 0, 0.06) !important;
+        }
+
+        body.light-theme .option-item {
+            background: #ffffff !important;
+            border: none !important;
         }
 
         body.light-theme .payment-overlay {
@@ -456,34 +464,45 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
         body.light-theme .price-section {
             background: #ffffff !important;
             box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04) !important;
-            border: 1px solid rgba(0, 0, 0, 0.08) !important;
+            border: 1px solid rgba(0, 0, 0, 0.06) !important;
         }
 
         body.light-theme .options-section {
             background: #ffffff !important;
             box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04) !important;
-            border: 1px solid rgba(0, 0, 0, 0.08) !important;
+            border: 1px solid rgba(0, 0, 0, 0.06) !important;
         }
 
         body.light-theme .payment-section {
             background: #ffffff !important;
             box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04) !important;
-            border: 1px solid rgba(0, 0, 0, 0.08) !important;
+            border: 1px solid rgba(0, 0, 0, 0.06) !important;
         }
 
         body.light-theme .phone-input-section {
             background: #ffffff !important;
             border: 1px solid rgba(0, 0, 0, 0.06) !important;
+            border-radius: 16px !important;
+            padding: 16px !important;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04) !important;
         }
 
         body.light-theme .phone-input-wrapper {
-            background: #ffffff !important;
-            border: 1px solid rgba(0, 0, 0, 0.1) !important;
+            background: #f5f5f5 !important;
+            border: none !important;
+            border-radius: 12px !important;
+            padding: 14px 16px !important;
+            box-shadow: none !important;
+        }
+
+        body.light-theme .phone-input-wrapper:focus-within {
+            background: #f5f5f5 !important;
+            box-shadow: 0 0 0 2px rgba(255, 200, 0, 0.25) !important;
         }
 
         body.light-theme .payment-button {
             background: #ffffff !important;
-            border: 1px solid rgba(0, 0, 0, 0.08) !important;
+            border: 1px solid rgba(0, 0, 0, 0.06) !important;
         }
 
         body.light-theme .payment-button:hover {
@@ -493,7 +512,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
         }
 
         body.light-theme .option-item:not(:last-child) {
-            border-bottom: 1px solid rgba(0, 0, 0, 0.06) !important;
+            border-bottom: none !important;
         }
 
         body.light-theme .yandex-toggle-slider {
@@ -631,15 +650,19 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
         body.light-theme .map-select-button {
             background: #f5f5f5 !important;
             border-color: rgba(0, 0, 0, 0.08) !important;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06) !important;
         }
 
         body.light-theme .map-select-button:hover {
             background: #eeeeee !important;
             border-color: rgba(255, 200, 0, 0.3) !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
         }
 
         body.light-theme .tariff-section {
             background: #ffffff !important;
+            border: 1px solid rgba(0, 0, 0, 0.06) !important;
+            border-radius: 22px !important;
         }
 
         body.light-theme .tariff-name {
@@ -695,18 +718,21 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
         }
 
         body.light-theme .phone-input {
-            background: #f7f7f7;
-            border: 1.5px solid rgba(0, 0, 0, 0.08);
-            color: #000000;
+            background: transparent !important;
+            border: none !important;
+            color: #1a1a1a;
         }
 
         body.light-theme .phone-input::placeholder {
-            color: rgba(0, 0, 0, 0.3);
+            color: rgba(0, 0, 0, 0.35);
         }
 
         body.light-theme .phone-input:focus {
-            border-color: #ffc800;
-            background: #ffffff;
+            outline: none;
+        }
+
+        body.light-theme .phone-input-icon {
+            color: #ffc800 !important;
         }
 
         body.light-theme .panel-header-title {
@@ -764,7 +790,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
 
 
 
-        /* Кнопка переключения темы */
+        /* Кнопка переключения темы — в стиле кнопок карты */
         .theme-toggle {
             display: inline-flex;
             align-items: center;
@@ -774,42 +800,61 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             padding: 0;
             border-radius: 12px;
             border: 1px solid var(--border-subtle);
-            background: var(--bg-card);
+            background: #11131b;
             color: var(--accent-primary);
-            font-size: 18px;
+            font-size: 16px;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: background 0.15s, box-shadow 0.15s, border-color 0.15s, color 0.15s;
             margin-right: 10px;
+            box-shadow: 0 14px 32px rgba(0, 0, 0, 0.85);
         }
 
         .theme-toggle:hover {
-            background: var(--accent-primary);
-            color: #141414;
-            transform: translateY(-1px) rotate(20deg);
-            box-shadow: 0 4px 12px rgba(255, 216, 77, 0.3);
+            background: #181b27;
+            border-color: rgba(255, 216, 77, 0.45);
+            box-shadow: 0 0 20px rgba(255, 216, 77, 0.55);
         }
 
         .theme-toggle:active {
-            transform: translateY(0) rotate(0deg);
+            background: #151822;
+            box-shadow: 0 0 14px rgba(255, 216, 77, 0.4);
         }
 
         .theme-icon {
-            transition: transform 0.3s ease;
+            font-size: 18px;
+            line-height: 1;
+        }
+
+        body.light-theme .theme-toggle {
+            background: #ffffff !important;
+            border: 1px solid rgba(0, 0, 0, 0.08) !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+            color: #ffc800;
+        }
+
+        body.light-theme .theme-toggle:hover {
+            background: #fafafa !important;
+            border-color: rgba(255, 200, 0, 0.4) !important;
+            box-shadow: 0 2px 12px rgba(255, 200, 0, 0.2) !important;
+        }
+
+        body.light-theme .theme-toggle:active {
+            background: #f5f5f5 !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
         }
 
 
+        /* Панель телефона — как в test.html: градиент + полупрозрачный тёмный фон */
         .phone-panel {
             position: fixed;
             top: calc(var(--topbar-gap) + var(--topbar-height) + var(--panel-vertical-gap));
             left: calc(var(--panel-left-gap) + var(--panel-width) + var(--panel-phone-gap));
-            background:
-                radial-gradient(circle at top left, rgba(255, 216, 77, 0.18), transparent 60%),
-                linear-gradient(135deg, #1b1f2a, #141822);
-            border-radius: 18px;
+            background: radial-gradient(circle at top left, rgba(255, 216, 77, 0.2), rgba(10, 10, 16, 0.98));
+            border-radius: 16px;
             padding: 12px 20px;
             z-index: 20;
             border: 1px solid var(--border-subtle);
-            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.9);
+            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.8);
             display: flex;
             align-items: center;
             gap: 10px;
@@ -889,7 +934,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
 
         .address-field {
             display: flex;
-            align-items: flex-start;
+            align-items: center;
             padding: 16px 18px;
             min-height: 64px;
             cursor: text;
@@ -942,7 +987,6 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-top: 8px;
         }
 
         .from-icon {
@@ -1012,7 +1056,6 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             margin-left: 8px;
             flex-shrink: 0;
             transition: all 0.2s;
-            margin-top: 8px;
         }
 
         .clear-button:hover {
@@ -1035,7 +1078,6 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             margin-left: 8px;
             flex-shrink: 0;
             transition: all 0.2s;
-            margin-top: 8px;
             box-shadow: 0 8px 18px rgba(0, 0, 0, 0.7);
         }
 
@@ -1275,7 +1317,8 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             padding: 14px 0;
         }
         .option-item:not(:last-child) {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            /* Убираем разделители по умолчанию, чтобы в светлой теме не было серых линий */
+            border-bottom: none;
         }
         .option-info {
             display: flex;
@@ -1395,6 +1438,8 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             color: var(--text-primary);
             font-size: 15px;
             font-family: inherit;
+            /* Делаем поле (placeholder) визуально округлым */
+            border-radius: 999px;
         }
 
         .phone-input::placeholder {
