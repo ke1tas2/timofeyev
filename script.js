@@ -38,7 +38,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 name: 'Седан',
                 price: 10000,
                 perKm: 200,
-                image: 'https://images.pexels.com/photos/112460/pexels-photo-112460.jpeg?auto=compress&cs=tinysrgb&w=600'
+                // BMW премиум‑класса, PNG с прозрачным фоном
+                image: 'https://www.freeiconspng.com/uploads/bmw-7-series-car-png-image-33.png'
             },
             {
                 id: 'suv',
