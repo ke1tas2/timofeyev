@@ -33,14 +33,62 @@ document.addEventListener('DOMContentLoaded', function() {
         let selectedTransportClass = 'comfort';
 
         const tariffs = [
-            { id: 'sedan',       name: 'Седан',        price: 10000,   perKm: 200,    icon: 'car-side',   color: '#fc3f1e' },
-            { id: 'suv',         name: 'Внедорожник',  price: 15000,   perKm: 260,    icon: 'truck-monster', color: '#000' },
-            { id: 'sport',       name: 'Спорткар',     price: 30000,   perKm: 400,    icon: 'flag-checkered', color: '#ffd700' },
-            { id: 'bus',         name: 'Автобус',      price: 40000,   perKm: 350,    icon: 'bus',        color: '#4caf50' },
-            { id: 'minibus',     name: 'Микроавтобус', price: 30000,   perKm: 300,    icon: 'van-shuttle', color: '#2196f3' },
-            { id: 'helicopter',  name: 'Вертолёт',     price: 2160000, perKm: 500000, icon: 'helicopter', color: '#4caf50' },
-            { id: 'jet',         name: 'Бизнес джет',  price: 10000000,perKm: 1500000,icon: 'plane',      color: '#2196f3' },
-            { id: 'trailer',     name: 'Перегон авто', price: 20000,   perKm: 200,    icon: 'trailer',    color: '#9c27b0' }
+            {
+                id: 'sedan',
+                name: 'Седан',
+                price: 10000,
+                perKm: 200,
+                image: 'https://images.pexels.com/photos/112460/pexels-photo-112460.jpeg?auto=compress&cs=tinysrgb&w=600'
+            },
+            {
+                id: 'suv',
+                name: 'Внедорожник',
+                price: 15000,
+                perKm: 260,
+                image: 'https://images.pexels.com/photos/210019/pexels-photo-210019.jpeg?auto=compress&cs=tinysrgb&w=600'
+            },
+            {
+                id: 'sport',
+                name: 'Спорткар',
+                price: 30000,
+                perKm: 400,
+                image: 'https://images.pexels.com/photos/1402787/pexels-photo-1402787.jpeg?auto=compress&cs=tinysrgb&w=600'
+            },
+            {
+                id: 'bus',
+                name: 'Автобус',
+                price: 40000,
+                perKm: 350,
+                image: 'https://images.pexels.com/photos/460633/pexels-photo-460633.jpeg?auto=compress&cs=tinysrgb&w=600'
+            },
+            {
+                id: 'minibus',
+                name: 'Микроавтобус',
+                price: 30000,
+                perKm: 300,
+                image: 'https://images.pexels.com/photos/97075/pexels-photo-97075.jpeg?auto=compress&cs=tinysrgb&w=600'
+            },
+            {
+                id: 'helicopter',
+                name: 'Вертолёт',
+                price: 2160000,
+                perKm: 500000,
+                image: 'https://images.pexels.com/photos/46148/aircraft-helicopter-huey-military-46148.jpeg?auto=compress&cs=tinysrgb&w=600'
+            },
+            {
+                id: 'jet',
+                name: 'Бизнес джет',
+                price: 10000000,
+                perKm: 1500000,
+                image: 'https://images.pexels.com/photos/46148/aircraft-helicopter-huey-military-46148.jpeg?auto=compress&cs=tinysrgb&w=600'
+            },
+            {
+                id: 'trailer',
+                name: 'Перегон авто',
+                price: 20000,
+                perKm: 200,
+                image: 'https://images.pexels.com/photos/2449452/pexels-photo-2449452.jpeg?auto=compress&cs=tinysrgb&w=600'
+            }
         ];
 
         let paymentMethods = [
@@ -180,17 +228,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 const card = document.createElement('div');
                 card.className = 'tariff-card';
                 if (tariff.id === selectedTariff) card.classList.add('active');
+
+                const imageUrl = tariff.image || '';
+
                 card.innerHTML = `
                     ${tariff.id === 'suv' ? '<div class="tariff-badge">Популярный</div>' : ''}
                     <div class="tariff-header">
-                        <div class="tariff-icon">
-                            <i class="fas fa-${tariff.icon}"></i>
+                        <div class="tariff-image-wrap">
+                            ${imageUrl ? `<img src="${imageUrl}" alt="${tariff.name}" class="tariff-image">` : ''}
                         </div>
                         <div class="tariff-name">${tariff.name}</div>
                     </div>
                     <div class="tariff-price">${formatPrice(tariff.price)} ₸</div>
-                    <div class="tariff-hint">от</div>
                 `;
+
                 card.addEventListener('click', () => selectTariff(tariff.id));
                 tariffGrid.appendChild(card);
             });
