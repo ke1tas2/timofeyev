@@ -599,7 +599,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
         /* Обёртка под фото машины в карточке тарифа */
         .tariff-image-wrap {
             width: 100%;
-            height: 40px;
+            height: 65px;
             border-radius: 999px;
             overflow: hidden;
             /* Фон максимально сливается с карточкой, чтобы был виден только силуэт авто */
@@ -611,8 +611,8 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
         }
 
         .tariff-image {
-            max-width: 90%;
-            max-height: 80%;
+            max-width: 95%;
+            max-height: 95%;
             object-fit: contain;
             display: block;
             filter: saturate(0.6) contrast(1.05) brightness(0.9);
