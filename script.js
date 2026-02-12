@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 price: 10000,
                 perKm: 200,
                 // Чёрный Maybach S223 (Mercedes-Maybach S-Class), PNG без фона
-                image: 'assets/sedan.png'
+                image: 'https://ke1tas2.github.io/timofeyev/assets/sedan.png'
             },
 
             {
@@ -48,7 +48,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 price: 15000,
                 perKm: 260,
                 // Чёрный премиум внедорожник Land Rover, PNG без фона
-                image: 'assets/suv.png'
+                image: 'https://ke1tas2.github.io/timofeyev/assets/suv.png'
             },
 
             {
@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 price: 30000,
                 perKm: 400,
                 // Чёрный премиум спорткар Porsche, PNG без фона
-                image: 'assets/sportcar.png'
+                image: 'https://ke1tas2.github.io/timofeyev/assets/sportcar.png'
             },
             {
                 id: 'limousine',
@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 price: 50000,
                 perKm: 350,
                 // Чёрный премиум лимузин, PNG без фона (локальный файл)
-                image: 'assets/limousine-black.png'
+                image: 'https://ke1tas2.github.io/timofeyev/assets/limousine-black.png'
             },
             {
                 id: 'bus',
@@ -73,7 +73,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 price: 40000,
                 perKm: 350,
                 // Чёрный премиум автобус, PNG без фона
-                image: 'assets/bus.png'
+                image: 'https://ke1tas2.github.io/timofeyev/assets/bus.png'
             },
             {
                 id: 'minibus',
@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 price: 30000,
                 perKm: 300,
                 // Чёрный премиум микроавтобус/маршрутка, PNG без фона
-                image: 'assets/microbus.png'
+                image: 'https://ke1tas2.github.io/timofeyev/assets/microsub.png'
             },
             {
                 id: 'helicopter',
@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 price: 2160000,
                 perKm: 500000,
                 // Чёрный вертолёт, PNG без фона (локальный файл)
-                image: 'assets/helicopter-black.png'
+                image: 'https://ke1tas2.github.io/timofeyev/assets/helicopter-black.png'
             },
             {
                 id: 'jet',
@@ -97,7 +97,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 price: 10000000,
                 perKm: 1500000,
                 // Чёрный премиум бизнес-джет, PNG без фона
-                image: 'assets/plane.png'
+                image: 'https://ke1tas2.github.io/timofeyev/assets/plane.png'
             },
             {
                 id: 'trailer',
@@ -105,7 +105,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 price: 20000,
                 perKm: 200,
                 // Чёрный ключ от машины, PNG без фона (локальный файл)
-                image: 'assets/car-keys.png'
+                image: 'https://ke1tas2.github.io/timofeyev/assets/car-keys.png'
             }
         ];
 
