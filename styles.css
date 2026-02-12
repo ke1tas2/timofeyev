@@ -2180,12 +2180,17 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
                 display: flex;
                 flex-direction: column;
                 width: 100%;
-                margin-top: 10px;
+                margin-top: 0;
                 background: #f5c743;
                 border-radius: 22px;
                 overflow: hidden;
                 border: none;
                 box-shadow: 0 14px 28px rgba(0, 0, 0, 0.24);
+            }
+
+            /* Небольшой отступ сверху только в развернутом состоянии */
+            .panel:not(.collapsed) .panel-bottom .order-stack {
+                margin-top: 10px;
             }
 
             .panel-bottom .transport-class-section {
