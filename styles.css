@@ -2173,11 +2173,23 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             .panel-bottom {
                 display: flex;
                 flex-direction: column;
-                gap: 8px;
+                gap: 0;
+            }
+
+            .panel-bottom .order-stack {
+                display: flex;
+                flex-direction: column;
+                width: 100%;
+                margin-top: 10px;
+                background: #f5c743;
+                border-radius: 22px;
+                overflow: hidden;
+                border: none;
+                box-shadow: 0 14px 28px rgba(0, 0, 0, 0.24);
             }
 
             .panel-bottom .transport-class-section {
-                padding: 0;
+                padding: 6px;
                 background: transparent;
                 border: none;
                 box-shadow: none;
@@ -2189,22 +2201,38 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             }
 
             .panel-bottom .transport-class-options {
-                background: #27292f;
+                background: transparent;
                 border-radius: 999px;
                 border: none;
-                padding: 2px;
-                justify-content: space-between;
+                padding: 3px;
+                justify-content: stretch;
+                box-shadow: none;
             }
 
             .panel-bottom .transport-class-option {
                 padding: 8px 0;
                 font-size: 13px;
-                color: #c8cab8;
+                color: #3b2a00;
+                border-radius: 999px;
+            }
+
+            .panel-bottom .transport-class-option + .transport-class-option::before {
+                display: none;
             }
 
             .panel-bottom .transport-class-option.active {
-                background: #3a3c44;
-                color: #ffffff;
+                background: rgba(0, 0, 0, 0.16);
+                color: #111111;
+            }
+
+            .panel-bottom .order-section {
+                margin-top: 0;
+            }
+
+            .panel-bottom .order-button {
+                border-radius: 0;
+                box-shadow: none;
+                background: #f5c743;
             }
 
 
