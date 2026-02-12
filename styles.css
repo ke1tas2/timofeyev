@@ -66,7 +66,8 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             --panel-width: 420px;
             --panel-left-gap: 16px;
             --panel-vertical-gap: 12px;
-            --panel-phone-gap: 16px;
+            /* Расстояние между основной панелью и плашкой телефона (desktop) */
+            --panel-phone-gap: 8px;
 
             /* Темная тема (СЕРАЯ) */
             --bg-main: #1f2229;
@@ -1592,6 +1593,93 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             box-shadow: 0 0 18px rgba(255, 216, 77, 0.7);
         }
 
+        /* Нижняя плашка с выбором класса и кнопкой "Заказать" (desktop + mobile).
+           Делаем её такой же цельной, как в мобильной версии. */
+        .panel-bottom {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .panel-bottom .order-stack {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            margin-top: 0;
+            background: #f5c743;
+            border-radius: 22px;
+            overflow: hidden;
+            border: none;
+            box-shadow: 0 14px 28px rgba(0, 0, 0, 0.24);
+        }
+
+        .panel-bottom .transport-class-section {
+            padding: 6px;
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            display: block;
+        }
+
+        .panel-bottom .transport-class-title {
+            display: none;
+        }
+
+        .panel-bottom .transport-class-options {
+            background: transparent !important;
+            border-radius: 999px;
+            border: none !important;
+            padding: 3px;
+            justify-content: stretch;
+            box-shadow: none !important;
+        }
+
+        .panel-bottom .transport-class-option {
+            padding: 8px 0;
+            font-size: 13px;
+            color: #3b2a00;
+            border-radius: 999px;
+        }
+
+        .panel-bottom .transport-class-option + .transport-class-option::before {
+            display: none;
+        }
+
+        .panel-bottom .transport-class-option.active {
+            background: rgba(0, 0, 0, 0.16);
+            color: #111111;
+        }
+
+        .panel-bottom .order-section {
+            margin-top: 0;
+        }
+
+        .panel-bottom .order-button {
+            border-radius: 0;
+            box-shadow: none;
+            background: #f5c743;
+        }
+
+        body.light-theme .panel-bottom .order-stack {
+            background: #ffc800;
+        }
+
+        body.light-theme .panel-bottom .transport-class-option {
+            color: #3b2a00;
+        }
+
+        body.light-theme .panel-bottom .transport-class-option.active {
+            background: rgba(0, 0, 0, 0.16) !important;
+            color: #111111 !important;
+        }
+
+        body.light-theme .panel-bottom .order-button {
+            background: #ffc800 !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            color: #000000 !important;
+        }
+
 
         .location-loading {
             position: absolute;
@@ -2421,8 +2509,8 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             padding:
                 calc(var(--panel-inset) + var(--panel-top-h) + 10px)
                 var(--panel-inset)
-                /* Увеличенный запас под высоту жёлтой панели,
-                   чтобы контент точно не заходил под неё */
+                /* Увеличенный запас под высоту жёлтой панели
+                   по умолчанию (для мобильной панели) */
                 calc(var(--panel-inset) + var(--panel-bottom-h) + 60px)
                 var(--panel-inset);
             overflow-y: auto;
@@ -2430,6 +2518,18 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             -webkit-overflow-scrolling: touch;
             scrollbar-width: none;
             -ms-overflow-style: none;
+        }
+
+        /* На десктопе делаем запас снизу меньше,
+           чтобы блок с телефоном был ближе к жёлтой кнопке */
+        @media (min-width: 769px) {
+            .panel-content {
+                padding:
+                    calc(var(--panel-inset) + var(--panel-top-h) + 10px)
+                    var(--panel-inset)
+                    calc(var(--panel-inset) + var(--panel-bottom-h) + 16px)
+                    var(--panel-inset);
+            }
         }
 
         .panel-content::-webkit-scrollbar {
