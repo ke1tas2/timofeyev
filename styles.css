@@ -2129,7 +2129,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             }
 
             .panel.collapsed .tariff-section {
-                padding: 6px 14px 6px;
+                padding: 6px 14px 4px;
                 margin-top: 0;
             }
 
@@ -2153,7 +2153,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
                 overflow: visible;
                 flex-shrink: 0;
                 padding-top: calc(var(--panel-top-h) + 4px);
-                padding-bottom: 4px;
+                padding-bottom: 0;
             }
 
             .panel.collapsed .panel-content .address-field.add-stop,
