@@ -210,6 +210,7 @@ document.addEventListener('DOMContentLoaded', function() {
             function updatePanelOverlayHeights() {
                 const topEl = document.querySelector('.panel-top');
                 const bottomEl = document.querySelector('.panel-bottom');
+                const tariffSectionEl = document.querySelector('.tariff-section');
                 if (!topEl || !bottomEl) return;
 
                 const topH = Math.ceil(topEl.getBoundingClientRect().height);
@@ -217,10 +218,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.documentElement.style.setProperty('--panel-top-h', `${topH}px`);
                 document.documentElement.style.setProperty('--panel-bottom-h', `${bottomH}px`);
 
-            // Для мобильной свернутой панели убираем пустое пространство:
-            // высота панели = высота верхнего блока + нижнего блока + небольшой отступ.
-            const collapsedH = topH + bottomH + 24;
-            document.documentElement.style.setProperty('--panel-collapsed-height', `${collapsedH}px`);
+                // Для мобильной свернутой панели: верхний блок + тарифы + нижний блок + отступ.
+                let collapsedH = topH + bottomH + 24;
+                if (tariffSectionEl && window.innerWidth <= 768) {
+                    const tariffH = Math.ceil(tariffSectionEl.getBoundingClientRect().height);
+                    collapsedH = topH + tariffH + bottomH + 24;
+                }
+                document.documentElement.style.setProperty('--panel-collapsed-height', `${collapsedH}px`);
             }
 
             updatePanelOverlayHeights();
@@ -1338,16 +1342,49 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             function getExpandedHeight() {
-                return window.innerHeight * 0.65; 
+                const topbarHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--topbar-height')) || 56;
+                const topbarGap = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--topbar-gap')) || 10;
+                return window.innerHeight - topbarHeight - topbarGap;
             }
 
             function updateMapControlsPosition() {
                 if (!isMobile() || !mapControls) return;
 
                 if (panel.classList.contains('collapsed')) {
-                    mapControls.style.bottom = '440px';
-                } else {
-                    mapControls.style.bottom = 'calc(65vh + 20px)';
+                    const collapsedH = getComputedStyle(document.documentElement).getPropertyValue('--panel-collapsed-height').trim() || '440px';
+                    mapControls.style.bottom = `calc(${collapsedH} + 20px)`;
+                }
+                // При развернутой панели элементы управления скрываются через CSS
+            }
+
+            function updateOverlayElementsVisibility() {
+                if (!isMobile()) return;
+                
+                const phonePanel = document.querySelector('.phone-panel');
+                const isCollapsed = panel.classList.contains('collapsed');
+                
+                if (mapControls) {
+                    if (isCollapsed) {
+                        mapControls.style.opacity = '1';
+                        mapControls.style.visibility = 'visible';
+                        mapControls.style.pointerEvents = 'auto';
+                    } else {
+                        mapControls.style.opacity = '0';
+                        mapControls.style.visibility = 'hidden';
+                        mapControls.style.pointerEvents = 'none';
+                    }
+                }
+                
+                if (phonePanel) {
+                    if (isCollapsed) {
+                        phonePanel.style.opacity = '1';
+                        phonePanel.style.visibility = 'visible';
+                        phonePanel.style.pointerEvents = 'auto';
+                    } else {
+                        phonePanel.style.opacity = '0';
+                        phonePanel.style.visibility = 'hidden';
+                        phonePanel.style.pointerEvents = 'none';
+                    }
                 }
             }
             function applyInitialState() {
@@ -1357,6 +1394,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     panel.classList.remove('collapsed');
                 }
                 updateMapControlsPosition();
+                updateOverlayElementsVisibility();
             }
             applyInitialState();
             window.addEventListener('resize', debounce(applyInitialState, 150));
@@ -1366,6 +1404,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 panel.style.height = '';
                 panel.style.maxHeight = '';
                 updateMapControlsPosition();
+                updateOverlayElementsVisibility();
             }
 
             function collapsePanel() {
@@ -1373,6 +1412,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 panel.style.height = '';
                 panel.style.maxHeight = '';
                 updateMapControlsPosition();
+                updateOverlayElementsVisibility();
             }
 
            

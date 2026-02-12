@@ -128,22 +128,6 @@
                     </div>
                 </div>
 
-                <!-- Класс транспорта -->
-                <div class="transport-class-section">
-                    <div class="transport-class-title">Выберите класс транспорта:</div>
-                    <div class="transport-class-options">
-                        <div class="transport-class-option active" data-class="comfort">
-                            <div class="transport-class-label">comfort</div>
-                        </div>
-                        <div class="transport-class-option" data-class="business">
-                            <div class="transport-class-label">business</div>
-                        </div>
-                        <div class="transport-class-option" data-class="premium">
-                            <div class="transport-class-label">premium</div>
-                        </div>
-                    </div>
-                </div>
-
                 <!-- Скрытый элемент цены для отправки формы -->
                 <span id="priceAmount" style="display:none;">—</span>
 
@@ -309,6 +293,22 @@
             </div>
 
             <div class="panel-bottom">
+                <!-- Баннер выбора класса транспорта (как плашка над кнопкой) -->
+                <div class="transport-class-section">
+                    <div class="transport-class-title">Выберите класс транспорта:</div>
+                    <div class="transport-class-options">
+                        <div class="transport-class-option active" data-class="comfort">
+                            <div class="transport-class-label">comfort</div>
+                        </div>
+                        <div class="transport-class-option" data-class="business">
+                            <div class="transport-class-label">business</div>
+                        </div>
+                        <div class="transport-class-option" data-class="premium">
+                            <div class="transport-class-label">premium</div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Кнопка заказа -->
                 <div class="order-section">
                     <button class="order-button" onclick="orderTaxi()">

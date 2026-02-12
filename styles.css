@@ -1998,11 +1998,12 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
                 left: 0;
                 right: 0;
                 width: 100%;
-                height: var(--panel-expanded-height, 65vh);
+                height: var(--panel-expanded-height, calc(100vh - var(--topbar-height) - var(--topbar-gap)));
                 border-radius: 24px 24px 0 0;
-                max-height: var(--panel-expanded-height, 65vh);
+                max-height: var(--panel-expanded-height, calc(100vh - var(--topbar-height) - var(--topbar-gap)));
                 box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.12);
                 transition: height 0.35s cubic-bezier(0.25, 0.8, 0.25, 1), max-height 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+                z-index: 100;
             }
 
             .panel.collapsed {
@@ -2039,6 +2040,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
                 right: auto;
                 padding: 10px 16px;
                 margin-left: 0;
+                transition: opacity 0.35s cubic-bezier(0.25, 0.8, 0.25, 1), visibility 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
             }
 
             .panel-header {
@@ -2064,6 +2066,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
 
             .panel.collapsed .panel-top {
                 align-items: center;
+                padding-bottom: 6px;
             }
 
 
@@ -2125,6 +2128,11 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
                 margin-top: 8px;
             }
 
+            .panel.collapsed .tariff-section {
+                padding: 6px 14px 6px;
+                margin-top: 0;
+            }
+
             .tariff-grid::-webkit-scrollbar {
                 display: none;
             }
@@ -2140,7 +2148,63 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
 
 
             .panel.collapsed .panel-content {
+                display: flex;
+                flex-direction: column;
+                overflow: visible;
+                flex-shrink: 0;
+                padding-top: calc(var(--panel-top-h) + 4px);
+                padding-bottom: 4px;
+            }
+
+            .panel.collapsed .panel-content .address-field.add-stop,
+            .panel.collapsed .panel-content .transport-class-section,
+            .panel.collapsed .panel-content .options-section,
+            .panel.collapsed .panel-content .payment-section,
+            .panel.collapsed .panel-content .phone-input-section {
+                display: none !important;
+            }
+
+            .panel.collapsed .panel-content .tariff-section {
+                display: block;
+            }
+
+            /* Плашка выбора класса транспорта над кнопкой «Заказать» — мобильный вид */
+
+            .panel-bottom {
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+            }
+
+            .panel-bottom .transport-class-section {
+                padding: 0;
+                background: transparent;
+                border: none;
+                box-shadow: none;
+                display: block;
+            }
+
+            .panel-bottom .transport-class-title {
                 display: none;
+            }
+
+            .panel-bottom .transport-class-options {
+                background: #27292f;
+                border-radius: 999px;
+                border: none;
+                padding: 2px;
+                justify-content: space-between;
+            }
+
+            .panel-bottom .transport-class-option {
+                padding: 8px 0;
+                font-size: 13px;
+                color: #c8cab8;
+            }
+
+            .panel-bottom .transport-class-option.active {
+                background: #3a3c44;
+                color: #ffffff;
             }
 
 
@@ -2156,12 +2220,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
                 bottom: 440px !important;
                 transform: none !important;
                 z-index: 50 !important;
-                transition: bottom 0.35s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
-            }
-
-
-            body:has(.panel:not(.collapsed)) .map-controls {
-                bottom: calc(65vh + 20px) !important;
+                transition: bottom 0.35s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.35s cubic-bezier(0.25, 0.8, 0.25, 1), visibility 0.35s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
             }
         }
 
