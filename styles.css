@@ -852,7 +852,8 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             background: radial-gradient(circle at top left, rgba(255, 216, 77, 0.2), rgba(10, 10, 16, 0.98));
             border-radius: 16px;
             padding: 12px 20px;
-            z-index: 20;
+            /* Поверх панели заказа и жёлтой кнопки в обеих темах */
+            z-index: 150;
             border: 1px solid var(--border-subtle);
             box-shadow: 0 18px 40px rgba(0, 0, 0, 0.8);
             display: flex;
@@ -890,7 +891,8 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             background: var(--panel-bg);
             border-radius: 24px;
             box-shadow: var(--card-shadow);
-            z-index: 10;
+            /* Панель ниже плашки телефона и оверлеев */
+            z-index: 50;
             overflow: hidden;
             border: 1px solid var(--border-subtle);
             max-height: none;
@@ -1998,12 +2000,20 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
                 left: 0;
                 right: 0;
                 width: 100%;
-                height: var(--panel-expanded-height, calc(100vh - var(--topbar-height) - var(--topbar-gap)));
+                /* Держим небольшой зазор (16px) до верхней панели */
+                height: var(
+                    --panel-expanded-height,
+                    calc(100vh - var(--topbar-height) - var(--topbar-gap) - 16px)
+                );
                 border-radius: 24px 24px 0 0;
-                max-height: var(--panel-expanded-height, calc(100vh - var(--topbar-height) - var(--topbar-gap)));
+                max-height: var(
+                    --panel-expanded-height,
+                    calc(100vh - var(--topbar-height) - var(--topbar-gap) - 16px)
+                );
                 box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.12);
                 transition: height 0.35s cubic-bezier(0.25, 0.8, 0.25, 1), max-height 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
-                z-index: 100;
+                /* На мобилке панель тоже ниже плашки телефона */
+                z-index: 50;
             }
 
             .panel.collapsed {
@@ -2040,6 +2050,8 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
                 right: auto;
                 padding: 10px 16px;
                 margin-left: 0;
+                /* На мобильных тоже держим телефон поверх панели и кнопки */
+                z-index: 150;
                 transition: opacity 0.35s cubic-bezier(0.25, 0.8, 0.25, 1), visibility 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
             }
 
@@ -2195,49 +2207,83 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
 
             .panel-bottom .transport-class-section {
                 padding: 6px;
-                background: transparent;
-                border: none;
-                box-shadow: none;
+                background: transparent !important;
+                border: none !important;
+                box-shadow: none !important;
                 display: block;
             }
-
+            
             .panel-bottom .transport-class-title {
                 display: none;
             }
-
+            
             .panel-bottom .transport-class-options {
-                background: transparent;
+                background: transparent !important;
                 border-radius: 999px;
-                border: none;
+                border: none !important;
                 padding: 3px;
                 justify-content: stretch;
-                box-shadow: none;
+                box-shadow: none !important;
             }
-
+            
             .panel-bottom .transport-class-option {
                 padding: 8px 0;
                 font-size: 13px;
                 color: #3b2a00;
                 border-radius: 999px;
             }
-
+            
             .panel-bottom .transport-class-option + .transport-class-option::before {
                 display: none;
             }
-
+            
             .panel-bottom .transport-class-option.active {
                 background: rgba(0, 0, 0, 0.16);
                 color: #111111;
             }
-
+            
             .panel-bottom .order-section {
                 margin-top: 0;
             }
-
+            
             .panel-bottom .order-button {
                 border-radius: 0;
                 box-shadow: none;
                 background: #f5c743;
+            }
+            
+            /* В светлой теме делаем мобильную плашку и кнопку единым жёлтым блоком,
+               как в тёмной теме (без белой карточки вокруг переключателя классов). */
+            body.light-theme .panel-bottom .order-stack {
+                background: #ffc800;
+            }
+            
+            body.light-theme .panel-bottom .transport-class-section {
+                background: transparent !important;
+                border: none !important;
+                box-shadow: none !important;
+            }
+            
+            body.light-theme .panel-bottom .transport-class-options {
+                background: transparent !important;
+                border: none !important;
+                box-shadow: none !important;
+            }
+            
+            body.light-theme .panel-bottom .transport-class-option {
+                color: #3b2a00;
+            }
+            
+            body.light-theme .panel-bottom .transport-class-option.active {
+                background: rgba(0, 0, 0, 0.16) !important;
+                color: #111111 !important;
+            }
+            
+            body.light-theme .panel-bottom .order-button {
+                background: #ffc800 !important;
+                border-radius: 0 !important;
+                box-shadow: none !important;
+                color: #000000 !important;
             }
 
 
@@ -2375,7 +2421,9 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             padding:
                 calc(var(--panel-inset) + var(--panel-top-h) + 10px)
                 var(--panel-inset)
-                calc(var(--panel-inset) + var(--panel-bottom-h) + 10px)
+                /* Увеличенный запас под высоту жёлтой панели,
+                   чтобы контент точно не заходил под неё */
+                calc(var(--panel-inset) + var(--panel-bottom-h) + 60px)
                 var(--panel-inset);
             overflow-y: auto;
             overflow-x: hidden;

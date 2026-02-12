@@ -1344,7 +1344,9 @@ document.addEventListener('DOMContentLoaded', function() {
             function getExpandedHeight() {
                 const topbarHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--topbar-height')) || 56;
                 const topbarGap = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--topbar-gap')) || 10;
-                return window.innerHeight - topbarHeight - topbarGap;
+                // Более заметный зазор между верхней и нижней панелями
+                const extraGap = 16;
+                return window.innerHeight - topbarHeight - topbarGap - extraGap;
             }
 
             function updateMapControlsPosition() {
