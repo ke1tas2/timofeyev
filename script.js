@@ -1420,18 +1420,23 @@ document.addEventListener('DOMContentLoaded', function() {
            
             let dragMoved = false;
 
-            header.addEventListener('click', () => {
+            function togglePanelByTap() {
                 if (!isMobile()) return;
-                if (dragMoved) {
-                    
-                    dragMoved = false;
-                    return;
-                }
                 if (panel.classList.contains('collapsed')) {
                     expandPanel();
                 } else {
                     collapsePanel();
                 }
+            }
+
+            // Простое нажатие по хэдэру разворачивает/сворачивает панель
+            header.addEventListener('click', () => {
+                if (dragMoved) {
+                    // если был реальный жест перетаскивания — не трогаем
+                    dragMoved = false;
+                    return;
+                }
+                togglePanelByTap();
             });
 
             
@@ -1459,7 +1464,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 currentY = clientY;
                 const deltaY = currentY - startY;
 
-                if (Math.abs(deltaY) > 5) {
+                // считаем, что это именно «перетаскивание», только если движение
+                // заметное (порог увеличен, чтобы обычное нажатие не ломалось)
+                if (Math.abs(deltaY) > 15) {
                     dragMoved = true;
                 }
 
@@ -1480,6 +1487,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 isDragging = false;
                 panel.style.transition = '';
                 const deltaY = currentY - startY;
+                
+                // Если реального перетаскивания не было (просто тап/клик),
+                // не вмешиваемся — даём сработать обычному click‑обработчику.
+                if (!dragMoved) {
+                    panel.style.height = '';
+                    panel.style.maxHeight = '';
+                    return;
+                }
+
                 const collapsedH = getCollapsedHeight();
                 const expandedH = getExpandedHeight();
                 if (deltaY < -dragThreshold && wasCollapsed) {
