@@ -81,7 +81,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 price: 30000,
                 perKm: 300,
                 // Чёрный премиум микроавтобус/маршрутка, PNG без фона
-                image: 'https://ke1tas2.github.io/timofeyev/assets/microsub.png'
+                image: 'https://ke1tas2.github.io/timofeyev/assets/microbus.png'
             },
             {
                 id: 'helicopter',
