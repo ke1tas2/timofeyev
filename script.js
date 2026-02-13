@@ -276,8 +276,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (!cls) return;
                     selectedTransportClass = cls;
 
+                    // Синхронизируем активное состояние для всех одинаковых классов
                     document.querySelectorAll('.transport-class-option').forEach(o => {
-                        o.classList.toggle('active', o === option);
+                        o.classList.toggle('active', o.getAttribute('data-class') === cls);
                     });
                 });
             });

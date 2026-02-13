@@ -1645,6 +1645,14 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             display: none;
         }
 
+        /* На десктопе убираем дубликат плашки у нижней кнопки —
+           оставляем выбор класса только в основной карточке над кнопкой */
+        @media (min-width: 769px) {
+            .panel-bottom .transport-class-section {
+                display: none;
+            }
+        }
+
         .panel-bottom .transport-class-option.active {
             background: rgba(0, 0, 0, 0.16);
             color: #111111;
@@ -1661,16 +1669,32 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
         }
 
         body.light-theme .panel-bottom .order-stack {
+            /* Вся нижняя плашка (капсула + кнопка) единым жёлтым блоком */
             background: #ffc800;
         }
 
-        body.light-theme .panel-bottom .transport-class-option {
-            color: #3b2a00;
+        /* В светлой теме внутри нижнего блока убираем отдельную белую "капсулу" */
+        body.light-theme .panel-bottom .transport-class-section {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
         }
 
+        body.light-theme .panel-bottom .transport-class-options {
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+        }
+
+        /* Светлая тема: переключатель классов как в тёмной теме:
+           активный таб тёмно‑жёлтый, остальные просто текст на жёлтом фоне */
+        body.light-theme .panel-bottom .transport-class-option {
+            color: rgba(0, 0, 0, 0.7);
+        }
+        
         body.light-theme .panel-bottom .transport-class-option.active {
-            background: rgba(0, 0, 0, 0.16) !important;
-            color: #111111 !important;
+            background: #e6b400 !important;
+            color: #000000 !important;
         }
 
         body.light-theme .panel-bottom .order-button {
