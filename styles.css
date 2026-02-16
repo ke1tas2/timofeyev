@@ -124,6 +124,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             position: relative;
             width: 100%;
             height: 100vh;
+            height: 100dvh;
         }
 
         #map {
@@ -2106,31 +2107,63 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
                 display: none;
             }
 
+            /* ====== ПАНЕЛЬ — МОБИЛЬНЫЙ БАЗОВЫЙ ВИД ====== */
             .panel {
                 top: auto;
                 bottom: 0;
                 left: 0;
                 right: 0;
                 width: 100%;
-                /* Держим небольшой зазор (16px) до верхней панели */
-                height: var(
-                    --panel-expanded-height,
-                    calc(100vh - var(--topbar-height) - var(--topbar-gap) - 16px)
-                );
+                height: 50vh;           /* JS перепишет немедленно */
+                max-height: 92vh;
+                max-height: 92dvh;
                 border-radius: 24px 24px 0 0;
-                max-height: var(
-                    --panel-expanded-height,
-                    calc(100vh - var(--topbar-height) - var(--topbar-gap) - 16px)
-                );
-                box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.12);
-                transition: height 0.35s cubic-bezier(0.25, 0.8, 0.25, 1), max-height 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
-                /* На мобилке панель тоже ниже плашки телефона */
+                box-shadow: 0 -4px 24px rgba(0, 0, 0, 0.18);
+                transition: height 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
                 z-index: 50;
+                overflow: hidden;
             }
 
+            /* ====== РАЗВЁРНУТАЯ — сохраняем absolute layout ====== */
+            .panel:not(.collapsed) .panel-top {
+                position: absolute;
+            }
+            .panel:not(.collapsed) .panel-bottom {
+                position: absolute;
+            }
+            .panel:not(.collapsed) .panel-content {
+                position: absolute;
+                inset: 0;
+                padding-top: calc(var(--panel-top-h, 140px) + 10px);
+                padding-bottom: calc(var(--panel-bottom-h, 76px) + 16px);
+            }
+
+            /* ====== СВЁРНУТАЯ — нормальный поток, высота по содержимому ====== */
             .panel.collapsed {
-                height: var(--panel-collapsed-height, 300px);
-                max-height: var(--panel-collapsed-height, 300px);
+                overflow: hidden;
+                display: flex;
+                flex-direction: column;
+            }
+            .panel.collapsed .panel-top {
+                position: relative;
+                top: auto; left: auto; right: auto;
+                flex-shrink: 0;
+                padding: 0 0 8px 0;
+            }
+            .panel.collapsed .panel-content {
+                position: relative;
+                inset: auto;
+                flex-shrink: 0;
+                overflow: visible;
+                padding: 0;
+                display: block;
+            }
+            .panel.collapsed .panel-bottom {
+                position: relative;
+                bottom: auto; left: auto; right: auto;
+                flex-shrink: 0;
+                padding: 8px var(--panel-inset, 16px) 8px;
+                margin-top: auto;
             }
 
 
@@ -2187,13 +2220,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
                 align-items: center;
             }
 
-
-            .panel.collapsed .panel-top {
-                align-items: center;
-                padding-bottom: 6px;
-            }
-
-
+            /* address-selector внутри panel-top на мобиле */
             .address-selector {
                 margin: 0 var(--panel-inset);
                 width: calc(100% - 2 * var(--panel-inset));
@@ -2262,22 +2289,36 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             }
 
             .tariff-card {
-                min-width: 90px;
+                min-width: 78px;
                 flex-shrink: 0;
+            }
+
+            /* Компактные тарифы в свёрнутом виде */
+            .panel.collapsed .tariff-card {
+                min-width: 72px;
+                padding: 6px 4px;
+                gap: 3px;
+            }
+            .panel.collapsed .tariff-image-box {
+                height: 40px;
+                min-height: 40px;
+            }
+            .panel.collapsed .tariff-image {
+                height: 40px;
+            }
+            .panel.collapsed .tariff-name {
+                font-size: 11px;
+            }
+            .panel.collapsed .tariff-price {
+                font-size: 11px;
             }
 
             .panel-content {
                 gap: 4px;
             }
 
-
             .panel.collapsed .panel-content {
-                display: flex;
-                flex-direction: column;
-                overflow: visible;
-                flex-shrink: 0;
-                padding-top: calc(var(--panel-top-h) + 4px);
-                padding-bottom: 0;
+                /* position и padding управляются выше */
             }
 
             .panel.collapsed .panel-content .address-field.add-stop,
@@ -2362,6 +2403,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
                 border-radius: 0;
                 box-shadow: none;
                 background: #f5c743;
+                padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
             }
             
             /* В светлой теме делаем мобильную плашку и кнопку единым жёлтым блоком,

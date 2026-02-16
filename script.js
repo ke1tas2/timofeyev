@@ -31,7 +31,6 @@ document.addEventListener('DOMContentLoaded', function() {
         let mapClickHandler = null;
         let geocoder = null;
         let selectedTransportClass = 'comfort';
-        let isSettingBounds = false;
 
         const tariffs = [
             {
@@ -177,8 +176,6 @@ document.addEventListener('DOMContentLoaded', function() {
             let centerGeocodeTimer = null;
             map.events.add('boundschange', function() {
                 if (selectingPoint) return;
-                if (isSettingBounds) return;
-                if (fromCoords && toCoords) return;
 
                 if (centerGeocodeTimer) clearTimeout(centerGeocodeTimer);
                 centerGeocodeTimer = setTimeout(function() {
@@ -749,27 +746,14 @@ document.addEventListener('DOMContentLoaded', function() {
                         pinVisible: false
                     });
 
-                    // Скрываем альтернативные маршруты (пунктирные линии)
-                    var routes = route.getRoutes();
-                    routes.each(function(r, i) {
-                        if (i > 0) {
-                            r.options.set('visible', false);
-                        }
-                    });
-
                     map.geoObjects.add(route);
 
                     if (centerOnRoute) {
                         const bounds = route.getBounds();
                         if (bounds) {
-                            isSettingBounds = true;
                             map.setBounds(bounds, {
                                 checkZoomRange: true,
                                 zoomMargin: 50
-                            }).then(function() {
-                                setTimeout(function() {
-                                    isSettingBounds = false;
-                                }, 500);
                             });
                         }
                     }
@@ -1343,230 +1327,152 @@ document.addEventListener('DOMContentLoaded', function() {
             animationFrame = requestAnimationFrame(updateCounter);
         }
         function setupBottomSheet() {
-            const panel = document.getElementById('panel');
-            const header = document.getElementById('panelHeader');
+            const panel      = document.getElementById('panel');
+            const header     = document.getElementById('panelHeader');
             const mapControls = document.getElementById('mapControls');
             if (!panel || !header) return;
 
             const isMobile = () => window.innerWidth <= 768;
 
-            function getCollapsedHeight() {
-                const rootStyle = getComputedStyle(document.documentElement);
-                const varValue = rootStyle.getPropertyValue('--panel-collapsed-height') || '';
-                const parsed = parseFloat(varValue.replace('px', '').trim());
-                if (!isNaN(parsed)) return parsed;
-                return panel.getBoundingClientRect().height;
+            // Реальная видимая высота экрана (учитывает Safari toolbar и всё прочее)
+            function realVH() {
+                return window.visualViewport ? window.visualViewport.height
+                                             : document.documentElement.clientHeight;
             }
 
-            function getExpandedHeight() {
-                const topbarHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--topbar-height')) || 56;
-                const topbarGap = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--topbar-gap')) || 10;
-                // Более заметный зазор между верхней и нижней панелями
-                const extraGap = 16;
-                return window.innerHeight - topbarHeight - topbarGap - extraGap;
+            // Высота свёрнутой панели — меряем реальный scrollHeight содержимого
+            function measureCollapsedH() {
+                // Временно снимаем overflow:hidden и height чтобы panel показала реальную высоту
+                const prevH          = panel.style.height;
+                const prevOverflow   = panel.style.overflow;
+                const prevTransition = panel.style.transition;
+                panel.style.transition = 'none';
+                panel.style.height     = 'auto';
+                panel.style.overflow   = 'visible';
+                const h = panel.scrollHeight;
+                panel.style.height     = prevH;
+                panel.style.overflow   = prevOverflow;
+                panel.style.transition = prevTransition;
+                return h + 2; // +2px запас
             }
 
-            function updateMapControlsPosition() {
-                if (!isMobile() || !mapControls) return;
-
-                if (panel.classList.contains('collapsed')) {
-                    const collapsedH = getComputedStyle(document.documentElement).getPropertyValue('--panel-collapsed-height').trim() || '440px';
-                    mapControls.style.bottom = `calc(${collapsedH} + 20px)`;
-                }
-                // При развернутой панели элементы управления скрываются через CSS
+            function getExpandedH() {
+                return Math.floor(realVH() * 0.88);
             }
 
-            function updateOverlayElementsVisibility() {
-                if (!isMobile()) return;
-                
-                const phonePanel = document.querySelector('.phone-panel');
-                const isCollapsed = panel.classList.contains('collapsed');
-                
+            function applyCollapsed(animate) {
+                panel.classList.add('collapsed');
+                // Нужно два rAF: first — браузер применяет collapsed CSS (normal flow),
+                // second — высоты элементов пересчитаны
+                requestAnimationFrame(() => requestAnimationFrame(() => {
+                    const h = measureCollapsedH();
+                    panel.style.transition = animate
+                        ? 'height 0.3s cubic-bezier(0.25,0.8,0.25,1)'
+                        : 'none';
+                    panel.style.height = h + 'px';
+                    syncUI(h, true);
+                    if (!animate) requestAnimationFrame(() => { panel.style.transition = ''; });
+                }));
+            }
+
+            function applyExpanded(animate) {
+                panel.classList.remove('collapsed');
+                const h = getExpandedH();
+                panel.style.transition = animate
+                    ? 'height 0.3s cubic-bezier(0.25,0.8,0.25,1)'
+                    : 'none';
+                panel.style.height = h + 'px';
+                syncUI(h, false);
+                if (!animate) requestAnimationFrame(() => { panel.style.transition = ''; });
+            }
+
+            function syncUI(panelH, isCollapsed) {
+                const phone = document.querySelector('.phone-panel');
                 if (mapControls) {
-                    if (isCollapsed) {
-                        mapControls.style.opacity = '1';
-                        mapControls.style.visibility = 'visible';
-                        mapControls.style.pointerEvents = 'auto';
-                    } else {
-                        mapControls.style.opacity = '0';
-                        mapControls.style.visibility = 'hidden';
-                        mapControls.style.pointerEvents = 'none';
-                    }
+                    mapControls.style.opacity       = isCollapsed ? '1' : '0';
+                    mapControls.style.visibility    = isCollapsed ? 'visible' : 'hidden';
+                    mapControls.style.pointerEvents = isCollapsed ? 'auto' : 'none';
+                    mapControls.style.bottom        = (panelH + 16) + 'px';
                 }
-                
-                if (phonePanel) {
-                    if (isCollapsed) {
-                        phonePanel.style.opacity = '1';
-                        phonePanel.style.visibility = 'visible';
-                        phonePanel.style.pointerEvents = 'auto';
-                    } else {
-                        phonePanel.style.opacity = '0';
-                        phonePanel.style.visibility = 'hidden';
-                        phonePanel.style.pointerEvents = 'none';
-                    }
+                if (phone) {
+                    phone.style.opacity       = isCollapsed ? '1' : '0';
+                    phone.style.visibility    = isCollapsed ? 'visible' : 'hidden';
+                    phone.style.pointerEvents = isCollapsed ? 'auto' : 'none';
                 }
             }
-            function applyInitialState() {
-                if (isMobile()) {
-                    panel.classList.add('collapsed');
-                } else {
-                    panel.classList.remove('collapsed');
-                }
-                updateMapControlsPosition();
-                updateOverlayElementsVisibility();
-            }
-            applyInitialState();
-            window.addEventListener('resize', debounce(applyInitialState, 150));
 
-            function expandPanel() {
+            // Инициализация
+            if (isMobile()) {
+                applyCollapsed(false);
+            } else {
                 panel.classList.remove('collapsed');
                 panel.style.height = '';
-                panel.style.maxHeight = '';
-                updateMapControlsPosition();
-                updateOverlayElementsVisibility();
+                panel.style.transition = '';
+                syncUI(0, false);
             }
 
-            function collapsePanel() {
-                panel.classList.add('collapsed');
-                panel.style.height = '';
-                panel.style.maxHeight = '';
-                updateMapControlsPosition();
-                updateOverlayElementsVisibility();
-            }
-
-           
-            let dragMoved = false;
-
-            function togglePanelByTap() {
-                if (!isMobile()) return;
-                if (panel.classList.contains('collapsed')) {
-                    expandPanel();
-                } else {
-                    collapsePanel();
-                }
-            }
-
-            // Простое нажатие по хэдэру разворачивает/сворачивает панель
-            header.addEventListener('click', () => {
-                if (dragMoved) {
-                    // если был реальный жест перетаскивания — не трогаем
-                    dragMoved = false;
+            const onResize = debounce(() => {
+                if (!isMobile()) {
+                    panel.classList.remove('collapsed');
+                    panel.style.height = '';
+                    syncUI(0, false);
                     return;
                 }
-                togglePanelByTap();
+                if (panel.classList.contains('collapsed')) applyCollapsed(false);
+                else applyExpanded(false);
+            }, 80);
+            window.addEventListener('resize', onResize);
+            if (window.visualViewport) {
+                window.visualViewport.addEventListener('resize', onResize);
+            }
+
+            // --- Touch drag ---
+            let sy = 0, sh = 0, cy = 0;
+            let dragging = false, moved = false, wasCollapsed = true;
+            let cachedCollapsedH = 0;
+
+            header.addEventListener('click', () => {
+                if (moved) { moved = false; return; }
+                if (!isMobile()) return;
+                if (panel.classList.contains('collapsed')) applyExpanded(true);
+                else applyCollapsed(true);
             });
 
-            
-            let startY = 0;
-            let currentY = 0;
-            let isDragging = false;
-            let startHeight = 0;
-            let wasCollapsed = true;
-
-            const dragThreshold = 40;
-
-            function onDragStart(clientY) {
-                if (!isMobile()) return;
-                isDragging = true;
-                startY = clientY;
-                currentY = clientY;
-                startHeight = panel.getBoundingClientRect().height;
-                wasCollapsed = panel.classList.contains('collapsed');
-                dragMoved = false;
-                panel.style.transition = 'none';
-            }
-
-            function onDragMove(clientY) {
-                if (!isDragging) return;
-                currentY = clientY;
-                const deltaY = currentY - startY;
-
-                // считаем, что это именно «перетаскивание», только если движение
-                // заметное (порог увеличен, чтобы обычное нажатие не ломалось)
-                if (Math.abs(deltaY) > 15) {
-                    dragMoved = true;
-                }
-
-                const collapsedH = getCollapsedHeight();
-                const expandedH = getExpandedHeight();
-                const minH = Math.min(collapsedH, expandedH);
-                const maxH = Math.max(collapsedH, expandedH);
-
-                let newHeight = startHeight - deltaY;
-                newHeight = Math.max(minH, Math.min(maxH, newHeight));
-
-                panel.style.height = `${newHeight}px`;
-                panel.style.maxHeight = `${newHeight}px`;
-            }
-
-            function onDragEnd() {
-                if (!isDragging) return;
-                isDragging = false;
-                panel.style.transition = '';
-                const deltaY = currentY - startY;
-                
-                // Если реального перетаскивания не было (просто тап/клик),
-                // не вмешиваемся — даём сработать обычному click‑обработчику.
-                if (!dragMoved) {
-                    panel.style.height = '';
-                    panel.style.maxHeight = '';
-                    return;
-                }
-
-                const collapsedH = getCollapsedHeight();
-                const expandedH = getExpandedHeight();
-                if (deltaY < -dragThreshold && wasCollapsed) {
-                    expandPanel();
-                }
-                else if (deltaY > dragThreshold && !wasCollapsed) {
-                    collapsePanel();
-                } else {
-                    if (wasCollapsed) {
-                        panel.style.height = `${collapsedH}px`;
-                        panel.style.maxHeight = `${collapsedH}px`;
-                        setTimeout(() => {
-                            collapsePanel();
-                        }, 50);
-                    } else {
-                        panel.style.height = `${expandedH}px`;
-                        panel.style.maxHeight = `${expandedH}px`;
-                        setTimeout(() => {
-                            expandPanel();
-                        }, 50);
-                    }
-                }
-            }
             header.addEventListener('touchstart', (e) => {
-                if (!isMobile()) return;
-                if (!e.touches || !e.touches[0]) return;
-                onDragStart(e.touches[0].clientY);
+                if (!isMobile() || !e.touches[0]) return;
+                dragging = true; moved = false;
+                sy = cy = e.touches[0].clientY;
+                sh = panel.getBoundingClientRect().height;
+                wasCollapsed = panel.classList.contains('collapsed');
+                cachedCollapsedH = wasCollapsed ? sh : measureCollapsedH();
+                panel.style.transition = 'none';
+                // Если свёрнута — временно переводим в absolute-flow для перетяжки
+                if (wasCollapsed) {
+                    panel.style.display = '';
+                }
             }, { passive: true });
 
             header.addEventListener('touchmove', (e) => {
-                if (!isMobile()) return;
-                if (!e.touches || !e.touches[0]) return;
-                onDragMove(e.touches[0].clientY);
-            }, { passive: true });
+                if (!dragging || !e.touches[0]) return;
+                e.preventDefault();
+                cy = e.touches[0].clientY;
+                const dy = cy - sy;
+                if (Math.abs(dy) > 8) moved = true;
+                const minH = cachedCollapsedH;
+                const maxH = getExpandedH();
+                const newH = Math.max(minH, Math.min(maxH, sh - dy));
+                panel.style.height = newH + 'px';
+                if (mapControls) mapControls.style.bottom = (newH + 16) + 'px';
+            }, { passive: false });
 
             header.addEventListener('touchend', () => {
-                if (!isMobile()) return;
-                onDragEnd();
-            });
-            header.addEventListener('mousedown', (e) => {
-                if (!isMobile()) return;
-                onDragStart(e.clientY);
-            });
-
-            window.addEventListener('mousemove', (e) => {
-                if (!isMobile()) return;
-                if (!isDragging) return;
-                onDragMove(e.clientY);
-            });
-
-            window.addEventListener('mouseup', () => {
-                if (!isMobile()) return;
-                if (!isDragging) return;
-                onDragEnd();
+                if (!dragging) return;
+                dragging = false;
+                if (!moved) return;
+                const dy = cy - sy;
+                if      (dy < -40) applyExpanded(true);
+                else if (dy >  40) applyCollapsed(true);
+                else wasCollapsed ? applyCollapsed(true) : applyExpanded(true);
             });
         }
         document.getElementById('paymentOverlay').addEventListener('click', function(e) {
