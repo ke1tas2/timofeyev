@@ -2129,8 +2129,8 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             }
 
             .panel.collapsed {
-                height: var(--panel-collapsed-height, 420px);
-                max-height: var(--panel-collapsed-height, 420px);
+                height: var(--panel-collapsed-height, 300px);
+                max-height: var(--panel-collapsed-height, 300px);
             }
 
 
@@ -2262,7 +2262,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             }
 
             .tariff-card {
-                min-width: 110px;
+                min-width: 90px;
                 flex-shrink: 0;
             }
 

@@ -31,6 +31,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let mapClickHandler = null;
         let geocoder = null;
         let selectedTransportClass = 'comfort';
+        let isSettingBounds = false;
 
         const tariffs = [
             {
@@ -176,6 +177,8 @@ document.addEventListener('DOMContentLoaded', function() {
             let centerGeocodeTimer = null;
             map.events.add('boundschange', function() {
                 if (selectingPoint) return;
+                if (isSettingBounds) return;
+                if (fromCoords && toCoords) return;
 
                 if (centerGeocodeTimer) clearTimeout(centerGeocodeTimer);
                 centerGeocodeTimer = setTimeout(function() {
@@ -746,14 +749,27 @@ document.addEventListener('DOMContentLoaded', function() {
                         pinVisible: false
                     });
 
+                    // Скрываем альтернативные маршруты (пунктирные линии)
+                    var routes = route.getRoutes();
+                    routes.each(function(r, i) {
+                        if (i > 0) {
+                            r.options.set('visible', false);
+                        }
+                    });
+
                     map.geoObjects.add(route);
 
                     if (centerOnRoute) {
                         const bounds = route.getBounds();
                         if (bounds) {
+                            isSettingBounds = true;
                             map.setBounds(bounds, {
                                 checkZoomRange: true,
                                 zoomMargin: 50
+                            }).then(function() {
+                                setTimeout(function() {
+                                    isSettingBounds = false;
+                                }, 500);
                             });
                         }
                     }
