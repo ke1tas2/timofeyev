@@ -130,6 +130,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
         #map {
             width: 100%;
             height: 100%;
+            transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
 
         /* Темная карта как в Яндекс Такси - серый фон, белый текст, цветные элементы */
@@ -939,8 +940,8 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
         .address-field {
             display: flex;
             align-items: center;
-            padding: 16px 18px;
-            min-height: 64px;
+            padding: 12px 16px;
+            min-height: 56px;
             cursor: text;
             position: relative;
         }
@@ -956,9 +957,9 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
         }
 
         .add-stop-icon {
-            width: 24px;
-            height: 24px;
-            margin-right: 12px;
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
             flex-shrink: 0;
             border-radius: 999px;
             border: 1px dashed rgba(255, 255, 255, 0.25);
@@ -966,7 +967,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             align-items: center;
             justify-content: center;
             color: var(--accent-primary);
-            font-size: 14px;
+            font-size: 13px;
         }
 
         .add-stop-text {
@@ -984,9 +985,9 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
         }
 
         .address-icon {
-            width: 24px;
-            height: 24px;
-            margin-right: 12px;
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
             flex-shrink: 0;
             display: flex;
             align-items: center;
@@ -1006,20 +1007,20 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             position: relative;
             display: flex;
             flex-direction: column;
-            min-height: 40px;
+            min-height: 34px;
         }
 
         .address-input {
             width: 100%;
             border: none;
             background: transparent;
-            font-size: 16px;
+            font-size: 15px;
             color: var(--text-primary);
             outline: none;
             font-weight: 400;
-            padding: 8px 0 0 0;
+            padding: 6px 0 0 0;
             font-family: inherit;
-            height: 40px;
+            height: 34px;
         }
 
         .address-input::placeholder {
@@ -1030,7 +1031,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             position: absolute;
             top: 0;
             left: 0;
-            font-size: 12px;
+            font-size: 11px;
             color: var(--text-muted);
             pointer-events: none;
             transition: all 0.2s;
@@ -1043,7 +1044,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
         .address-input:focus + .address-hint,
         .address-input:not(:placeholder-shown) + .address-hint {
             top: -6px;
-            font-size: 11px;
+            font-size: 10px;
         }
 
         .clear-button {
@@ -2247,12 +2248,38 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
                 align-items: center;
                 justify-content: center;
                 width: 100%;
-                padding: 12px 0 8px;
+                padding: 8px 0 6px;
             }
 
             .panel.collapsed .panel-handle {
                 margin-left: auto;
                 margin-right: auto;
+            }
+
+            /* Компактные адреса в collapsed на мобиле */
+            .panel.collapsed .address-field {
+                padding: 10px 14px;
+                min-height: 50px;
+            }
+            .panel.collapsed .address-icon {
+                width: 18px;
+                height: 18px;
+                margin-right: 10px;
+            }
+            .panel.collapsed .address-input-container {
+                min-height: 30px;
+            }
+            .panel.collapsed .address-input {
+                font-size: 14px;
+                height: 30px;
+                padding-top: 5px;
+            }
+            .panel.collapsed .address-hint {
+                font-size: 10px;
+            }
+            .panel.collapsed .address-input:focus + .address-hint,
+            .panel.collapsed .address-input:not(:placeholder-shown) + .address-hint {
+                font-size: 9px;
             }
 
             .panel-header-title {
@@ -2317,9 +2344,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
                 gap: 4px;
             }
 
-            .panel.collapsed .panel-content {
-                /* position и padding управляются выше */
-            }
+            
 
             .panel.collapsed .panel-content .address-field.add-stop,
             .panel.collapsed .panel-content .transport-class-section,
@@ -2347,10 +2372,10 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
                 width: 100%;
                 margin-top: 0;
                 background: #f5c743;
-                border-radius: 22px;
+                border-radius: 16px;
                 overflow: hidden;
                 border: none;
-                box-shadow: 0 14px 28px rgba(0, 0, 0, 0.24);
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.18);
             }
 
             /* Небольшой отступ сверху только в развернутом состоянии */
@@ -2359,40 +2384,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             }
 
             .panel-bottom .transport-class-section {
-                padding: 6px;
-                background: transparent !important;
-                border: none !important;
-                box-shadow: none !important;
-                display: block;
-            }
-            
-            .panel-bottom .transport-class-title {
-                display: none;
-            }
-            
-            .panel-bottom .transport-class-options {
-                background: transparent !important;
-                border-radius: 999px;
-                border: none !important;
-                padding: 3px;
-                justify-content: stretch;
-                box-shadow: none !important;
-            }
-            
-            .panel-bottom .transport-class-option {
-                padding: 8px 0;
-                font-size: 13px;
-                color: #3b2a00;
-                border-radius: 999px;
-            }
-            
-            .panel-bottom .transport-class-option + .transport-class-option::before {
-                display: none;
-            }
-            
-            .panel-bottom .transport-class-option.active {
-                background: rgba(0, 0, 0, 0.16);
-                color: #111111;
+                display: none !important;
             }
             
             .panel-bottom .order-section {
@@ -2400,42 +2392,20 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             }
             
             .panel-bottom .order-button {
-                border-radius: 0;
+                border-radius: 16px;
                 box-shadow: none;
                 background: #f5c743;
                 padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
             }
             
-            /* В светлой теме делаем мобильную плашку и кнопку единым жёлтым блоком,
-               как в тёмной теме (без белой карточки вокруг переключателя классов). */
+            /* В светлой теме делаем мобильную плашку и кнопку единым жёлтым блоком */
             body.light-theme .panel-bottom .order-stack {
                 background: #ffc800;
             }
             
-            body.light-theme .panel-bottom .transport-class-section {
-                background: transparent !important;
-                border: none !important;
-                box-shadow: none !important;
-            }
-            
-            body.light-theme .panel-bottom .transport-class-options {
-                background: transparent !important;
-                border: none !important;
-                box-shadow: none !important;
-            }
-            
-            body.light-theme .panel-bottom .transport-class-option {
-                color: #3b2a00;
-            }
-            
-            body.light-theme .panel-bottom .transport-class-option.active {
-                background: rgba(0, 0, 0, 0.16) !important;
-                color: #111111 !important;
-            }
-            
             body.light-theme .panel-bottom .order-button {
                 background: #ffc800 !important;
-                border-radius: 0 !important;
+                border-radius: 16px !important;
                 box-shadow: none !important;
                 color: #000000 !important;
             }
@@ -2620,7 +2590,9 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             transform: translate(-50%, -100%);
             z-index: 5;
             pointer-events: none;
-            transition: all 0.3s ease;
+            /* Анимацию оставляем только для transform/opacity,
+               чтобы смена top (перецентровка) происходила без "скачков" */
+            transition: transform 0.3s ease, opacity 0.3s ease;
         }
 
 

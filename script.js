@@ -1,3 +1,4 @@
+// Version: 3.0.0 - CSS transform approach for perfect Yandex-style marker centering
 document.addEventListener('DOMContentLoaded', function() {
             const allRecords = document.getElementById('allrecords');
             if (allRecords) {
@@ -38,8 +39,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 name: 'Седан',
                 price: 10000,
                 perKm: 200,
-                // Чёрный Maybach S223 (Mercedes-Maybach S-Class), PNG без фона
-                image: 'https://ke1tas2.github.io/timofeyev/assets/sedan.png'
+                image: './assets/sedan.png'
             },
 
             {
@@ -47,8 +47,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 name: 'Внедорожник',
                 price: 15000,
                 perKm: 260,
-                // Чёрный премиум внедорожник Land Rover, PNG без фона
-                image: 'https://ke1tas2.github.io/timofeyev/assets/suv.png'
+                image: './assets/suv.png'
             },
 
             {
@@ -56,56 +55,49 @@ document.addEventListener('DOMContentLoaded', function() {
                 name: 'Спорткар',
                 price: 30000,
                 perKm: 400,
-                // Чёрный премиум спорткар Porsche, PNG без фона
-                image: 'https://ke1tas2.github.io/timofeyev/assets/sportcar.png'
+                image: './assets/sportcar.png'
             },
             {
                 id: 'limousine',
                 name: 'Лимузин',
                 price: 50000,
                 perKm: 350,
-                // Чёрный премиум лимузин, PNG без фона (локальный файл)
-                image: 'https://ke1tas2.github.io/timofeyev/assets/limousine-black.png'
+                image: './assets/limousine-black.png'
             },
             {
                 id: 'bus',
                 name: 'Автобус',
                 price: 40000,
                 perKm: 350,
-                // Чёрный премиум автобус, PNG без фона
-                image: 'https://ke1tas2.github.io/timofeyev/assets/bus.png'
+                image: './assets/bus.png'
             },
             {
                 id: 'minibus',
                 name: 'Микроавтобус',
                 price: 30000,
                 perKm: 300,
-                // Чёрный премиум микроавтобус/маршрутка, PNG без фона
-                image: 'https://ke1tas2.github.io/timofeyev/assets/microbus.png'
+                image: './assets/microbus.png'
             },
             {
                 id: 'helicopter',
                 name: 'Вертолёт',
                 price: 2160000,
                 perKm: 500000,
-                // Чёрный вертолёт, PNG без фона (локальный файл)
-                image: 'https://ke1tas2.github.io/timofeyev/assets/helicopter-black.png'
+                image: './assets/helicopter-black.png'
             },
             {
                 id: 'jet',
                 name: 'Бизнес джет',
                 price: 10000000,
                 perKm: 1500000,
-                // Чёрный премиум бизнес-джет, PNG без фона
-                image: 'https://ke1tas2.github.io/timofeyev/assets/plane.png'
+                image: './assets/plane.png'
             },
             {
                 id: 'trailer',
                 name: 'Перегон авто',
                 price: 20000,
                 perKm: 200,
-                // Чёрный ключ от машины, PNG без фона (локальный файл)
-                image: 'https://ke1tas2.github.io/timofeyev/assets/car-keys.png'
+                image: './assets/car-keys.png'
             }
         ];
 
@@ -536,20 +528,72 @@ document.addEventListener('DOMContentLoaded', function() {
             const lon = coords[1];
 
             const callbackName = 'geocodeCallback_' + (++geocodeRequestCounter);
+            let timeoutId = null;
+            let scriptElement = null;
+
+            // Функция очистки
+            function cleanup() {
+                if (timeoutId) clearTimeout(timeoutId);
+                if (window[callbackName]) delete window[callbackName];
+                if (scriptElement && scriptElement.parentNode) {
+                    scriptElement.parentNode.removeChild(scriptElement);
+                }
+            }
+
+            // Fallback на Yandex Geocoder если OSM не работает
+            function fallbackToYandex() {
+                console.warn('OSM недоступен, используем Yandex Geocoder');
+                cleanup();
+                
+                if (typeof ymaps === 'undefined' || !ymaps.geocode) {
+                    showCoordinates(pointType, coords, updateMap);
+                    return;
+                }
+
+                ymaps.geocode(coords, { results: 1 }).then(function(res) {
+                    const firstGeoObject = res.geoObjects.get(0);
+                    if (firstGeoObject) {
+                        let address = firstGeoObject.getAddressLine();
+                        
+                        // Убираем страну и город если они есть
+                        const parts = address.split(',').map(s => s.trim());
+                        if (parts.length > 2) {
+                            address = parts.slice(-2).join(', ');
+                        }
+                        
+                        if (pointType === 'from') {
+                            document.getElementById('fromInput').value = address;
+                            if (updateMap) {
+                                setFromPoint(coords, address);
+                            } else {
+                                fromCoords = coords;
+                                updateMarkerWithAddress(coords, address);
+                            }
+                        } else {
+                            setToPoint(coords, address);
+                        }
+                    } else {
+                        showCoordinates(pointType, coords, updateMap);
+                    }
+                }, function(err) {
+                    console.error('Yandex Geocoder error:', err);
+                    showCoordinates(pointType, coords, updateMap);
+                });
+            }
+
+            // Таймаут 8 секунд для OSM
+            timeoutId = setTimeout(function() {
+                console.warn('OSM timeout, переключаемся на Yandex');
+                fallbackToYandex();
+            }, 8000);
 
             window[callbackName] = function(data) {
                 console.log('Получен ответ от Nominatim:', data);
-
-                delete window[callbackName];
-
-                const script = document.getElementById(callbackName);
-                if (script) {
-                    script.parentNode.removeChild(script);
-                }
+                cleanup();
 
                 if (!data || !data.address) {
                     console.warn('Адрес не найден в ответе');
-                    showCoordinates(pointType, coords, updateMap);
+                    fallbackToYandex();
                     return;
                 }
 
@@ -575,7 +619,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 if (!address || address.trim().length === 0) {
                     console.warn('Не удалось сформировать адрес');
-                    showCoordinates(pointType, coords, updateMap);
+                    fallbackToYandex();
                     return;
                 }
 
@@ -594,17 +638,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             };
 
-            const script = document.createElement('script');
-            script.id = callbackName;
-            script.src = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1&accept-language=ru&json_callback=${callbackName}`;
+            scriptElement = document.createElement('script');
+            scriptElement.id = callbackName;
+            scriptElement.src = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18&addressdetails=1&accept-language=ru&json_callback=${callbackName}`;
 
-            script.onerror = function() {
-                console.error('!!! Ошибка при загрузке скрипта геокодирования');
-                delete window[callbackName];
-                showCoordinates(pointType, coords, updateMap);
+            scriptElement.onerror = function() {
+                console.error('!!! Ошибка при загрузке скрипта геокодирования OSM');
+                fallbackToYandex();
             };
 
-            document.head.appendChild(script);
+            document.head.appendChild(scriptElement);
         }
 
         function updateMarkerWithAddress(coords, address) {
@@ -738,6 +781,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 }).then(function(router) {
                     route = router;
 
+                    // Проверка что route полностью загружен (важно для iframe в Tilda)
+                    if (!route || typeof route.options !== 'object') {
+                        console.warn('Route object not fully loaded');
+                        const directDistance = calculateDirectDistance(fromCoords, toCoords);
+                        calculatePrice(directDistance);
+                        return;
+                    }
+
                     route.options.set({
                         routeActiveStrokeWidth: 5,
                         routeActiveStrokeColor: '#fc3f1e',
@@ -748,7 +799,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     map.geoObjects.add(route);
 
-                    if (centerOnRoute) {
+                    if (centerOnRoute && typeof route.getBounds === 'function') {
                         const bounds = route.getBounds();
                         if (bounds) {
                             map.setBounds(bounds, {
@@ -758,15 +809,25 @@ document.addEventListener('DOMContentLoaded', function() {
                         }
                     }
 
-                    const activeRoute = route.getActiveRoute();
-                    if (activeRoute) {
-                        const distance = activeRoute.properties.get("distance");
-                        if (distance && distance.value) {
-                            calculatePrice(distance.value / 1000);
+                    // Безопасное получение активного маршрута
+                    if (typeof route.getActiveRoute === 'function') {
+                        const activeRoute = route.getActiveRoute();
+                        if (activeRoute && activeRoute.properties) {
+                            const distance = activeRoute.properties.get("distance");
+                            if (distance && distance.value) {
+                                calculatePrice(distance.value / 1000);
+                            } else {
+                                const directDistance = calculateDirectDistance(fromCoords, toCoords);
+                                calculatePrice(directDistance);
+                            }
                         } else {
                             const directDistance = calculateDirectDistance(fromCoords, toCoords);
                             calculatePrice(directDistance);
                         }
+                    } else {
+                        // Fallback: прямая дистанция если метод недоступен
+                        const directDistance = calculateDirectDistance(fromCoords, toCoords);
+                        calculatePrice(directDistance);
                     }
                 }).catch(function(error) {
                     console.log('Ошибка построения маршрута:', error);
@@ -878,9 +939,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         function updatePrice() {
             if (fromCoords && toCoords) {
-                if (route) {
+                if (route && typeof route.getActiveRoute === 'function') {
                     const activeRoute = route.getActiveRoute();
-                    if (activeRoute) {
+                    if (activeRoute && activeRoute.properties) {
                         const distance = activeRoute.properties.get("distance");
                         if (distance && distance.value) {
                             calculatePrice(distance.value / 1000);
@@ -1387,7 +1448,11 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             function syncUI(panelH, isCollapsed) {
-                const phone = document.querySelector('.phone-panel');
+                const phone      = document.querySelector('.phone-panel');
+                const marker     = document.getElementById('mapMarker');
+                const mapElement = document.getElementById('map');
+                const calculator = document.getElementById('calculator');
+                
                 if (mapControls) {
                     mapControls.style.opacity       = isCollapsed ? '1' : '0';
                     mapControls.style.visibility    = isCollapsed ? 'visible' : 'hidden';
@@ -1398,6 +1463,33 @@ document.addEventListener('DOMContentLoaded', function() {
                     phone.style.opacity       = isCollapsed ? '1' : '0';
                     phone.style.visibility    = isCollapsed ? 'visible' : 'hidden';
                     phone.style.pointerEvents = isCollapsed ? 'auto' : 'none';
+                }
+
+                // Центр маркера считаем как середину между нижней границей верхнего блока
+                // (телефонная плашка или просто верх карты) и верхней границей нижней панели.
+                if (marker && calculator && isMobile()) {
+                    if (isCollapsed) {
+                        const calcRect  = calculator.getBoundingClientRect();
+                        const panelRect = panel.getBoundingClientRect();
+                        const phoneRect = phone ? phone.getBoundingClientRect() : null;
+
+                        const topObstruction    = phoneRect ? phoneRect.bottom : calcRect.top;
+                        const bottomObstruction = panelRect.top;
+
+                        const centerY  = (topObstruction + bottomObstruction) / 2;
+                        const markerY  = centerY - calcRect.top; // координата относительно calculator
+
+                        marker.style.top = `${markerY}px`;
+                    } else {
+                        // В развернутом состоянии — обычный центр экрана.
+                        marker.style.top = '50%';
+                    }
+                }
+
+                // Карту не двигаем transform'ом — она всегда заполняет экран,
+                // а «виртуальный центр» задаём положением маркера.
+                if (mapElement) {
+                    mapElement.style.transform = 'translateY(0)';
                 }
             }
 
