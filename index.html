@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="format-detection" content="telephone=no">
     <title>Заказ трансфера</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -80,7 +80,7 @@
                             </svg>
                         </div>
                         <div class="address-input-container">
-                            <input type="text" class="address-input" id="fromInput" placeholder="Откуда" autocomplete="off">
+                            <input type="text" class="address-input" id="fromInput" placeholder="Откуда" autocomplete="off" readonly>
                             <span class="address-hint">Адрес точки А</span>
                         </div>
                         <button class="clear-button" id="clearFrom" style="display: none;">
@@ -100,7 +100,7 @@
                             </svg>
                         </div>
                         <div class="address-input-container">
-                            <input type="text" class="address-input" id="toInput" placeholder="Куда?" autocomplete="off">
+                            <input type="text" class="address-input" id="toInput" placeholder="Куда?" autocomplete="off" readonly>
                             <span class="address-hint">Адрес точки Б</span>
                         </div>
                         <button class="clear-button" id="clearTo" style="display: none;">
@@ -341,6 +341,68 @@
         <div class="map-select-mode" id="mapSelectMode">
             <div class="title">Выберите точку на карте</div>
             <div class="hint">Кликните в нужном месте на карте<br>или нажмите ESC для отмены</div>
+        </div>
+
+        <!-- ===== ОВЕРЛЕЙ ПОИСКА АДРЕСА (стиль Яндекс Go) ===== -->
+        <div class="search-overlay" id="searchOverlay">
+            <!-- Шапка: строка А (фиксированная) + строка Б (ввод) -->
+            <div class="srch-header">
+                <!-- Строка А — только отображение -->
+                <div class="srch-row">
+                    <div class="srch-ico">
+                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                            <circle cx="8" cy="8" r="5" stroke="#fc3f1e" stroke-width="2" fill="none"/>
+                            <circle cx="8" cy="8" r="2.5" fill="#fc3f1e"/>
+                        </svg>
+                    </div>
+                    <span class="srch-label" id="srchLabelA">Откуда</span>
+                </div>
+                <div class="srch-divider"></div>
+                <!-- Строка Б — поле поиска -->
+                <div class="srch-row">
+                    <div class="srch-ico">
+                        <i class="fas fa-search" style="font-size:13px;color:#999;"></i>
+                    </div>
+                    <input type="text" id="srchInput" class="srch-input" placeholder="Куда поедете?" autocomplete="off">
+                    <button class="srch-clear" id="srchClear" style="display:none;">
+                        <i class="fas fa-times-circle"></i>
+                    </button>
+                    <div class="srch-sep"></div>
+                    <button class="srch-map-btn" id="srchMapBtn">Карта</button>
+                </div>
+            </div>
+            <!-- Список подсказок -->
+            <div class="srch-results" id="srchResults"></div>
+        </div>
+
+        <!-- ===== ПАНЕЛЬ ВЫБОРА ТОЧКИ НА КАРТЕ (как в приложении) ===== -->
+        <div class="map-pick-bar" id="mapPickBar">
+            <div class="mpb-header">
+                <button class="mpb-icon-btn" id="mpbBackBtn" type="button" aria-label="Назад">
+                    <span class="mpb-icon-circle">
+                        <i class="fas fa-arrow-left"></i>
+                    </span>
+                </button>
+                <button class="mpb-icon-btn" id="mpbNavBtn" type="button" aria-label="Маршрут">
+                    <span class="mpb-icon-circle">
+                        <i class="fas fa-location-arrow"></i>
+                    </span>
+                </button>
+            </div>
+
+            <div class="mpb-panel-title">Точка назначения</div>
+
+            <div class="mpb-address-card">
+                <div class="mpb-address-icon">
+                    <i class="fas fa-map-marker-alt"></i>
+                </div>
+                <div class="mpb-address-text">
+                    <div class="mpb-dest-subtitle">Переместите карту, чтобы выбрать адрес</div>
+                    <div class="mpb-dest-address mpb-addr-b" id="mpbAddrB">Переместите карту...</div>
+                </div>
+            </div>
+
+            <button class="mpb-confirm-btn" id="mpbConfirmBtn">Готово</button>
         </div>
 
         <div id="map"></div>

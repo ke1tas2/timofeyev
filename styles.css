@@ -2790,3 +2790,399 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             opacity: 0;
             pointer-events: none;
         }
+/* ==============================================
+   FIX: предотвращаем iOS zoom на инпутах
+   ============================================== */
+.address-input,
+.phone-input,
+input[type="text"],
+input[type="tel"] {
+    font-size: 16px !important;
+    touch-action: manipulation;
+}
+
+/* ==============================================
+   SEARCH OVERLAY — полноэкранный поиск адреса
+   ============================================== */
+.search-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 700;
+    display: flex;
+    flex-direction: column;
+    background: var(--card-bg, #22252f);
+    transform: translateY(100%);
+    transition: transform 0.26s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+}
+.search-overlay.srch-open {
+    transform: translateY(0);
+}
+body.light-theme .search-overlay {
+    background: #f0f0f0;
+}
+
+/* На десктопе — как боковая панель */
+@media (min-width: 769px) {
+    .search-overlay {
+        position: fixed;
+        left: var(--panel-left-gap, 16px);
+        top: calc(var(--topbar-gap, 12px) + var(--topbar-height, 72px));
+        bottom: var(--panel-vertical-gap, 12px);
+        right: auto;
+        width: var(--panel-width, 420px);
+        border-radius: 20px;
+        transform: scale(0.95) translateY(12px);
+        opacity: 0;
+        transition: transform 0.22s ease, opacity 0.22s ease;
+        pointer-events: none;
+    }
+    .search-overlay.srch-open {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+        pointer-events: auto;
+    }
+}
+
+/* Шапка оверлея */
+.srch-header {
+    flex-shrink: 0;
+    background: var(--card-bg, #2a2d38);
+    border-radius: 0 0 20px 20px;
+    padding: 14px 16px 14px;
+    padding-top: max(14px, calc(14px + env(safe-area-inset-top)));
+    box-shadow: 0 4px 24px rgba(0,0,0,0.22);
+}
+body.light-theme .srch-header {
+    background: #fff;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.1);
+}
+@media (min-width: 769px) {
+    .srch-header { border-radius: 20px 20px 0 0; }
+}
+
+/* Строки А и Б */
+.srch-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 48px;
+}
+.srch-ico {
+    width: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.srch-label {
+    flex: 1;
+    font-size: 16px;
+    color: var(--text-primary, #fff);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: text;
+}
+body.light-theme .srch-label { color: #1a1a1a; }
+
+.srch-divider {
+    height: 1px;
+    margin: 0 0 0 34px;
+    background: rgba(255,255,255,0.07);
+}
+body.light-theme .srch-divider { background: rgba(0,0,0,0.08); }
+
+/* Поле ввода поиска */
+.srch-input {
+    flex: 1;
+    min-width: 0;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 16px;
+    font-family: inherit;
+    color: var(--text-primary, #fff);
+    padding: 0;
+    appearance: none;
+    -webkit-appearance: none;
+    touch-action: manipulation;
+}
+.srch-input::placeholder { color: rgba(255,255,255,0.3); }
+body.light-theme .srch-input { color: #1a1a1a; }
+body.light-theme .srch-input::placeholder { color: rgba(0,0,0,0.3); }
+
+/* Кнопка очистки × */
+.srch-clear {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #888;
+    font-size: 16px;
+    padding: 4px 2px;
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Разделитель | */
+.srch-sep {
+    width: 1px;
+    height: 18px;
+    background: rgba(255,255,255,0.15);
+    flex-shrink: 0;
+    margin: 0 10px;
+}
+body.light-theme .srch-sep { background: rgba(0,0,0,0.15); }
+
+/* Кнопка «Карта» */
+.srch-map-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 700;
+    color: #ffd84d;
+    font-family: inherit;
+    padding: 4px 0;
+    flex-shrink: 0;
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+}
+body.light-theme .srch-map-btn { color: #b38900; }
+
+/* Список результатов */
+.srch-results {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Один элемент подсказки */
+.srch-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 13px 16px;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    transition: background 0.1s;
+}
+.srch-item:active { background: rgba(255,255,255,0.06); }
+body.light-theme .srch-item { border-bottom: 1px solid rgba(0,0,0,0.05); }
+body.light-theme .srch-item:active { background: rgba(0,0,0,0.04); }
+
+.srch-item-ico {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.07);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #888;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+body.light-theme .srch-item-ico { background: rgba(0,0,0,0.06); }
+
+.srch-item-body { flex: 1; min-width: 0; }
+.srch-item-main {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-primary, #fff);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+body.light-theme .srch-item-main { color: #1a1a1a; }
+.srch-item-sub {
+    font-size: 12px;
+    color: #888;
+    margin-top: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Пустое состояние / loading */
+.srch-empty {
+    padding: 32px 16px;
+    text-align: center;
+    color: #888;
+    font-size: 14px;
+}
+
+/* ==============================================
+   MAP PICK BAR — бар выбора точки на карте
+   ============================================== */
+.map-pick-bar {
+    display: none;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--card-bg, #22252f);
+    border-radius: 20px 20px 0 0;
+    padding: 18px 16px max(20px, env(safe-area-inset-bottom, 20px));
+    z-index: 300;
+    box-shadow: 0 -6px 32px rgba(0,0,0,0.3);
+    /* чтобы кнопки могли висеть над панелью */
+    position: fixed;
+    overflow: visible;
+}
+body.light-theme .map-pick-bar {
+    background: #fff;
+    box-shadow: 0 -4px 24px rgba(0,0,0,0.12);
+}
+.map-pick-bar.mpb-open { display: block; }
+
+@media (min-width: 769px) {
+    .map-pick-bar {
+        left: var(--panel-left-gap, 16px);
+        right: auto;
+        width: var(--panel-width, 420px);
+        border-radius: 20px;
+        bottom: var(--panel-vertical-gap, 12px);
+    }
+}
+
+/* Верхняя строка: назад, заголовок, стрелка */
+.mpb-header {
+    position: absolute;
+    left: 16px;
+    right: 16px;
+    top: -52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.mpb-icon-btn {
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+}
+
+.mpb-icon-circle {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #141414;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.35);
+}
+
+.mpb-icon-circle i {
+    font-size: 18px;
+}
+
+body.light-theme .mpb-icon-circle {
+    background: #000000;
+    color: #fff;
+}
+
+/* Заголовок внутри панели */
+.mpb-panel-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.7);
+    margin-bottom: 10px;
+}
+
+body.light-theme .mpb-panel-title {
+    color: rgba(0,0,0,0.7);
+}
+
+/* Карточка адреса */
+.mpb-address-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 16px;
+    background: rgba(0,0,0,0.35);
+    margin-bottom: 16px;
+}
+
+body.light-theme .mpb-address-card {
+    background: #141414;
+}
+
+.mpb-address-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(255,216,77,0.16);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffd84d;
+    flex-shrink: 0;
+}
+
+.mpb-address-icon i {
+    font-size: 14px;
+}
+
+.mpb-address-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.mpb-dest-subtitle {
+    font-size: 12px;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 2px;
+}
+
+body.light-theme .mpb-dest-subtitle {
+    color: rgba(255,255,255,0.7);
+}
+
+.mpb-dest-address {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary, #fff);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+body.light-theme .mpb-dest-address {
+    color: #fff;
+}
+
+.mpb-addr-b {
+    color: #888 !important;
+    font-style: italic;
+}
+.mpb-addr-b.mpb-has-addr {
+    color: var(--text-primary, #fff) !important;
+    font-style: normal;
+}
+body.light-theme .mpb-addr-b.mpb-has-addr { color: #1a1a1a !important; }
+
+.mpb-confirm-btn {
+    width: 100%;
+    height: 54px;
+    background: #ffd84d;
+    color: #141414;
+    border: none;
+    border-radius: 14px;
+    font-size: 17px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: opacity 0.15s;
+}
+.mpb-confirm-btn:active { opacity: 0.82; }

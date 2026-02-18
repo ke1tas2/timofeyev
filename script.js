@@ -167,21 +167,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
             let centerGeocodeTimer = null;
             map.events.add('boundschange', function() {
-                // Обновляем адрес динамически при движении карты:
-                // - для точки А всегда (когда не выбираем точку Б)
-                // - для точки Б только в режиме выбора (point-selection-mode)
-                if (selectingPoint === 'to') {
-                    // В режиме выбора точки Б - обновляем адрес точки Б
+                if (selectingPoint === 'to' || selectingPoint === 'from') {
+                    // Режим выбора на карте — обновляем превью адреса в баре
+                    var coords = getMarkerGeoCoords();
+                    previewMpbAddr(coords);
+
+                    // Также обновляем геокод для основного поля
                     if (centerGeocodeTimer) clearTimeout(centerGeocodeTimer);
                     centerGeocodeTimer = setTimeout(function() {
-                        const center = map.getCenter();
-                        geocodeCoords('to', center, false);
-                    }, 800);
-                } else if (!selectingPoint || selectingPoint === 'from') {
-                    // Для точки А - обновляем всегда (включая режим выбора)
+                        geocodeCoords(selectingPoint === 'from' ? 'from' : 'to', coords, false);
+                    }, 900);
+                } else if (!selectingPoint) {
+                    // Обычный режим — обновляем точку А по позиции маркера
                     if (centerGeocodeTimer) clearTimeout(centerGeocodeTimer);
                     centerGeocodeTimer = setTimeout(function() {
-                        const center = map.getCenter();
+                        var center = getMarkerGeoCoords();
                         geocodeCoords('from', center, false);
                     }, 800);
                 }
@@ -194,21 +194,22 @@ document.addEventListener('DOMContentLoaded', function() {
                 map.setZoom(map.getZoom() - 1, { duration: 200 });
             });
 
-            document.getElementById('geoBtn').addEventListener('click', function() {
-                if (navigator.geolocation) {
-                    navigator.geolocation.getCurrentPosition(
-                        function(position) {
-                            const coords = [position.coords.latitude, position.coords.longitude];
-                            geocodeCoords('from', coords);
-                            map.setCenter(coords, 15, { duration: 300 });
-                        },
-                        function() {
-                            alert('Не удалось определить местоположение. Разрешите доступ к геолокации.');
-                        },
-                        { enableHighAccuracy: true, timeout: 10000 }
-                    );
-                }
-            });
+            function goToUserLocation() {
+                if (!navigator.geolocation) return;
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        const coords = [position.coords.latitude, position.coords.longitude];
+                        geocodeCoords('from', coords);
+                        map.setCenter(coords, 15, { duration: 300 });
+                    },
+                    function() {
+                        alert('Не удалось определить местоположение. Разрешите доступ к геолокации.');
+                    },
+                    { enableHighAccuracy: true, timeout: 10000 }
+                );
+            }
+
+            document.getElementById('geoBtn').addEventListener('click', goToUserLocation);
 
             function updatePanelOverlayHeights() {
                 const topEl = document.querySelector('.panel-top');
@@ -296,29 +297,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 clearPoint('to');
             });
 
-            document.getElementById('toField').addEventListener('click', () => {
-                document.getElementById('toInput').focus();
-            });
-
-            document.getElementById('fromField').addEventListener('click', () => {
-                document.getElementById('fromInput').focus();
-            });
-
             document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape' && selectingPoint) {
-                    cancelSelection();
+                if (e.key === 'Escape') {
+                    if (document.getElementById('searchOverlay').classList.contains('srch-open')) {
+                        closeSearchOverlay();
+                    } else if (selectingPoint) {
+                        closeMapPickMode();
+                    }
                 }
             });
 
             updateClearButtons();
-
             updatePaymentMethods();
-
             setupCardInputFormatting();
-
             updatePrice();
-
             setupBottomSheet();
+            setupSearchOverlay();
+            setupMapPickBar();
         }
 
         function setupCardInputFormatting() {
@@ -361,36 +356,20 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         function setupInputFields() {
-            const fromInput = document.getElementById('fromInput');
-            const toInput = document.getElementById('toInput');
+            // Инпуты readonly — тап открывает оверлей поиска
+            var fromField = document.getElementById('fromField');
+            var toField   = document.getElementById('toField');
 
-            [fromInput, toInput].forEach(input => {
-                input.addEventListener('input', function() {
-                    updateClearButtons();
-                });
-            });
+            function fieldTap(e, pt) {
+                if (e.target.closest('.map-select-button') || e.target.closest('.clear-button')) return;
+                openSearchOverlay(pt);
+            }
+            fromField.addEventListener('click', function(e){ fieldTap(e,'from'); });
+            toField.addEventListener('click',   function(e){ fieldTap(e,'to'); });
 
-            [fromInput, toInput].forEach(input => {
-                input.addEventListener('focus', function() {
-                    this.parentElement.parentElement.classList.add('focused');
-                });
-
-                input.addEventListener('blur', function() {
-                    this.parentElement.parentElement.classList.remove('focused');
-                });
-            });
-
-            toInput.addEventListener('input', debounce((e) => {
-                if (e.target.value.length > 2) {
-                    searchAddress('to', e.target.value);
-                }
-            }, 300));
-
-            toInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    searchAddress('to', e.target.value);
-                }
-            });
+            // Кнопки карты → режим выбора на карте
+            document.getElementById('fromMapButton').onclick = function(){ openMapPickMode('from'); };
+            document.getElementById('toMapButton').onclick   = function(){ openMapPickMode('to'); };
         }
 
         function updateClearButtons() {
@@ -398,6 +377,285 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.getElementById('fromInput').value ? 'flex' : 'none';
             document.getElementById('clearTo').style.display =
                 document.getElementById('toInput').value ? 'flex' : 'none';
+        }
+
+        /* ===================================================
+           SEARCH OVERLAY — поиск с подсказками (Яндекс-стиль)
+           =================================================== */
+        var _srchPt = null;          // 'from' | 'to'
+        var _srchTimer = null;
+
+        function openSearchOverlay(pointType) {
+            _srchPt = pointType;
+
+            // Подставляем текущий адрес А в label
+            document.getElementById('srchLabelA').textContent =
+                document.getElementById('fromInput').value || 'Откуда';
+
+            // Подставляем текущее значение редактируемого поля
+            var cur = pointType === 'to'
+                ? document.getElementById('toInput').value
+                : document.getElementById('fromInput').value;
+            document.getElementById('srchInput').value = cur || '';
+
+            updateSrchClearBtn();
+            document.getElementById('srchResults').innerHTML = '';
+
+            // Если редактируем А и адрес уже есть — сразу ищем подсказки
+            if (cur && cur.length >= 2) triggerSuggest(cur);
+
+            document.getElementById('searchOverlay').classList.add('srch-open');
+
+            // Даём время появиться анимации, потом фокус
+            setTimeout(function() {
+                document.getElementById('srchInput').focus();
+            }, 120);
+        }
+
+        function closeSearchOverlay() {
+            document.getElementById('searchOverlay').classList.remove('srch-open');
+            document.getElementById('srchInput').blur();
+            if (_srchTimer) { clearTimeout(_srchTimer); _srchTimer = null; }
+            _srchPt = null;
+        }
+
+        function updateSrchClearBtn() {
+            var val = document.getElementById('srchInput').value;
+            document.getElementById('srchClear').style.display = val ? 'flex' : 'none';
+        }
+
+        function triggerSuggest(query) {
+            if (!query || query.length < 2) {
+                document.getElementById('srchResults').innerHTML = '';
+                return;
+            }
+            var opts = { results: 7, strictBounds: false };
+            try { if (map) opts.boundedBy = map.getBounds(); } catch(e){}
+
+            ymaps.suggest(query, opts).then(function(items) {
+                renderSuggestions(items.filter(function(i){ return i.value; }));
+            }).catch(function(){ document.getElementById('srchResults').innerHTML = ''; });
+        }
+
+        function renderSuggestions(items) {
+            var list = document.getElementById('srchResults');
+            list.innerHTML = '';
+
+            if (!items.length) {
+                list.innerHTML = '<div class="srch-empty">Ничего не найдено</div>';
+                return;
+            }
+
+            items.forEach(function(item) {
+                var name = item.displayName || item.value;
+                var parts = name.split(',');
+                var main = esc(parts[0].trim());
+                var sub  = parts.length > 1 ? esc(parts.slice(1).join(',').trim()) : '';
+
+                var el = document.createElement('div');
+                el.className = 'srch-item';
+                el.innerHTML =
+                    '<div class="srch-item-ico"><i class="fas fa-map-marker-alt"></i></div>' +
+                    '<div class="srch-item-body">' +
+                        '<div class="srch-item-main">' + main + '</div>' +
+                        (sub ? '<div class="srch-item-sub">' + sub + '</div>' : '') +
+                    '</div>';
+
+                // touchend: быстрее чем click, предотвращаем ghost-click
+                var used = false;
+                el.addEventListener('touchend', function(e) {
+                    e.preventDefault();
+                    used = true;
+                    pickSuggestion(item);
+                });
+                el.addEventListener('click', function() {
+                    if (!used) pickSuggestion(item);
+                    used = false;
+                });
+                list.appendChild(el);
+            });
+        }
+
+        function pickSuggestion(item) {
+            var pt = _srchPt;
+            closeSearchOverlay();
+            ymaps.geocode(item.value, { results: 1 }).then(function(res) {
+                var obj = res.geoObjects.get(0);
+                if (!obj) return;
+                var coords = obj.geometry.getCoordinates();
+                if (pt === 'from') setFromPoint(coords, item.displayName || item.value, true);
+                else               setToPoint(coords, item.displayName || item.value);
+            }).catch(function(){});
+        }
+
+        function esc(str) {
+            if (!str) return '';
+            return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+                      .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+        }
+
+        function setupSearchOverlay() {
+            var input  = document.getElementById('srchInput');
+            var clearB = document.getElementById('srchClear');
+            var mapBtn = document.getElementById('srchMapBtn');
+
+            input.addEventListener('input', function() {
+                updateSrchClearBtn();
+                if (_srchTimer) clearTimeout(_srchTimer);
+                var q = input.value.trim();
+                _srchTimer = setTimeout(function(){ triggerSuggest(q); }, 270);
+            });
+
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') { closeSearchOverlay(); return; }
+                if (e.key === 'Enter') {
+                    var first = document.querySelector('.srch-item');
+                    if (first) first.click();
+                }
+            });
+
+            clearB.addEventListener('click', function() {
+                input.value = '';
+                updateSrchClearBtn();
+                document.getElementById('srchResults').innerHTML = '';
+                input.focus();
+            });
+
+            // «Карта» — закрыть поиск, открыть режим выбора на карте
+            mapBtn.addEventListener('click', function() {
+                var pt = _srchPt || 'to';
+                closeSearchOverlay();
+                setTimeout(function(){ openMapPickMode(pt); }, 80);
+            });
+        }
+
+        /* ===================================================
+           MAP PICK MODE — выбор точки перемещением карты
+           =================================================== */
+        var _mpbPreviewTimer = null;
+
+        function openMapPickMode(pointType) {
+            selectingPoint = pointType;
+
+            // Скрываем основную панель
+            document.getElementById('panel').style.display = 'none';
+
+            // Показываем маркер
+            document.getElementById('mapMarker').classList.remove('hidden');
+
+            // Заполняем текст в ячейке "Точка назначения"
+            var addrB = document.getElementById('mpbAddrB');
+            if (addrB) {
+                if (pointType === 'to') {
+                    var curTo = document.getElementById('toInput').value;
+                    if (curTo) {
+                        addrB.textContent = curTo;
+                        addrB.classList.add('mpb-has-addr');
+                    } else {
+                        addrB.textContent = 'Переместите карту...';
+                        addrB.classList.remove('mpb-has-addr');
+                    }
+                } else {
+                    // Режим точки А — показываем текущий адрес А
+                    var curFrom = document.getElementById('fromInput').value;
+                    addrB.textContent = curFrom || 'Переместите карту...';
+                    if (curFrom) addrB.classList.add('mpb-has-addr');
+                    else addrB.classList.remove('mpb-has-addr');
+                }
+            }
+
+            // Показываем бар
+            document.getElementById('mapPickBar').classList.add('mpb-open');
+
+            // Убираем старый clickHandler если был
+            if (mapClickHandler) {
+                map.events.remove('click', mapClickHandler);
+                mapClickHandler = null;
+            }
+
+            // Сразу preview адреса текущего положения маркера
+            previewMpbAddr(getMarkerGeoCoords());
+        }
+
+        function closeMapPickMode() {
+            selectingPoint = null;
+            document.getElementById('panel').style.display = '';
+            document.getElementById('mapPickBar').classList.remove('mpb-open');
+            document.getElementById('mapSelectMode').classList.remove('active');
+            if (_mpbPreviewTimer) { clearTimeout(_mpbPreviewTimer); _mpbPreviewTimer = null; }
+
+            // Возвращаем bottomsheet в нормальное состояние на мобиле
+            if (window.innerWidth <= 768) {
+                setTimeout(function(){ window.dispatchEvent(new Event('resize')); }, 60);
+            }
+        }
+
+        // Геокод координат → обновление строки Б в баре (без маркеров)
+        function previewMpbAddr(coords) {
+            if (_mpbPreviewTimer) clearTimeout(_mpbPreviewTimer);
+            _mpbPreviewTimer = setTimeout(function() {
+                if (!selectingPoint) return;
+                ymaps.geocode(coords, { results: 1 }).then(function(res) {
+                    if (!selectingPoint) return;
+                    var obj = res.geoObjects.get(0);
+                    if (!obj) return;
+                    var full = obj.getAddressLine ? obj.getAddressLine() : obj.properties.get('text') || '';
+                    // Убираем страну + город
+                    var parts = full.split(',').map(function(s){ return s.trim(); });
+                    var addr = parts.length > 2 ? parts.slice(-2).join(', ') : full;
+
+                    var el = document.getElementById('mpbAddrB');
+                    el.textContent = addr || 'Переместите карту...';
+                    el.classList.toggle('mpb-has-addr', !!addr);
+                }).catch(function(){});
+            }, 600);
+        }
+
+        function setupMapPickBar() {
+            const confirmBtn = document.getElementById('mpbConfirmBtn');
+            const backBtn = document.getElementById('mpbBackBtn');
+            const navBtn = document.getElementById('mpbNavBtn');
+
+            if (backBtn) {
+                backBtn.addEventListener('click', function() {
+                    // Кнопка "назад" просто отменяет выбор точки
+                    cancelSelection();
+                });
+            }
+
+            // Правая круглая кнопка — как кнопка геолокации на карте
+            if (navBtn) {
+                navBtn.addEventListener('click', function() {
+                    if (typeof goToUserLocation === 'function') {
+                        goToUserLocation();
+                    }
+                });
+            }
+
+            if (!confirmBtn) return;
+
+            confirmBtn.addEventListener('click', function() {
+                if (!selectingPoint) return;
+                var coords = getMarkerGeoCoords();
+                var pt = selectingPoint;
+                closeMapPickMode();
+                // Геокодируем и устанавливаем точку
+                ymaps.geocode(coords, { results: 1 }).then(function(res) {
+                    var obj = res.geoObjects.get(0);
+                    var addr = obj
+                        ? (function() {
+                            var full = obj.getAddressLine ? obj.getAddressLine() : '';
+                            var parts = full.split(',').map(function(s){ return s.trim(); });
+                            return parts.length > 2 ? parts.slice(-2).join(', ') : full;
+                        })()
+                        : ('Координаты: ' + coords[0].toFixed(5) + ', ' + coords[1].toFixed(5));
+
+                    if (pt === 'from') setFromPoint(coords, addr, false);
+                    else               setToPoint(coords, addr);
+                }).catch(function() {
+                    geocodeCoords(pt, coords, pt === 'from');
+                });
+            });
         }
 
         function requestUserLocation() {
@@ -429,131 +687,63 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         function startSelectingPoint(pointType) {
-            selectingPoint = pointType;
+            openMapPickMode(pointType);
+        }
 
-            // НОВЫЙ РЕЖИМ для обеих точек: перетаскивание карты с маркером в центре
-            if (pointType === 'to' || pointType === 'from') {
-                // Предотвращаем фокус на input (блокируем клавиатуру)
-                const input = document.getElementById(pointType === 'to' ? 'toInput' : 'fromInput');
-                if (input) {
-                    input.blur();
-                }
-                
-                // Скрываем весь интерфейс кроме кнопки заказа
-                const panel = document.getElementById('panel');
-                if (panel) {
-                    panel.classList.add('point-selection-mode');
-                }
-                
-                // Меняем текст и обработчик кнопки
-                const orderBtn = document.getElementById('orderButton');
-                const orderBtnText = document.getElementById('orderButtonText');
-                
-                if (orderBtnText) {
-                    orderBtnText.textContent = 'Подтвердить';
-                }
-                
-                if (orderBtn) {
-                    orderBtn.onclick = function() {
-                        confirmPointSelection();
-                    };
-                }
-                
-                // Показываем маркер в центре карты
-                document.getElementById('mapMarker').classList.remove('hidden');
-                
-                // Удаляем обработчик клика по карте (не нужен в новом режиме)
-                if (mapClickHandler) {
-                    map.events.remove('click', mapClickHandler);
-                    mapClickHandler = null;
-                }
-                
-                // Для точки А сразу обновляем адрес по текущему центру карты
-                if (pointType === 'from') {
-                    const center = map.getCenter();
-                    geocodeCoords('from', center, false);
-                }
-                
-                return; // Выходим, не выполняя старую логику
+        // Возвращает гео-координаты кончика пина маркера.
+        // Берём getBoundingClientRect() именно .marker-pin (после rotate(-45deg))
+        // — его нижняя граница соответствует визуальному острому кончику.
+        function getMarkerGeoCoords() {
+            const markerEl = document.getElementById('mapMarker');
+            const mapEl = document.getElementById('map');
+            if (!markerEl || markerEl.classList.contains('hidden') || !mapEl) {
+                return map.getCenter();
             }
+            try {
+                const mapRect = mapEl.getBoundingClientRect();
 
-            // СТАРАЯ ЛОГИКА (fallback для других случаев)
-            document.getElementById('mapSelectMode').classList.add('active');
-            document.getElementById('mapMarker').classList.add('hidden');
+                const pinEl = markerEl.querySelector('.marker-pin');
+                const pinRect = pinEl
+                    ? pinEl.getBoundingClientRect()
+                    : markerEl.getBoundingClientRect();
 
-            const fromBtn = document.getElementById('fromSelectButton');
-            if (fromBtn) fromBtn.classList.add('active');
-            document.getElementById('fromMapButton').classList.add('active');
+                // Кончик пина — нижний центр bounding-box'а после rotate(-45deg)
+                const tipX = pinRect.left + pinRect.width / 2;
+                const tipY = pinRect.bottom;
 
-            if (mapClickHandler) {
-                map.events.remove('click', mapClickHandler);
+                // Смещение от центра div'а карты
+                const mapCenterX = mapRect.left + mapRect.width / 2;
+                const mapCenterY = mapRect.top + mapRect.height / 2;
+                const dx = tipX - mapCenterX;
+                const dy = tipY - mapCenterY;
+
+                // Проекция Яндекс.Карт: пиксели → гео
+                const projection = map.options.get('projection');
+                const zoom = map.getZoom();
+                const center = map.getCenter();
+                const centerGlobalPx = projection.toGlobalPixels(center, zoom);
+                const tipGlobalPx = [centerGlobalPx[0] + dx, centerGlobalPx[1] + dy];
+                return projection.fromGlobalPixels(tipGlobalPx, zoom);
+            } catch (e) {
+                console.error('getMarkerGeoCoords error:', e);
+                return map.getCenter();
             }
-
-            mapClickHandler = function(e) {
-                const coords = e.get('coords');
-                geocodeCoords(pointType, coords);
-                finishSelection();
-            };
-
-            map.events.add('click', mapClickHandler);
         }
 
         function confirmPointSelection() {
-            if (selectingPoint !== 'to' && selectingPoint !== 'from') return;
-            
-            // Берём координаты центра карты (где маркер)
-            const coords = map.getCenter();
-            
-            // Устанавливаем как выбранную точку (не двигая карту)
-            geocodeCoords(selectingPoint, coords, false);
-            
-            // Выходим из режима выбора
-            finishSelection();
+            if (!selectingPoint) return;
+            var coords = getMarkerGeoCoords();
+            var pt = selectingPoint;
+            closeMapPickMode();
+            geocodeCoords(pt, coords, pt === 'from');
         }
 
         function finishSelection() {
-            const wasSelectingPoint = selectingPoint === 'to' || selectingPoint === 'from';
-            
-            selectingPoint = null;
-            
-            // Возвращаем UI если был режим выбора точки (А или Б)
-            if (wasSelectingPoint) {
-                const panel = document.getElementById('panel');
-                const orderBtn = document.getElementById('orderButton');
-                const orderBtnText = document.getElementById('orderButtonText');
-                
-                if (panel) {
-                    panel.classList.remove('point-selection-mode');
-                }
-                
-                if (orderBtnText) {
-                    orderBtnText.textContent = 'Заказать трансфер';
-                }
-                
-                if (orderBtn) {
-                    orderBtn.onclick = orderTaxi;
-                }
-            }
-            
-            // Старая логика для точки А
-            document.getElementById('mapSelectMode').classList.remove('active');
-            const fromBtn = document.getElementById('fromSelectButton');
-            const toBtn = document.getElementById('toSelectButton');
-            if (fromBtn) fromBtn.classList.remove('active');
-            if (toBtn) toBtn.classList.remove('active');
-            document.getElementById('fromMapButton').classList.remove('active');
-            document.getElementById('toMapButton').classList.remove('active');
-
-            document.getElementById('mapMarker').classList.remove('hidden');
-
-            if (mapClickHandler) {
-                map.events.remove('click', mapClickHandler);
-                mapClickHandler = null;
-            }
+            closeMapPickMode();
         }
 
         function cancelSelection() {
-            finishSelection();
+            closeMapPickMode();
         }
 
         function setFromPoint(coords, address, centerMap = true) {
