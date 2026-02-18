@@ -1,4 +1,4 @@
-// Version: 3.0.0 - CSS transform approach for perfect Yandex-style marker centering
+// Version: 3.1.0 - New point B selection mode: drag map, confirm location
 document.addEventListener('DOMContentLoaded', function() {
             const allRecords = document.getElementById('allrecords');
             if (allRecords) {
@@ -167,13 +167,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
             let centerGeocodeTimer = null;
             map.events.add('boundschange', function() {
-                if (selectingPoint) return;
-
-                if (centerGeocodeTimer) clearTimeout(centerGeocodeTimer);
-                centerGeocodeTimer = setTimeout(function() {
-                    const center = map.getCenter();
-                    geocodeCoords('from', center, false);
-                }, 800);
+                // Обновляем адрес динамически при движении карты:
+                // - для точки А всегда (когда не выбираем точку Б)
+                // - для точки Б только в режиме выбора (point-selection-mode)
+                if (selectingPoint === 'to') {
+                    // В режиме выбора точки Б - обновляем адрес точки Б
+                    if (centerGeocodeTimer) clearTimeout(centerGeocodeTimer);
+                    centerGeocodeTimer = setTimeout(function() {
+                        const center = map.getCenter();
+                        geocodeCoords('to', center, false);
+                    }, 800);
+                } else if (!selectingPoint || selectingPoint === 'from') {
+                    // Для точки А - обновляем всегда (включая режим выбора)
+                    if (centerGeocodeTimer) clearTimeout(centerGeocodeTimer);
+                    centerGeocodeTimer = setTimeout(function() {
+                        const center = map.getCenter();
+                        geocodeCoords('from', center, false);
+                    }, 800);
+                }
             });
 
             document.getElementById('zoomIn').addEventListener('click', function() {
@@ -420,19 +431,59 @@ document.addEventListener('DOMContentLoaded', function() {
         function startSelectingPoint(pointType) {
             selectingPoint = pointType;
 
-            document.getElementById('mapSelectMode').classList.add('active');
+            // НОВЫЙ РЕЖИМ для обеих точек: перетаскивание карты с маркером в центре
+            if (pointType === 'to' || pointType === 'from') {
+                // Предотвращаем фокус на input (блокируем клавиатуру)
+                const input = document.getElementById(pointType === 'to' ? 'toInput' : 'fromInput');
+                if (input) {
+                    input.blur();
+                }
+                
+                // Скрываем весь интерфейс кроме кнопки заказа
+                const panel = document.getElementById('panel');
+                if (panel) {
+                    panel.classList.add('point-selection-mode');
+                }
+                
+                // Меняем текст и обработчик кнопки
+                const orderBtn = document.getElementById('orderButton');
+                const orderBtnText = document.getElementById('orderButtonText');
+                
+                if (orderBtnText) {
+                    orderBtnText.textContent = 'Подтвердить';
+                }
+                
+                if (orderBtn) {
+                    orderBtn.onclick = function() {
+                        confirmPointSelection();
+                    };
+                }
+                
+                // Показываем маркер в центре карты
+                document.getElementById('mapMarker').classList.remove('hidden');
+                
+                // Удаляем обработчик клика по карте (не нужен в новом режиме)
+                if (mapClickHandler) {
+                    map.events.remove('click', mapClickHandler);
+                    mapClickHandler = null;
+                }
+                
+                // Для точки А сразу обновляем адрес по текущему центру карты
+                if (pointType === 'from') {
+                    const center = map.getCenter();
+                    geocodeCoords('from', center, false);
+                }
+                
+                return; // Выходим, не выполняя старую логику
+            }
 
+            // СТАРАЯ ЛОГИКА (fallback для других случаев)
+            document.getElementById('mapSelectMode').classList.add('active');
             document.getElementById('mapMarker').classList.add('hidden');
 
             const fromBtn = document.getElementById('fromSelectButton');
-            const toBtn = document.getElementById('toSelectButton');
-            if (pointType === 'from') {
-                if (fromBtn) fromBtn.classList.add('active');
-                document.getElementById('fromMapButton').classList.add('active');
-            } else {
-                if (toBtn) toBtn.classList.add('active');
-                document.getElementById('toMapButton').classList.add('active');
-            }
+            if (fromBtn) fromBtn.classList.add('active');
+            document.getElementById('fromMapButton').classList.add('active');
 
             if (mapClickHandler) {
                 map.events.remove('click', mapClickHandler);
@@ -447,8 +498,44 @@ document.addEventListener('DOMContentLoaded', function() {
             map.events.add('click', mapClickHandler);
         }
 
+        function confirmPointSelection() {
+            if (selectingPoint !== 'to' && selectingPoint !== 'from') return;
+            
+            // Берём координаты центра карты (где маркер)
+            const coords = map.getCenter();
+            
+            // Устанавливаем как выбранную точку (не двигая карту)
+            geocodeCoords(selectingPoint, coords, false);
+            
+            // Выходим из режима выбора
+            finishSelection();
+        }
+
         function finishSelection() {
+            const wasSelectingPoint = selectingPoint === 'to' || selectingPoint === 'from';
+            
             selectingPoint = null;
+            
+            // Возвращаем UI если был режим выбора точки (А или Б)
+            if (wasSelectingPoint) {
+                const panel = document.getElementById('panel');
+                const orderBtn = document.getElementById('orderButton');
+                const orderBtnText = document.getElementById('orderButtonText');
+                
+                if (panel) {
+                    panel.classList.remove('point-selection-mode');
+                }
+                
+                if (orderBtnText) {
+                    orderBtnText.textContent = 'Заказать трансфер';
+                }
+                
+                if (orderBtn) {
+                    orderBtn.onclick = orderTaxi;
+                }
+            }
+            
+            // Старая логика для точки А
             document.getElementById('mapSelectMode').classList.remove('active');
             const fromBtn = document.getElementById('fromSelectButton');
             const toBtn = document.getElementById('toSelectButton');
@@ -1454,10 +1541,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 const calculator = document.getElementById('calculator');
                 
                 if (mapControls) {
-                    mapControls.style.opacity       = isCollapsed ? '1' : '0';
-                    mapControls.style.visibility    = isCollapsed ? 'visible' : 'hidden';
-                    mapControls.style.pointerEvents = isCollapsed ? 'auto' : 'none';
-                    mapControls.style.bottom        = (panelH + 16) + 'px';
+                    if (isMobile()) {
+                        mapControls.style.opacity       = isCollapsed ? '1' : '0';
+                        mapControls.style.visibility    = isCollapsed ? 'visible' : 'hidden';
+                        mapControls.style.pointerEvents = isCollapsed ? 'auto' : 'none';
+                        mapControls.style.bottom        = (panelH + 16) + 'px';
+                    } else {
+                        // На ПК кнопки карты всегда видимы
+                        mapControls.style.opacity       = '1';
+                        mapControls.style.visibility    = 'visible';
+                        mapControls.style.pointerEvents = 'auto';
+                        mapControls.style.bottom        = '';
+                    }
                 }
                 if (phone) {
                     phone.style.opacity       = isCollapsed ? '1' : '0';
