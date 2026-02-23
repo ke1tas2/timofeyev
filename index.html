@@ -32,13 +32,570 @@
                     <i class="theme-icon fas fa-moon" aria-hidden="true"></i>
                 </button>
                 
-                <a class="topbar-login" href="javascript:void(0)">
-                    <i class="fas fa-arrow-right-to-bracket"></i>
-                    Войти
-                </a>
+                <!-- Бургер-меню (открывает тот же drawer) -->
+                <button class="topbar-menu-btn" onclick="toggleHsMenu()" aria-label="Меню">
+                    <i class="fas fa-bars"></i>
+                </button>
             </div>
         </div>
     </div>
+
+    <!-- ===== ГЛАВНЫЙ ЭКРАН (Яндекс Go стиль) ===== -->
+    <div id="homeScreen" class="home-screen">
+
+        <!-- ═══ ВЕРХНЯЯ ПАНЕЛЬ (Timofeyev по центру экрана) ═══ -->
+        <div class="hs-topbar">
+            <!-- Левая группа -->
+            <div class="hs-topbar-left">
+                <button class="hs-menu-btn" onclick="toggleHsMenu()">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+
+            <!-- Центр: логотип + адрес — абсолютно по центру экрана -->
+            <div class="hs-title-wrap">
+                <div class="hs-brand-logo">Timofeyev</div>
+                <div class="hs-address" id="hsAddress">
+                    <i class="fas fa-location-dot" style="font-size:9px;"></i>
+                    Алма-Ата
+                </div>
+            </div>
+
+            <!-- Правая группа -->
+            <div class="hs-topbar-right">
+                <button class="hs-login-btn" onclick="openAuthScreen()">
+                    <i class="fas fa-arrow-right-to-bracket"></i>
+                    Войти
+                </button>
+            </div>
+        </div>
+
+        <!-- ═══ ПРОКРУЧИВАЕМОЕ ТЕЛО ═══ -->
+        <div class="hs-body">
+
+            <!-- ── Сетка 2×2: главные категории ── -->
+            <div class="hs-cards-grid">
+
+                <!-- Перегон авто -->
+                <div class="hs-card hs-card-relay" onclick="openCalculator()">
+                    <div class="hs-card-inner">
+                        <img class="hs-card-img hs-card-img--keys" src="./assets/car-keys.png" alt="Перегон авто">
+                        <div class="hs-card-label">Перегон авто</div>
+                    </div>
+                </div>
+
+                <!-- Трансфер -->
+                <div class="hs-card hs-card-transfer" onclick="openCalculator()">
+                    <div class="hs-card-inner">
+                        <img class="hs-card-img hs-card-img--sedan" src="./assets/sedan.png" alt="Трансфер">
+                        <div class="hs-card-label">Трансфер</div>
+                    </div>
+                </div>
+
+                <!-- Туры -->
+                <div class="hs-card hs-card-tours" onclick="openCalculator()">
+                    <div class="hs-card-inner">
+                        <img class="hs-card-img hs-card-img--heli" src="./assets/helicopter-black.png" alt="Туры">
+                        <div class="hs-card-label">Туры</div>
+                    </div>
+                </div>
+
+                <!-- Стать водителем -->
+                <div class="hs-card hs-card-driver" onclick="openCalculator()">
+                    <div class="hs-card-inner">
+                        <img class="hs-card-img hs-card-img--suv" src="./assets/suv.png" alt="Стать водителем">
+                        <div class="hs-card-label">Стать водителем</div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- ── Горизонтальная лента тарифов ── -->
+            <div class="hs-tariff-wrap">
+                <div class="hs-tariff-strip" id="hsTariffStrip">
+
+                    <div class="hs-tariff-chip active" onclick="openCalculator()">
+                        <div class="hs-tariff-img-wrap">
+                            <img src="./assets/car-keys.png" alt="Перегон авто">
+                        </div>
+                        <span>Перегон авто</span>
+                    </div>
+
+                    <div class="hs-tariff-chip" onclick="openCalculator()">
+                        <div class="hs-tariff-img-wrap">
+                            <img src="./assets/sedan.png" alt="Седан">
+                        </div>
+                        <span>Седан</span>
+                    </div>
+
+                    <div class="hs-tariff-chip" onclick="openCalculator()">
+                        <div class="hs-tariff-img-wrap">
+                            <img src="./assets/suv.png" alt="Внедорожник">
+                        </div>
+                        <span>Внедорожник</span>
+                    </div>
+
+                    <div class="hs-tariff-chip" onclick="openCalculator()">
+                        <div class="hs-tariff-img-wrap">
+                            <img src="./assets/sportcar.png" alt="Спорткар">
+                        </div>
+                        <span>Спорткар</span>
+                    </div>
+
+                    <div class="hs-tariff-chip" onclick="openCalculator()">
+                        <div class="hs-tariff-img-wrap">
+                            <img src="./assets/microbus.png" alt="Микроавтобус">
+                        </div>
+                        <span>Микроавтобус</span>
+                    </div>
+
+                    <div class="hs-tariff-chip" onclick="openCalculator()">
+                        <div class="hs-tariff-img-wrap">
+                            <img src="./assets/limousine-black.png" alt="Лимузин">
+                        </div>
+                        <span>Лимузин</span>
+                    </div>
+
+                    <div class="hs-tariff-chip" onclick="openCalculator()">
+                        <div class="hs-tariff-img-wrap">
+                            <img src="./assets/bus.png" alt="Автобус">
+                        </div>
+                        <span>Автобус</span>
+                    </div>
+
+                    <div class="hs-tariff-chip" onclick="openCalculator()">
+                        <div class="hs-tariff-img-wrap">
+                            <img src="./assets/helicopter-black.png" alt="Вертолёт">
+                        </div>
+                        <span>Вертолёт</span>
+                    </div>
+
+                    <div class="hs-tariff-chip" onclick="openCalculator()">
+                        <div class="hs-tariff-img-wrap">
+                            <img src="./assets/plane.png" alt="Бизнес джет">
+                        </div>
+                        <span>Бизнес джет</span>
+                    </div>
+
+                </div>
+                <!-- Пагинация (три точки) -->
+                <div class="hs-pagination">
+                    <span class="hs-dot active"></span>
+                    <span class="hs-dot"></span>
+                    <span class="hs-dot"></span>
+                </div>
+            </div>
+
+            <!-- ── Строка поиска ── -->
+            <div class="hs-search-bar" onclick="openCalculator()">
+                <i class="fas fa-search hs-search-icon"></i>
+                <span class="hs-search-placeholder">Введите ваш адрес</span>
+            </div>
+
+            <!-- ── Последние адреса ── -->
+            <div class="hs-recent-section">
+                <div class="hs-section-title">Адреса</div>
+                <div class="hs-recent-list">
+                    <div class="hs-recent-item" onclick="openCalculator()">
+                        <div class="hs-recent-icon"><i class="fas fa-map-marker-alt"></i></div>
+                        <div class="hs-recent-info">
+                            <div class="hs-recent-main">Таира Жарокова 245</div>
+                            <div class="hs-recent-sub">Алматы</div>
+                        </div>
+                        <div class="hs-recent-time">25 мин</div>
+                    </div>
+                    <div class="hs-recent-item" onclick="openCalculator()">
+                        <div class="hs-recent-icon"><i class="fas fa-map-marker-alt"></i></div>
+                        <div class="hs-recent-info">
+                            <div class="hs-recent-main">мкр-н Баянаул 31/3</div>
+                            <div class="hs-recent-sub">Алматы</div>
+                        </div>
+                        <div class="hs-recent-time">29 мин</div>
+                    </div>
+                    <div class="hs-recent-item" onclick="openCalculator()">
+                        <div class="hs-recent-icon"><i class="fas fa-clock"></i></div>
+                        <div class="hs-recent-info">
+                            <div class="hs-recent-main">Проспект Достык 5</div>
+                            <div class="hs-recent-sub">Алматы</div>
+                        </div>
+                        <div class="hs-recent-time">35 мин</div>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /hs-body -->
+
+        <!-- ═══ НИЖНЯЯ НАВИГАЦИЯ ═══ -->
+        <div class="hs-bottom-nav">
+            <div class="hs-nav-item active">
+                <i class="fas fa-home"></i>
+                <span>Главная</span>
+            </div>
+            <div class="hs-nav-item">
+                <i class="fas fa-route"></i>
+                <span>Маршруты</span>
+            </div>
+            <div class="hs-nav-item">
+                <i class="fas fa-history"></i>
+                <span>История</span>
+            </div>
+            <div class="hs-nav-item">
+                <i class="fas fa-user-circle"></i>
+                <span>Профиль</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         БОКОВОЕ МЕНЮ (drawer) — стиль Яндекс Go / Профиль
+         ═══════════════════════════════════════════════════ -->
+    <!-- Затемнение фона -->
+    <div class="hs-drawer-overlay" id="hsDrawerOverlay" onclick="closeHsMenu()"></div>
+
+    <!-- Сам ящик меню -->
+    <div class="hs-drawer" id="hsDrawer">
+
+        <!-- ── Шапка: назад + аватар ── -->
+        <div class="hs-drawer-header">
+            <button class="hs-drawer-back" onclick="closeHsMenu()">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <div class="hs-drawer-avatar">
+                <i class="fas fa-user"></i>
+            </div>
+        </div>
+
+        <!-- ── Кнопка входа ── -->
+        <div class="hs-drawer-auth">
+            <button class="hs-drawer-login-btn" onclick="openAuthScreen()">
+                Войти или зарегистрироваться
+            </button>
+            <p class="hs-drawer-auth-hint">У вас будет доступ к заказам и избранному</p>
+        </div>
+
+        <!-- ── Список пунктов меню ── -->
+        <div class="hs-drawer-body">
+
+            <!-- Уведомления -->
+            <div class="hs-drawer-group">
+                <div class="hs-drawer-item" onclick="closeHsMenu()">
+                    <div class="hs-drawer-item-icon hs-di-bell">
+                        <i class="fas fa-bell"></i>
+                        <span class="hs-di-badge"></span>
+                    </div>
+                    <div class="hs-drawer-item-text">
+                        <span class="hs-di-title">Включите уведомления</span>
+                    </div>
+                    <i class="fas fa-chevron-right hs-drawer-chevron"></i>
+                </div>
+            </div>
+
+            <!-- Скидки и подарки -->
+            <div class="hs-drawer-group">
+                <div class="hs-drawer-item" onclick="closeHsMenu()">
+                    <div class="hs-drawer-item-icon hs-di-discount">
+                        <i class="fas fa-percent"></i>
+                    </div>
+                    <div class="hs-drawer-item-text">
+                        <span class="hs-di-title">Скидки и подарки</span>
+                        <span class="hs-di-subtitle">Ввести промокод</span>
+                    </div>
+                    <i class="fas fa-chevron-right hs-drawer-chevron"></i>
+                </div>
+            </div>
+
+            <!-- Способы оплаты -->
+            <div class="hs-drawer-group">
+                <div class="hs-drawer-item" onclick="closeHsMenu()">
+                    <div class="hs-drawer-item-icon hs-di-payment">
+                        <i class="fas fa-credit-card"></i>
+                    </div>
+                    <div class="hs-drawer-item-text">
+                        <span class="hs-di-title">Способы оплаты</span>
+                    </div>
+                    <i class="fas fa-chevron-right hs-drawer-chevron"></i>
+                </div>
+            </div>
+
+            <!-- Поддержка -->
+            <div class="hs-drawer-group">
+                <div class="hs-drawer-item" onclick="closeHsMenu()">
+                    <div class="hs-drawer-item-icon hs-di-support">
+                        <i class="fas fa-headset"></i>
+                    </div>
+                    <div class="hs-drawer-item-text">
+                        <span class="hs-di-title">Поддержка</span>
+                    </div>
+                    <i class="fas fa-chevron-right hs-drawer-chevron"></i>
+                </div>
+            </div>
+
+            <!-- Работа водителем (жёлтая) -->
+            <div class="hs-drawer-group hs-drawer-group--yellow">
+                <div class="hs-drawer-item" onclick="openDriverScreen()">
+                    <div class="hs-drawer-item-icon hs-di-work">
+                        <i class="fas fa-car-side"></i>
+                    </div>
+                    <div class="hs-drawer-item-text">
+                        <span class="hs-di-title hs-di-title--dark">Работа водителем</span>
+                    </div>
+                    <i class="fas fa-chevron-right hs-drawer-chevron hs-drawer-chevron--dark"></i>
+                </div>
+            </div>
+
+            <!-- Бизнес-аккаунт -->
+            <div class="hs-drawer-group">
+                <div class="hs-drawer-item" onclick="closeHsMenu()">
+                    <div class="hs-drawer-item-icon hs-di-business">
+                        <i class="fas fa-briefcase"></i>
+                    </div>
+                    <div class="hs-drawer-item-text">
+                        <span class="hs-di-title">Бизнес-аккаунт</span>
+                    </div>
+                    <i class="fas fa-chevron-right hs-drawer-chevron"></i>
+                </div>
+            </div>
+
+            <!-- Семейный аккаунт -->
+            <div class="hs-drawer-group">
+                <div class="hs-drawer-item" onclick="closeHsMenu()">
+                    <div class="hs-drawer-item-icon hs-di-family">
+                        <i class="fas fa-user-group"></i>
+                    </div>
+                    <div class="hs-drawer-item-text">
+                        <span class="hs-di-title">Семейный аккаунт</span>
+                    </div>
+                    <i class="fas fa-chevron-right hs-drawer-chevron"></i>
+                </div>
+            </div>
+
+            <!-- Безопасность -->
+            <div class="hs-drawer-group">
+                <div class="hs-drawer-item" onclick="closeHsMenu()">
+                    <div class="hs-drawer-item-icon hs-di-security">
+                        <i class="fas fa-shield-halved"></i>
+                    </div>
+                    <div class="hs-drawer-item-text">
+                        <span class="hs-di-title">Безопасность</span>
+                    </div>
+                    <i class="fas fa-chevron-right hs-drawer-chevron"></i>
+                </div>
+            </div>
+
+            <!-- Настройки -->
+            <div class="hs-drawer-group">
+                <div class="hs-drawer-item" onclick="closeHsMenu()">
+                    <div class="hs-drawer-item-icon hs-di-settings">
+                        <i class="fas fa-gear"></i>
+                    </div>
+                    <div class="hs-drawer-item-text">
+                        <span class="hs-di-title">Настройки</span>
+                    </div>
+                    <i class="fas fa-chevron-right hs-drawer-chevron"></i>
+                </div>
+            </div>
+
+            <!-- Тёмная тема — переключатель -->
+            <div class="hs-drawer-group">
+                <div class="hs-drawer-item hs-drawer-item--notap" onclick="toggleTheme()">
+                    <div class="hs-drawer-item-icon hs-di-theme">
+                        <i class="hs-theme-icon fas fa-moon"></i>
+                    </div>
+                    <div class="hs-drawer-item-text">
+                        <span class="hs-di-title" id="hsDrawerThemeLabel">Тёмная тема включена</span>
+                    </div>
+                    <div class="hs-drawer-toggle-wrap">
+                        <label class="hs-drawer-toggle" onclick="event.stopPropagation()">
+                            <input type="checkbox" id="hsThemeToggleCheck" onchange="toggleTheme()">
+                            <span class="hs-drawer-toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /hs-drawer-body -->
+
+        <!-- ── Версия приложения ── -->
+        <div class="hs-drawer-footer">
+            <span>Timofeyev Transfer</span>
+            <span>v1.0.0</span>
+        </div>
+
+    </div><!-- /hs-drawer -->
+
+    <!-- ═══════════════════════════════════════════════════
+         ЭКРАН «РАБОТА ВОДИТЕЛЕМ»
+         ═══════════════════════════════════════════════════ -->
+    <div class="drv-screen" id="driverScreen">
+
+        <!-- Фоновая картинка-градиент -->
+        <div class="drv-hero-bg"></div>
+
+        <!-- Кнопка назад -->
+        <button class="drv-back-btn" onclick="closeDriverScreen()">
+            <i class="fas fa-arrow-left"></i>
+        </button>
+
+        <!-- Скроллируемое тело -->
+        <div class="drv-body">
+
+            <!-- ── Герой ── -->
+            <div class="drv-hero">
+                <h1 class="drv-hero-title">Работа водителем<br>с Timofeyev</h1>
+            </div>
+
+            <!-- ── Заработок ── -->
+            <div class="drv-earn-card">
+                <div class="drv-earn-amount">
+                    100 000 ₸ в месяц
+                </div>
+                <div class="drv-earn-label">— столько получает водитель</div>
+            </div>
+
+            <!-- ── Преимущества ── -->
+            <div class="drv-section">
+                <div class="drv-section-title">А ещё можно:</div>
+                <div class="drv-benefits">
+                    <div class="drv-benefit-item">
+                        <span class="drv-benefit-dash">—</span>
+                        <span>Выходить на линию только в удобное время</span>
+                    </div>
+                    <div class="drv-benefit-item">
+                        <span class="drv-benefit-dash">—</span>
+                        <span>Выполнять заказы на своём авто либо взять машину в парке</span>
+                    </div>
+                    <div class="drv-benefit-item">
+                        <span class="drv-benefit-dash">—</span>
+                        <span>Получать деньги сразу в поездках за наличные</span>
+                    </div>
+                </div>
+            </div>
+
+
+
+        </div><!-- /drv-body -->
+
+        <!-- ── Фиксированный футер ── -->
+        <div class="drv-footer">
+            <button class="drv-cta-btn" onclick="openDriverApplication()">
+                <span class="drv-cta-main">Оставить заявку</span>
+                <span class="drv-cta-sub">Вам перезвонят</span>
+            </button>
+            <button class="drv-login-link" onclick="openAuthScreen()">Войти или зарегистрироваться</button>
+            <p class="drv-legal">
+                Отправляя заявку, вы соглашаетесь с <a href="javascript:void(0)" class="drv-legal-link">условиями оферты</a>.
+                Сотрудничество с партнёрами сервиса. Условия индивидуальны,
+                за подробной информацией обратитесь к партнёрам.
+                Максимальный средний доход указан для тарифа «Эконом»
+                в Казахстане за вычетом сбора сервиса по данным за декабрь 2025 г.
+            </p>
+        </div>
+
+    </div><!-- /driverScreen -->
+
+    <!-- Модал подтверждения заявки -->
+    <div class="drv-modal-overlay" id="drvModalOverlay" onclick="closeDrvModal()">
+        <div class="drv-modal" onclick="event.stopPropagation()">
+            <div class="drv-modal-icon"><i class="fas fa-check-circle"></i></div>
+            <div class="drv-modal-title">Заявка отправлена!</div>
+            <div class="drv-modal-text">Наш менеджер свяжется с вами в ближайшее время.</div>
+            <button class="drv-modal-btn" onclick="closeDrvModal()">Отлично</button>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════
+         ЭКРАН АВТОРИЗАЦИИ — стиль Яндекс ID
+         ═══════════════════════════════════════════════════ -->
+    <div class="auth-screen" id="authScreen">
+
+        <!-- Шапка -->
+        <div class="auth-header">
+            <button class="auth-back-btn" onclick="closeAuthScreen()">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <div class="auth-logo">
+                Timofeyev <span class="auth-logo-id">ID</span>
+            </div>
+        </div>
+
+        <!-- Основной контент -->
+        <div class="auth-body">
+
+            <h1 class="auth-title">Введите номер<br>телефона</h1>
+            <p class="auth-subtitle">Чтобы войти или зарегистрироваться</p>
+
+            <!-- Поле ввода телефона -->
+            <div class="auth-phone-wrap">
+                <div class="auth-flag-btn" onclick="toggleCountryPicker()">
+                    <span class="auth-flag">🇰🇿</span>
+                    <span class="auth-code">+7</span>
+                </div>
+                <input
+                    class="auth-phone-input"
+                    id="authPhoneInput"
+                    type="tel"
+                    placeholder="(000) 000-00-00"
+                    maxlength="15"
+                    oninput="formatPhone(this)"
+                >
+                <button class="auth-clear-btn" id="authClearBtn" onclick="clearPhone()" style="display:none;">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Сторонние провайдеры -->
+            <div class="auth-social-row">
+                <button class="auth-social-btn" title="Apple">
+                    <i class="fab fa-apple"></i>
+                </button>
+                <button class="auth-social-btn auth-social-vk" title="ВКонтакте">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M15.07 2H8.93C3.33 2 2 3.33 2 8.93v6.14C2 20.67 3.33 22 8.93 22h6.14C20.67 22 22 20.67 22 15.07V8.93C22 3.33 20.67 2 15.07 2zm2.85 13.27h-1.5c-.57 0-.74-.45-1.77-1.5-.89-.87-1.27-.99-1.49-.99-.3 0-.39.09-.39.51v1.38c0 .36-.12.57-1.08.57-1.59 0-3.35-.96-4.59-2.76C5.37 10.5 5 8.82 5 8.46c0-.21.09-.42.51-.42h1.5c.39 0 .54.18.69.6.75 2.16 2.01 4.05 2.52 4.05.18 0 .27-.09.27-.57v-2.22c-.06-1.02-.6-1.11-.6-1.47 0-.18.15-.36.39-.36h2.37c.33 0 .45.18.45.57v3c0 .33.15.45.24.45.18 0 .33-.12.66-.45 1.02-1.14 1.74-2.88 1.74-2.88.09-.21.27-.42.66-.42h1.5c.45 0 .54.24.45.57-.18.84-2.01 3.45-2.01 3.45-.15.27-.21.39 0 .69.15.21.66.66.99 1.05.63.69 1.11 1.26 1.23 1.65.15.39-.06.6-.48.6z"/>
+                    </svg>
+                </button>
+                <button class="auth-social-btn auth-social-google" title="Google">
+                    <svg width="20" height="20" viewBox="0 0 24 24">
+                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                    </svg>
+                </button>
+                <button class="auth-social-btn auth-social-mail" title="Mail.ru">
+                    <i class="fas fa-at"></i>
+                </button>
+                <button class="auth-social-btn auth-social-more" title="Ещё">
+                    <i class="fas fa-ellipsis"></i>
+                </button>
+            </div>
+
+            <!-- Основная кнопка -->
+            <button class="auth-submit-btn" onclick="submitPhone()">
+                Войти
+            </button>
+
+            <!-- Биометрия -->
+            <button class="auth-bio-btn">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                    <path d="M12 1C5.9 1 1 5.9 1 12s4.9 11 11 11 11-4.9 11-11S18.1 1 12 1z" stroke-opacity=".0" fill="none"/>
+                    <path d="M7 9.5C7 7 9.2 5 12 5s5 2 5 4.5"/>
+                    <path d="M5.5 8C5.5 5 8.5 2.5 12 2.5S18.5 5 18.5 8"/>
+                    <path d="M9 13c0-1.7 1.3-3 3-3s3 1.3 3 3-.5 3.5-1.5 5"/>
+                    <path d="M12 10v4M12 16v1"/>
+                    <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
+                </svg>
+                По лицу или отпечатку
+            </button>
+
+            <!-- Кнопка Ещё -->
+            <button class="auth-more-btn">
+                Ещё
+            </button>
+
+        </div><!-- /auth-body -->
+
+    </div><!-- /authScreen -->
 
     <div id="calculator">
         <!-- Красная метка на карте -->
@@ -91,6 +648,8 @@
                         </button>
                     </div>
 
+                    <div id="stopsContainer"></div>
+
                     <div class="address-field" id="toField">
                         <div class="address-icon to-icon">
                             <svg width="24" height="24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -114,7 +673,7 @@
             </div>
 
             <div class="panel-content">
-                <div class="address-field add-stop" id="addStopField">
+                <div class="address-field add-stop" id="addStopField" onclick="addStop()">
                     <div class="add-stop-icon">
                         <i class="fas fa-plus"></i>
                     </div>
@@ -345,30 +904,34 @@
 
         <!-- ===== ОВЕРЛЕЙ ПОИСКА АДРЕСА (стиль Яндекс Go) ===== -->
         <div class="search-overlay" id="searchOverlay">
-            <!-- Шапка: строка А (фиксированная) + строка Б (ввод) -->
+            <!-- Ползунок (хэндл) для сворачивания -->
+            <div class="srch-sheet-handle" id="srchSheetHandle" aria-hidden="true"></div>
+
+            <!-- Шапка: адресные строки как на скриншоте -->
             <div class="srch-header">
-                <!-- Строка А — только отображение -->
-                <div class="srch-row">
-                    <div class="srch-ico">
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                            <circle cx="8" cy="8" r="5" stroke="#fc3f1e" stroke-width="2" fill="none"/>
-                            <circle cx="8" cy="8" r="2.5" fill="#fc3f1e"/>
-                        </svg>
+                <div class="srch-address-card">
+                    <!-- Строка A (показ) -->
+                    <div class="srch-addr-row srch-addr-row-a">
+                        <div class="srch-addr-ico srch-addr-ico-a">
+                            <i class="fas fa-walking"></i>
+                        </div>
+                        <span class="srch-addr-text" id="srchLabelA">Откуда</span>
                     </div>
-                    <span class="srch-label" id="srchLabelA">Откуда</span>
-                </div>
-                <div class="srch-divider"></div>
-                <!-- Строка Б — поле поиска -->
-                <div class="srch-row">
-                    <div class="srch-ico">
-                        <i class="fas fa-search" style="font-size:13px;color:#999;"></i>
+
+                    <div class="srch-divider"></div>
+
+                    <!-- Строка B (ввод) -->
+                    <div class="srch-addr-row srch-addr-row-b">
+                        <div class="srch-addr-ico srch-addr-ico-b">
+                            <i class="fas fa-taxi"></i>
+                        </div>
+                        <input type="text" id="srchInput" class="srch-input" placeholder="Куда поедете?" autocomplete="off">
+                        <button class="srch-clear" id="srchClear" style="display:none;">
+                            <i class="fas fa-times-circle"></i>
+                        </button>
+                        <div class="srch-sep"></div>
+                        <button class="srch-map-btn" id="srchMapBtn">Карта</button>
                     </div>
-                    <input type="text" id="srchInput" class="srch-input" placeholder="Куда поедете?" autocomplete="off">
-                    <button class="srch-clear" id="srchClear" style="display:none;">
-                        <i class="fas fa-times-circle"></i>
-                    </button>
-                    <div class="srch-sep"></div>
-                    <button class="srch-map-btn" id="srchMapBtn">Карта</button>
                 </div>
             </div>
             <!-- Список подсказок -->
@@ -486,6 +1049,6 @@
     <script src="https://api-maps.yandex.ru/2.1/?apikey=69c18fe9-15b1-4391-b4e7-2a005a4fb22d&lang=ru_RU"></script>
     
     </div>
-    <script src="script.js?v=3.1.0"></script>
+    <script src="script.js?v=4.0.0"></script>
 </body>
 </html>

@@ -43,7 +43,8 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             height: 100vh;
             height: 100dvh;
             overflow: hidden;
-            background: radial-gradient(circle at top, #2a2d35 0, #1f2229 42%, #181b20 100%);
+            /* Yandex Go тёмная тема: мягкий градиент */
+            background: #1C1C1E;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             color: #f5f5f7;
             position: relative;
@@ -72,10 +73,10 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             /* Расстояние между основной панелью и плашкой телефона (desktop) */
             --panel-phone-gap: 8px;
 
-            /* Темная тема (СЕРАЯ) */
-            --bg-main: #1f2229;
-            --bg-surface: #2a2d35;
-            --bg-card: #33373f;
+            /* Темная тема (СЕРАЯ — как Яндекс Go) */
+            --bg-main: #1C1C1E;
+            --bg-surface: #252528;
+            --bg-card: #2C2C2E;
             --accent-primary: #ffd84d;
             --accent-primary-soft: rgba(255, 216, 77, 0.15);
             --accent-secondary: #c8a251;
@@ -88,7 +89,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             --card-radius: 22px;
             --card-shadow: 0 18px 40px rgba(0, 0, 0, 0.6);
             --cta-bg: var(--accent-primary);
-            --cta-text: #141414;
+            --cta-text: #1C1C1E;
             --panel-inset: 12px;
             --panel-top-h: 140px;
             --panel-bottom-h: 76px;
@@ -163,8 +164,8 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             height: var(--topbar-height);
             /* Более тёмный, ближе к общему фону панели */
             background:
-                radial-gradient(circle at top left, rgba(255, 216, 77, 0.22), transparent 55%),
-                linear-gradient(135deg, #151821, #0e1017);
+                radial-gradient(circle at top left, rgba(255, 216, 77, 0.16), transparent 55%),
+                linear-gradient(135deg, #1C1C1E, #141416);
             backdrop-filter: blur(18px);
             border-radius: 20px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
@@ -261,7 +262,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             padding: 10px 14px;
             border-radius: 14px;
             border: 1px solid var(--border-subtle);
-            background: #11131b;
+            background: #1C1C1E;
             color: var(--text-primary);
             font-size: 14px;
             text-decoration: none;
@@ -269,7 +270,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
         }
 
         .topbar-login:hover {
-            background: #1b1f2a;
+            background: #222224;
             box-shadow: 0 0 18px rgba(255, 216, 77, 0.35);
             transform: translateY(-1px);
         }
@@ -282,6 +283,37 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
         body.light-theme .topbar-login:hover {
             background: rgba(0, 0, 0, 0.08);
             box-shadow: 0 0 12px rgba(255, 200, 0, 0.25);
+        }
+
+        /* Бургер-кнопка в основном топбаре */
+        .topbar-menu-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            border: 1px solid var(--border-subtle);
+            background: #1C1C1E;
+            color: var(--text-primary);
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.18s ease, box-shadow 0.18s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .topbar-menu-btn:hover {
+            background: #222224;
+            box-shadow: 0 0 18px rgba(255, 216, 77, 0.25);
+        }
+
+        body.light-theme .topbar-menu-btn {
+            background: rgba(0, 0, 0, 0.04);
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+
+        body.light-theme .topbar-menu-btn:hover {
+            background: rgba(0, 0, 0, 0.08);
         }
 
         /* Панель телефона в светлой теме — как в тёмной, но светлые цвета */
@@ -810,23 +842,23 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             padding: 0;
             border-radius: 12px;
             border: 1px solid var(--border-subtle);
-            background: #11131b;
+            background: #1C1C1E;
             color: var(--accent-primary);
             font-size: 16px;
             cursor: pointer;
             transition: background 0.15s, box-shadow 0.15s, border-color 0.15s, color 0.15s;
             margin-right: 10px;
-            box-shadow: 0 14px 32px rgba(0, 0, 0, 0.85);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
         }
 
         .theme-toggle:hover {
-            background: #181b27;
+            background: #323235;
             border-color: rgba(255, 216, 77, 0.45);
             box-shadow: 0 0 20px rgba(255, 216, 77, 0.55);
         }
 
         .theme-toggle:active {
-            background: #151822;
+            background: #2C2C2E;
             box-shadow: 0 0 14px rgba(255, 216, 77, 0.4);
         }
 
@@ -859,7 +891,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             position: fixed;
             top: calc(var(--topbar-gap) + var(--topbar-height) + var(--panel-vertical-gap));
             left: calc(var(--panel-left-gap) + var(--panel-width) + var(--panel-phone-gap));
-            background: radial-gradient(circle at top left, rgba(255, 216, 77, 0.2), rgba(10, 10, 16, 0.98));
+            background: radial-gradient(circle at top left, rgba(255, 216, 77, 0.2), rgba(28, 28, 30, 0.98));
             border-radius: 16px;
             padding: 12px 20px;
             /* Поверх панели заказа и жёлтой кнопки в обеих темах */
@@ -963,6 +995,41 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             cursor: pointer;
         }
 
+        /* ===== Поля остановок ===== */
+        .stop-field {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            cursor: pointer;
+        }
+
+        .stop-icon {
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+            flex-shrink: 0;
+            border-radius: 50%;
+            background: rgba(255, 140, 0, 0.18);
+            border: 1.5px solid #ff8c00;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .stop-number {
+            font-size: 11px;
+            font-weight: 700;
+            color: #ff8c00;
+            line-height: 1;
+        }
+
+        body.light-theme .stop-icon {
+            background: rgba(255, 140, 0, 0.12);
+            border-color: #ff8c00;
+        }
+        body.light-theme .stop-number {
+            color: #d97000;
+        }
+
         .add-stop-icon {
             width: 20px;
             height: 20px;
@@ -1021,7 +1088,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             width: 100%;
             border: none;
             background: transparent;
-            font-size: 15px;
+            font-size: 14px;
             color: var(--text-primary);
             outline: none;
             font-weight: 400;
@@ -1079,7 +1146,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
         .map-select-button {
             width: 32px;
             height: 32px;
-            background: #11131b;
+            background: #1C1C1E;
             border: 1px solid var(--border-subtle);
             border-radius: 10px;
             color: var(--accent-primary);
@@ -1094,7 +1161,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
         }
 
         .map-select-button:hover {
-            background: #181b27;
+            background: #323235;
             border-color: rgba(255, 216, 77, 0.5);
             box-shadow: 0 0 18px rgba(255, 216, 77, 0.5);
             transform: translateY(-1px);
@@ -1253,7 +1320,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             top: -8px;
             right: 8px;
             background: var(--accent-primary);
-            color: #141414;
+            color: #1C1C1E;
             font-size: 10px;
             font-weight: 600;
             padding: 2px 6px;
@@ -1296,7 +1363,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             border-radius: 999px;
             overflow: hidden;
             border: 1px solid rgba(255, 255, 255, 0.12);
-            background: #080a12;
+            background: #111113;
             position: relative;
         }
         .transport-class-option {
@@ -1503,7 +1570,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             align-items: center;
             justify-content: space-between;
             padding: 16px;
-            background: #141722;
+            background: #1A1A1C;
             border-radius: 12px;
             cursor: pointer;
             transition: all 0.2s;
@@ -1511,7 +1578,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
         }
 
         .payment-button:hover {
-            background: #181b27;
+            background: #323235;
             border-color: rgba(255, 216, 77, 0.4);
             box-shadow: 0 0 18px rgba(255, 216, 77, 0.4);
         }
@@ -1719,7 +1786,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: #10131d;
+            background: #1C1C1E;
             padding: 32px;
             border-radius: 16px;
             z-index: 1000;
@@ -1895,7 +1962,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
         }
 
         .payment-method-item:hover {
-            background: #181b27;
+            background: #323235;
         }
 
         .payment-method-item.active {
@@ -1961,7 +2028,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
         }
 
         .add-card-button:hover {
-            background: #181b27;
+            background: #323235;
         }
 
         .add-card-icon {
@@ -2588,7 +2655,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             display: flex;
             flex-direction: column;
             width: 44px;
-            background: #11131b;
+            background: #1C1C1E;
             border-radius: 22px;
             box-shadow: 0 14px 32px rgba(0, 0, 0, 0.85);
             overflow: hidden;
@@ -2632,7 +2699,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             width: 44px;
             height: 44px;
             border-radius: 50%;
-            background: #11131b;
+            background: #1C1C1E;
             border: 1px solid var(--border-subtle);
             box-shadow: 0 14px 32px rgba(0, 0, 0, 0.85);
             cursor: pointer;
@@ -2644,13 +2711,13 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
         }
 
         .map-geo-btn:hover {
-            background: #181b27;
+            background: #323235;
             border-color: rgba(255, 216, 77, 0.45);
             box-shadow: 0 0 20px rgba(255, 216, 77, 0.55);
         }
 
         .map-geo-btn:active {
-            background: #151822;
+            background: #2C2C2E;
             box-shadow: 0 0 14px rgba(255, 216, 77, 0.4);
         }
 
@@ -2790,6 +2857,65 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             opacity: 0;
             pointer-events: none;
         }
+
+        /* ===== Кастомные маркеры точек А/Б и остановок (визуал как на референсе) ===== */
+        .custom-point-marker,
+        .custom-stop-marker {
+            position: relative;
+            width: 24px;
+            height: 44px;
+            transform: translateZ(0);
+            --pin-color: #fc3f1e;
+        }
+
+        .custom-stop-marker {
+            opacity: 0.9;
+        }
+
+        /* “Головка”: красный круг + белая точка в центре, без обводок и теней */
+        .custom-point-marker::before,
+        .custom-stop-marker::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 50%;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--pin-color);
+            transform: translateX(-50%);
+        }
+
+        .custom-point-marker::after,
+        .custom-stop-marker::after {
+            content: "";
+            position: absolute;
+            top: 5px;
+            left: 50%;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ffffff;
+            transform: translateX(-50%);
+        }
+
+        /* “Палка”: ровная красная, без белой полосы и без градиентов */
+        .custom-point-marker .cpm-stick,
+        .custom-stop-marker .cpm-stick {
+            position: absolute;
+            left: 50%;
+            top: 18px;
+            width: 3px;
+            height: 24px;
+            transform: translateX(-50%);
+            background: var(--pin-color);
+            border-radius: 1.5px;
+        }
+
+        body.light-theme .custom-point-marker,
+        body.light-theme .custom-stop-marker {
+            filter: none;
+        }
 /* ==============================================
    FIX: предотвращаем iOS zoom на инпутах
    ============================================== */
@@ -2802,24 +2928,34 @@ input[type="tel"] {
 }
 
 /* ==============================================
-   SEARCH OVERLAY — полноэкранный поиск адреса
+   SEARCH OVERLAY — шторка поиска адреса
    ============================================== */
 .search-overlay {
     position: fixed;
-    inset: 0;
-    z-index: 700;
+    left: 0;
+    right: 0;
+    top: auto;
+    bottom: 0;
+    z-index: 750;  /* Выше панели телефона */
     display: flex;
     flex-direction: column;
     background: var(--card-bg, #22252f);
+    border-radius: 24px 24px 0 0;  /* Скругление только сверху */
+    box-shadow: 0 -10px 40px rgba(0,0,0,0.45);
+    overflow: hidden;
+    /* Высота на весь экран */
+    height: calc(100dvh - 96px);
+    max-height: calc(100dvh - 96px);
     transform: translateY(100%);
-    transition: transform 0.26s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     will-change: transform;
 }
 .search-overlay.srch-open {
     transform: translateY(0);
 }
 body.light-theme .search-overlay {
-    background: #f0f0f0;
+    background: #ffffff;
+    box-shadow: 0 -10px 34px rgba(0,0,0,0.18);
 }
 
 /* На десктопе — как боковая панель */
@@ -2832,6 +2968,7 @@ body.light-theme .search-overlay {
         right: auto;
         width: var(--panel-width, 420px);
         border-radius: 20px;
+        height: auto;
         transform: scale(0.95) translateY(12px);
         opacity: 0;
         transition: transform 0.22s ease, opacity 0.22s ease;
@@ -2844,21 +2981,95 @@ body.light-theme .search-overlay {
     }
 }
 
+/* Хэндл (ползунок) */
+.srch-sheet-handle {
+    height: 22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    cursor: grab;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+.srch-sheet-handle::before {
+    content: "";
+    width: 42px;
+    height: 4px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.28);
+}
+body.light-theme .srch-sheet-handle::before {
+    background: rgba(0,0,0,0.18);
+}
+
 /* Шапка оверлея */
 .srch-header {
     flex-shrink: 0;
-    background: var(--card-bg, #2a2d38);
-    border-radius: 0 0 20px 20px;
-    padding: 14px 16px 14px;
-    padding-top: max(14px, calc(14px + env(safe-area-inset-top)));
-    box-shadow: 0 4px 24px rgba(0,0,0,0.22);
+    background: transparent;
+    padding: 0 12px 10px;
 }
 body.light-theme .srch-header {
-    background: #fff;
-    box-shadow: 0 2px 16px rgba(0,0,0,0.1);
+    background: transparent;
 }
 @media (min-width: 769px) {
-    .srch-header { border-radius: 20px 20px 0 0; }
+    .srch-header { padding: 14px 16px 14px; }
+}
+
+/* Карточка адресных строк (как на скрине) */
+.srch-address-card {
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.08);
+    background: rgba(0,0,0,0.28);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+body.light-theme .srch-address-card {
+    background: rgba(245,245,245,0.95);
+    border-color: rgba(0,0,0,0.06);
+}
+
+/* Ряды A/B */
+.srch-addr-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    min-height: 52px;
+}
+.srch-addr-ico {
+    width: 36px;
+    height: 36px;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.srch-addr-ico-a {
+    background: rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.9);
+}
+body.light-theme .srch-addr-ico-a {
+    background: rgba(0,0,0,0.06);
+    color: rgba(0,0,0,0.8);
+}
+.srch-addr-ico-b {
+    background: #ffd84d;
+    color: #111;
+}
+.srch-addr-text {
+    flex: 1;
+    min-width: 0;
+    font-size: 16px;
+    color: rgba(255,255,255,0.95);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+body.light-theme .srch-addr-text {
+    color: rgba(0,0,0,0.9);
 }
 
 /* Строки А и Б */
@@ -2888,8 +3099,8 @@ body.light-theme .srch-label { color: #1a1a1a; }
 
 .srch-divider {
     height: 1px;
-    margin: 0 0 0 34px;
-    background: rgba(255,255,255,0.07);
+    margin: 0;
+    background: rgba(255,255,255,0.12);
 }
 body.light-theme .srch-divider { background: rgba(0,0,0,0.08); }
 
@@ -2960,6 +3171,11 @@ body.light-theme .srch-map-btn { color: #b38900; }
     -webkit-overflow-scrolling: touch;
 }
 
+/* Свернутая шторка: прячем результаты */
+.search-overlay.srch-collapsed .srch-results {
+    display: none;
+}
+
 /* Один элемент подсказки */
 .srch-item {
     display: flex;
@@ -3009,6 +3225,16 @@ body.light-theme .srch-item-main { color: #1a1a1a; }
     white-space: nowrap;
 }
 
+.srch-item-distance {
+    font-size: 13px;
+    color: #888;
+    font-weight: 400;
+    flex-shrink: 0;
+    margin-left: 12px;
+    white-space: nowrap;
+}
+body.light-theme .srch-item-distance { color: #666; }
+
 /* Пустое состояние / loading */
 .srch-empty {
     padding: 32px 16px;
@@ -3036,8 +3262,8 @@ body.light-theme .srch-item-main { color: #1a1a1a; }
     overflow: visible;
 }
 body.light-theme .map-pick-bar {
-    background: #fff;
-    box-shadow: 0 -4px 24px rgba(0,0,0,0.12);
+    background: #ffffff;
+    box-shadow: 0 -4px 24px rgba(0,0,0,0.10);
 }
 .map-pick-bar.mpb-open { display: block; }
 
@@ -3073,7 +3299,7 @@ body.light-theme .map-pick-bar {
     width: 44px;
     height: 44px;
     border-radius: 50%;
-    background: #141414;
+    background: #1C1C1E;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -3114,7 +3340,8 @@ body.light-theme .mpb-panel-title {
 }
 
 body.light-theme .mpb-address-card {
-    background: #141414;
+    background: #1C1C1E;
+    border-radius: 18px;
 }
 
 .mpb-address-icon {
@@ -3149,8 +3376,8 @@ body.light-theme .mpb-dest-subtitle {
 }
 
 .mpb-dest-address {
-    font-size: 15px;
-    font-weight: 600;
+    font-size: 14px;
+    font-weight: 500;
     color: var(--text-primary, #fff);
     overflow: hidden;
     text-overflow: ellipsis;
@@ -3158,7 +3385,7 @@ body.light-theme .mpb-dest-subtitle {
 }
 
 body.light-theme .mpb-dest-address {
-    color: #fff;
+    color: #ffffff;
 }
 
 .mpb-addr-b {
@@ -3169,13 +3396,19 @@ body.light-theme .mpb-dest-address {
     color: var(--text-primary, #fff) !important;
     font-style: normal;
 }
-body.light-theme .mpb-addr-b.mpb-has-addr { color: #1a1a1a !important; }
+/* В светлой теме адрес в карточке остаётся светлым, чтобы не теряться на тёмном фоне */
+body.light-theme .mpb-addr-b {
+    color: rgba(255,255,255,0.7) !important;
+}
+body.light-theme .mpb-addr-b.mpb-has-addr {
+    color: #ffffff !important;
+}
 
 .mpb-confirm-btn {
     width: 100%;
     height: 54px;
     background: #ffd84d;
-    color: #141414;
+    color: #1C1C1E;
     border: none;
     border-radius: 14px;
     font-size: 17px;
@@ -3186,3 +3419,1804 @@ body.light-theme .mpb-addr-b.mpb-has-addr { color: #1a1a1a !important; }
     transition: opacity 0.15s;
 }
 .mpb-confirm-btn:active { opacity: 0.82; }
+/* === Подсветка совпадений в подсказках === */
+.srch-hl {
+    color: #4b9eff;
+    font-weight: 600;
+}
+body.light-theme .srch-hl {
+    color: #1a73e8;
+}
+
+/* === Загрузка подсказок (три точки) === */
+.srch-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 28px 0;
+}
+.srch-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.25);
+    animation: srchDotPulse 1.2s ease-in-out infinite;
+}
+.srch-dot:nth-child(2) { animation-delay: 0.2s; }
+.srch-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes srchDotPulse {
+    0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+    40% { transform: scale(1); opacity: 1; }
+}
+body.light-theme .srch-dot {
+    background: rgba(0,0,0,0.2);
+}
+
+/* === Улучшенный список подсказок === */
+.srch-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 13px 16px;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    transition: background 0.1s;
+}
+.srch-item:last-child { border-bottom: none; }
+.srch-item:active { background: rgba(255,255,255,0.06); }
+body.light-theme .srch-item { border-bottom: 1px solid rgba(0,0,0,0.05); }
+body.light-theme .srch-item:active { background: rgba(0,0,0,0.04); }
+
+.srch-item-ico {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #aaa;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+body.light-theme .srch-item-ico {
+    background: rgba(0,0,0,0.06);
+    color: #666;
+}
+
+.srch-item-body { flex: 1; min-width: 0; }
+.srch-item-main {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-primary, #fff);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: 1.3;
+}
+body.light-theme .srch-item-main { color: #1a1a1a; }
+.srch-item-sub {
+    font-size: 12px;
+    color: #888;
+    margin-top: 3px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.srch-empty {
+    padding: 40px 16px;
+    text-align: center;
+    color: #888;
+    font-size: 14px;
+}
+/* ================================================================
+   ГЛАВНЫЙ ЭКРАН — новый дизайн по макету
+   ================================================================ */
+
+.home-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    /* Yandex Go тёмная тема: мягкий тёмно-серый фон */
+    background: #1C1C1E;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+    transition: opacity 0.35s ease, transform 0.35s ease;
+}
+
+.home-screen.hs-hidden {
+    opacity: 0;
+    transform: translateY(-20px);
+    pointer-events: none;
+}
+
+/* ─── Топбар (Yandex Go стиль) ─── */
+.hs-topbar {
+    display: grid;
+    grid-template-columns: 1fr minmax(0, auto) 1fr;
+    align-items: center;
+    gap: 12px;
+    padding: 48px 16px 16px;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.hs-topbar-left {
+    display: flex;
+    justify-content: flex-start;
+}
+
+.hs-menu-btn {
+    width: 40px;
+    height: 40px;
+    background: rgba(255,255,255,0.06);
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.2s;
+    -webkit-tap-highlight-color: transparent;
+}
+.hs-menu-btn:hover { background: rgba(255,255,255,0.1); }
+.hs-menu-btn:active { background: rgba(255,255,255,0.14); }
+
+/* Центр: Timofeyev — строго по центру экрана (grid) */
+.hs-title-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    text-align: center;
+}
+
+.hs-brand-logo {
+    font-size: 23px;
+    font-weight: 700;
+    color: #ffd84d;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+}
+
+.hs-address {
+    font-size: 12px;
+    color: rgba(255,216,77,0.9);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+.hs-address:hover { color: #ffd84d; }
+.hs-address i { color: inherit; }
+
+/* Правая группа — симметрична левой */
+.hs-topbar-right {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+.hs-theme-btn {
+    width: 38px;
+    height: 38px;
+    background: rgba(255,255,255,0.08);
+    border: none;
+    border-radius: 12px;
+    color: rgba(255,255,255,0.7);
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.18s, color 0.18s;
+    -webkit-tap-highlight-color: transparent;
+}
+.hs-theme-btn:active { background: rgba(255,255,255,0.14); }
+
+.hs-login-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    border-radius: 50px;
+    border: none;
+    background: rgba(255,255,255,0.12);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background 0.2s;
+    -webkit-tap-highlight-color: transparent;
+}
+.hs-login-btn:hover { background: rgba(255,255,255,0.16); }
+.hs-login-btn:active { background: rgba(255,255,255,0.2); }
+
+/* ─── Тело (скролл) ─── */
+.hs-body {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 6px 12px 90px;
+    -webkit-overflow-scrolling: touch;
+}
+.hs-body::-webkit-scrollbar { display: none; }
+
+/* ═══════════════════════════════
+   КАРТОЧКИ 2×2 — стиль Яндекс Go
+   ═══════════════════════════════ */
+.hs-cards-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+    /* Разрешаем картинкам немного вылезать вверх */
+    overflow: visible;
+}
+
+/* Оболочка карточки — Yandex Go: мягкие карточки с лёгкой глубиной */
+.hs-card {
+    position: relative;
+    border-radius: 20px;
+    overflow: hidden;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    height: 148px;
+    /* Слегка приподнятая карточка — как в Яндекс Go */
+    background: #2C2C2E;
+    border: 1px solid rgba(255,255,255,0.04);
+}
+
+.hs-card:active {
+    transform: scale(0.98);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+}
+
+/* Мягкие градиенты для каждой карточки — не страшные, приятные */
+.hs-card-relay    { background: linear-gradient(165deg, #323235 0%, #2C2C2E 50%, #222224 100%); }
+.hs-card-transfer { background: linear-gradient(165deg, #323235 0%, #2C2C2E 50%, #222224 100%); }
+.hs-card-tours    { background: linear-gradient(165deg, #323235 0%, #2C2C2E 50%, #222224 100%); }
+.hs-card-driver   { background: linear-gradient(165deg, #323235 0%, #2C2C2E 50%, #222224 100%); }
+
+/* Внутренний контейнер — управляет позицией картинки и текста */
+.hs-card-inner {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 0 0 12px 14px;
+}
+
+/* Картинка — Яндекс Go: сбалансированные пропорции внутри карточки */
+.hs-card-img {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: 75%;
+    height: 70%;
+    object-fit: contain;
+    object-position: right center;
+    filter: drop-shadow(0 6px 14px rgba(0,0,0,0.45));
+    pointer-events: none;
+    transition: transform 0.25s ease;
+}
+
+/* Ключи — уменьшаем, чтобы не переполняли карточку */
+.hs-card-img--keys {
+    width: 52%;
+    height: 58%;
+    right: 8%;
+    top: 4px;
+    object-position: right center;
+}
+
+/* Седан — стандартный размер */
+.hs-card-img--sedan {
+    width: 78%;
+    height: 72%;
+    right: 0;
+    top: -2px;
+    object-position: right center;
+}
+
+/* Вертолёт — справа как остальные, крупный, край слегка обрезается контейнером */
+.hs-card-img--heli {
+    left: auto;
+    right: 0;
+    width: 108%;
+    height: 88%;
+    top: -4px;
+    object-position: right center;
+}
+
+/* Внедорожник — как седан */
+.hs-card-img--suv {
+    width: 78%;
+    height: 72%;
+    right: 0;
+    top: -2px;
+    object-position: right center;
+}
+
+.hs-card:active .hs-card-img {
+    transform: scale(1.03) translateY(-1px);
+}
+
+/* Текст-подпись — чистый, без тяжёлой тени */
+.hs-card-label {
+    position: relative;
+    z-index: 2;
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.95);
+    line-height: 1.3;
+    letter-spacing: 0.01em;
+}
+
+/* ─── Лента тарифов ─── */
+.hs-tariff-wrap {
+    margin-bottom: 4px;
+}
+
+.hs-tariff-strip {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 4px 2px 8px;
+    scrollbar-width: none;
+}
+.hs-tariff-strip::-webkit-scrollbar { display: none; }
+
+.hs-tariff-chip {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    padding: 12px 14px 10px;
+    background: #2C2C2E;
+    border-radius: 16px;
+    min-width: 80px;
+    border: 2px solid rgba(255,255,255,0.06);
+    transition: border-color 0.2s, background 0.2s, transform 0.2s;
+}
+
+.hs-tariff-chip:hover {
+    background: #2a2d36;
+}
+
+.hs-tariff-chip.active {
+    border-color: rgba(255,216,77,0.5);
+    background: rgba(255,216,77,0.1);
+    box-shadow: 0 0 0 1px rgba(255,216,77,0.15);
+}
+
+.hs-tariff-chip:active { opacity: 0.85; }
+
+.hs-tariff-img-wrap {
+    width: 52px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hs-tariff-img-wrap img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5));
+}
+
+.hs-tariff-chip span {
+    font-size: 12px;
+    color: rgba(255,255,255,0.6);
+    text-align: center;
+    white-space: nowrap;
+    font-weight: 500;
+}
+
+.hs-tariff-chip.active span { color: #ffd84d; }
+
+/* ─── Пагинация — как в Яндекс Go ─── */
+.hs-pagination {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    padding: 4px 0 12px;
+}
+
+.hs-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    transition: all 0.25s ease;
+    cursor: pointer;
+}
+
+.hs-dot.active {
+    width: 18px;
+    border-radius: 3px;
+    background: #ffd84d;
+}
+
+/* ─── Строка поиска — Яндекс Go: очень скруглённая, мягкая ─── */
+.hs-search-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #2C2C2E;
+    border-radius: 14px;
+    padding: 16px 20px;
+    margin-bottom: 14px;
+    cursor: pointer;
+    border: 1px solid rgba(255,255,255,0.05);
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.2s, border-color 0.2s;
+}
+.hs-search-bar:hover,
+.hs-search-bar:active { background: #2a2d36; border-color: rgba(255,255,255,0.08); }
+
+.hs-search-icon {
+    font-size: 16px;
+    color: rgba(255,216,77,0.65);
+}
+
+.hs-search-placeholder {
+    flex: 1;
+    font-size: 15px;
+    color: rgba(255,255,255,0.4);
+}
+
+/* ─── Раздел адресов — как в Яндекс Go ─── */
+.hs-recent-section {}
+
+.hs-section-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    padding-left: 6px;
+}
+
+.hs-recent-list {
+    background: #2C2C2E;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+.hs-recent-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 15px 18px;
+    cursor: pointer;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.15s;
+}
+.hs-recent-item:last-child { border-bottom: none; }
+.hs-recent-item:hover { background: rgba(255,255,255,0.03); }
+.hs-recent-item:active { background: rgba(255,255,255,0.05); }
+
+.hs-recent-icon {
+    width: 36px;
+    height: 36px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(255,255,255,0.5);
+    font-size: 13px;
+    flex-shrink: 0;
+}
+
+.hs-recent-info { flex: 1; min-width: 0; }
+
+.hs-recent-main {
+    font-size: 15px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.95);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.hs-recent-sub {
+    font-size: 12px;
+    color: rgba(255,255,255,0.4);
+    margin-top: 2px;
+}
+
+.hs-recent-time {
+    font-size: 13px;
+    color: rgba(255,255,255,0.4);
+    white-space: nowrap;
+}
+
+/* ─── Нижняя навигация — Yandex Go стиль ─── */
+.hs-bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    background: #1C1C1E;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    padding: 12px 0 max(16px, env(safe-area-inset-bottom, 16px));
+    z-index: 10;
+}
+
+.hs-nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    cursor: pointer;
+    padding: 6px 0;
+    color: rgba(255,255,255,0.4);
+    font-size: 11px;
+    font-weight: 500;
+    transition: color 0.2s;
+    -webkit-tap-highlight-color: transparent;
+}
+.hs-nav-item:hover { color: rgba(255,255,255,0.6); }
+.hs-nav-item i { font-size: 20px; }
+.hs-nav-item.active { color: #ffd84d; }
+
+/* Домашний экран перекрывает всё через position:fixed + z-index:9999.
+   Калькулятор НЕ скрывается через display:none — иначе карта не инициализируется. */
+#calculator.hs-calc-hidden {
+    /* намеренно пусто — скрытие через home-screen overlay */
+}
+
+
+/* Кнопка темы на домашнем экране */
+.hs-theme-btn {
+    width: 38px;
+    height: 38px;
+    background: rgba(255,255,255,0.08);
+    border: none;
+    border-radius: 12px;
+    color: rgba(255,255,255,0.75);
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.18s, color 0.18s;
+    -webkit-tap-highlight-color: transparent;
+}
+.hs-theme-btn:hover  { background: rgba(255,255,255,0.14); color: #fff; }
+.hs-theme-btn:active { background: rgba(255,255,255,0.2); }
+
+/* Скруглённый топбар — светлая тема карточек с красивыми градиентами */
+body.light-theme .hs-theme-btn {
+    background: rgba(0,0,0,0.07);
+    color: rgba(0,0,0,0.6);
+}
+body.light-theme .hs-theme-btn:hover { background: rgba(0,0,0,0.12); color: #000; }
+
+/* ─── Светлая тема ─── */
+/* ═══ СВЕТЛАЯ ТЕМА — ГЛАВНЫЙ ЭКРАН (Yandex Go светлая) ═══ */
+body.light-theme .home-screen {
+    background: #f5f5f7;
+}
+
+/* Топбар */
+body.light-theme .hs-menu-btn {
+    background: rgba(0,0,0,0.06);
+    color: #1a1a1a;
+}
+body.light-theme .hs-theme-btn {
+    background: rgba(0,0,0,0.06);
+    color: rgba(0,0,0,0.55);
+}
+body.light-theme .hs-brand-logo { color: #e6b800; }
+body.light-theme .hs-address    { color: rgba(0,0,0,0.5); }
+body.light-theme .hs-login-btn  {
+    border: none;
+    color: #111;
+    background: rgba(0,0,0,0.08);
+}
+body.light-theme .hs-login-btn:hover { background: rgba(0,0,0,0.12); }
+
+/* Карточки 2×2 — светлая тема: один нейтральный фон без цветных оттенков */
+body.light-theme .hs-card,
+body.light-theme .hs-card-relay,
+body.light-theme .hs-card-transfer,
+body.light-theme .hs-card-tours,
+body.light-theme .hs-card-driver {
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    border-color: rgba(0,0,0,0.06);
+    background: #f5f5f7;
+}
+body.light-theme .hs-card-label { color: #111; text-shadow: none; }
+body.light-theme .hs-card-img {
+    filter: drop-shadow(0 6px 14px rgba(0,0,0,0.25));
+}
+
+/* Лента тарифов */
+body.light-theme .hs-tariff-chip {
+    background: #fff;
+    border-color: transparent;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+}
+body.light-theme .hs-tariff-chip.active {
+    border-color: #e6b800;
+    background: rgba(230,184,0,0.12);
+    box-shadow: 0 2px 8px rgba(230,184,0,0.18);
+}
+body.light-theme .hs-tariff-chip span          { color: rgba(0,0,0,0.6); }
+body.light-theme .hs-tariff-chip.active span   { color: #b8860b; }
+
+/* Точки пагинации */
+body.light-theme .hs-dot        { background: rgba(0,0,0,0.18); }
+body.light-theme .hs-dot.active { background: #e6b800; }
+
+/* Поиск */
+body.light-theme .hs-search-bar {
+    background: #fff;
+    border-color: rgba(0,0,0,0.06);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+}
+body.light-theme .hs-search-icon        { color: rgba(0,0,0,0.4); }
+body.light-theme .hs-search-placeholder { color: rgba(0,0,0,0.32); }
+
+/* Адреса */
+body.light-theme .hs-section-title { color: rgba(0,0,0,0.38); }
+body.light-theme .hs-recent-list   {
+    background: #fff;
+    border-color: rgba(0,0,0,0.04);
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+}
+body.light-theme .hs-recent-item  { border-color: rgba(0,0,0,0.05); }
+body.light-theme .hs-recent-item:active { background: rgba(0,0,0,0.03); }
+body.light-theme .hs-recent-icon  { background: rgba(0,0,0,0.06); color: rgba(0,0,0,0.4); }
+body.light-theme .hs-recent-main  { color: #111; }
+body.light-theme .hs-recent-sub,
+body.light-theme .hs-recent-time  { color: rgba(0,0,0,0.42); }
+
+/* Нижняя навигация */
+body.light-theme .hs-bottom-nav {
+    background: #fff;
+    border-color: rgba(0,0,0,0.07);
+    box-shadow: 0 -2px 12px rgba(0,0,0,0.05);
+}
+body.light-theme .hs-nav-item        { color: rgba(0,0,0,0.35); }
+body.light-theme .hs-nav-item.active { color: #e6b800; }
+/* ================================================================
+   БОКОВОЕ МЕНЮ (DRAWER) — стиль Яндекс Go
+   ================================================================ */
+
+/* ── Затемнение фона ── */
+.hs-drawer-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 19998;
+    background: transparent;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.32s ease;
+}
+
+.hs-drawer-overlay.is-open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* ── Сам ящик ── */
+.hs-drawer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 100vw;
+    z-index: 19999;
+    background: #222224;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transform: translateX(-100%);
+    transition: transform 0.34s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+    box-shadow: none;
+}
+
+.hs-drawer.is-open {
+    transform: translateX(0);
+}
+
+/* Когда открыт с основной карты — выдвигается справа */
+.hs-drawer.from-map {
+    left: auto;
+    right: 0;
+    transform: translateX(100%);
+}
+
+.hs-drawer.from-map.is-open {
+    transform: translateX(0);
+}
+
+/* Светлая тема drawer */
+body.light-theme .hs-drawer {
+    background: #f5f5f7;
+    box-shadow: none;
+}
+
+/* ── Шапка: назад + аватар ── */
+.hs-drawer-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 52px 20px 24px;
+    position: relative;
+    flex-shrink: 0;
+    background: #222224;
+}
+
+body.light-theme .hs-drawer-header {
+    background: #f5f5f7;
+}
+
+.hs-drawer-back {
+    position: absolute;
+    top: 52px;
+    left: 16px;
+    width: 40px;
+    height: 40px;
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    border-radius: 50%;
+    transition: background 0.15s;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.hs-drawer-back:active { background: rgba(255,255,255,0.1); }
+
+body.light-theme .hs-drawer-back { color: #1a1a1a; }
+body.light-theme .hs-drawer-back:active { background: rgba(0,0,0,0.06); }
+
+.hs-drawer-avatar {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 35%, #48484A, #3A3A3C);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    overflow: hidden;
+    font-size: 52px;
+    color: rgba(255,255,255,0.45);
+    padding-top: 12px;
+    margin-top: 8px;
+    border: 2px solid rgba(255,255,255,0.08);
+}
+
+body.light-theme .hs-drawer-avatar {
+    background: radial-gradient(circle at 40% 35%, #b0b8cc, #8090a8);
+    border-color: rgba(0,0,0,0.06);
+}
+
+/* ── Кнопка входа ── */
+.hs-drawer-auth {
+    padding: 0 16px 20px;
+    flex-shrink: 0;
+    background: #222224;
+}
+
+body.light-theme .hs-drawer-auth {
+    background: #f5f5f7;
+}
+
+.hs-drawer-login-btn {
+    width: 100%;
+    padding: 16px;
+    border-radius: 16px;
+    border: none;
+    background: #f0ece4;
+    color: #1a1a1a;
+    font-size: 16px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.18s, transform 0.12s;
+    letter-spacing: -0.01em;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.hs-drawer-login-btn:active {
+    background: #e4e0d8;
+    transform: scale(0.99);
+}
+
+body.light-theme .hs-drawer-login-btn {
+    background: #ebe8e0;
+}
+
+.hs-drawer-auth-hint {
+    text-align: center;
+    font-size: 13px;
+    color: rgba(255,255,255,0.45);
+    margin-top: 10px;
+    padding: 0 8px;
+    line-height: 1.4;
+}
+
+body.light-theme .hs-drawer-auth-hint { color: rgba(0,0,0,0.42); }
+
+/* ── Тело: список пунктов ── */
+.hs-drawer-body {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 4px 14px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    -webkit-overflow-scrolling: touch;
+}
+
+.hs-drawer-body::-webkit-scrollbar { display: none; }
+
+/* ── Группа (одна карточка = один пункт) ── */
+.hs-drawer-group {
+    background: #2C2C2E;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.05);
+    flex-shrink: 0;
+}
+
+body.light-theme .hs-drawer-group {
+    background: #ffffff;
+    border-color: rgba(0,0,0,0.04);
+    box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+}
+
+/* Жёлтая группа "Работа в такси" */
+.hs-drawer-group--yellow {
+    background: #ffd84d;
+    border-color: transparent;
+    box-shadow: 0 4px 18px rgba(255, 216, 77, 0.35);
+}
+
+body.light-theme .hs-drawer-group--yellow {
+    background: #ffd84d;
+    box-shadow: 0 4px 18px rgba(255, 216, 77, 0.45);
+}
+
+/* ── Пункт меню ── */
+.hs-drawer-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 14px 13px 12px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: opacity 0.12s;
+    user-select: none;
+    min-height: 56px;
+}
+
+.hs-drawer-item:active { opacity: 0.72; }
+
+/* ── Иконка пункта ── */
+.hs-drawer-item-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+    position: relative;
+}
+
+/* Цвета иконок — все одинаковые нейтральные */
+.hs-di-bell,
+.hs-di-discount,
+.hs-di-payment,
+.hs-di-support,
+.hs-di-business,
+.hs-di-family,
+.hs-di-security,
+.hs-di-settings,
+.hs-di-theme    { background: rgba(255,255,255,0.09); color: rgba(255,255,255,0.85); }
+
+/* Иконка "Работа в такси" — круглая тёмная на жёлтом */
+.hs-di-work {
+    background: rgba(0,0,0,0.2);
+    color: #1a1a1a;
+    border-radius: 50%;
+    font-size: 18px;
+}
+
+/* Светлая тема — иконки */
+body.light-theme .hs-di-bell,
+body.light-theme .hs-di-discount,
+body.light-theme .hs-di-payment,
+body.light-theme .hs-di-support,
+body.light-theme .hs-di-business,
+body.light-theme .hs-di-family,
+body.light-theme .hs-di-security,
+body.light-theme .hs-di-settings,
+body.light-theme .hs-di-theme {
+    background: rgba(0,0,0,0.07);
+    color: #444;
+}
+
+/* Значок уведомления на колоколе */
+.hs-di-badge {
+    position: absolute;
+    top: 7px;
+    right: 7px;
+    width: 8px;
+    height: 8px;
+    background: #ff3a30;
+    border-radius: 50%;
+    border: 2px solid #2C2C2E;
+}
+
+body.light-theme .hs-di-badge { border-color: #fff; }
+
+/* ── Текст пункта ── */
+.hs-drawer-item-text {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.hs-di-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #fff;
+    line-height: 1.3;
+}
+
+body.light-theme .hs-di-title { color: #1a1a1a; }
+
+.hs-di-title--dark { color: #1a1a1a !important; }
+
+.hs-di-subtitle {
+    font-size: 12px;
+    color: rgba(255,255,255,0.45);
+}
+
+body.light-theme .hs-di-subtitle { color: rgba(0,0,0,0.45); }
+
+/* ── Шеврон ── */
+.hs-drawer-chevron {
+    font-size: 13px;
+    color: rgba(255,255,255,0.35);
+    flex-shrink: 0;
+}
+
+body.light-theme .hs-drawer-chevron { color: rgba(0,0,0,0.3); }
+
+.hs-drawer-chevron--dark { color: rgba(0,0,0,0.4) !important; }
+
+/* ── Переключатель темы (toggle) ── */
+.hs-drawer-toggle-wrap {
+    flex-shrink: 0;
+}
+
+.hs-drawer-toggle {
+    position: relative;
+    display: inline-flex;
+    width: 50px;
+    height: 28px;
+    cursor: pointer;
+}
+
+.hs-drawer-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+}
+
+.hs-drawer-toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.15);
+    border-radius: 50px;
+    transition: background 0.22s;
+}
+
+.hs-drawer-toggle-slider::before {
+    content: '';
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    left: 3px;
+    top: 3px;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+}
+
+.hs-drawer-toggle input:checked + .hs-drawer-toggle-slider {
+    background: #ffd84d;
+}
+
+.hs-drawer-toggle input:checked + .hs-drawer-toggle-slider::before {
+    transform: translateX(22px);
+    background: #1a1a1a;
+}
+
+body.light-theme .hs-drawer-toggle-slider {
+    background: rgba(0,0,0,0.15);
+}
+
+body.light-theme .hs-drawer-toggle-slider::before {
+    background: #fff;
+}
+
+/* ── Футер ── */
+.hs-drawer-footer {
+    padding: 14px 20px max(18px, env(safe-area-inset-bottom, 18px));
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    flex-shrink: 0;
+}
+
+body.light-theme .hs-drawer-footer {
+    border-color: rgba(0,0,0,0.07);
+}
+
+.hs-drawer-footer span {
+    font-size: 12px;
+    color: rgba(255,255,255,0.3);
+}
+
+body.light-theme .hs-drawer-footer span { color: rgba(0,0,0,0.3); }
+
+/* ── Анимация иконки бургера → крестик ── */
+.hs-menu-btn.is-active .fa-bars::before {
+    content: "\f00d";
+}
+
+
+/* ================================================================
+   ЭКРАН «РАБОТА ВОДИТЕЛЕМ»
+   ================================================================ */
+
+.drv-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 19990;
+    background: #1C1C1E;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transform: translateX(100%);
+    transition: transform 0.36s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+}
+
+.drv-screen.is-open {
+    transform: translateX(0);
+}
+
+/* Фоновый градиент */
+.drv-hero-bg {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 340px;
+    background: linear-gradient(160deg, #222224 0%, #1C1C1E 100%);
+    z-index: 0;
+    pointer-events: none;
+}
+
+.drv-hero-bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: 
+        radial-gradient(ellipse at 80% 30%, rgba(255, 216, 77, 0.12) 0%, transparent 60%),
+        radial-gradient(ellipse at 20% 80%, rgba(255, 100, 50, 0.07) 0%, transparent 50%);
+}
+
+/* Кнопка назад */
+.drv-back-btn {
+    position: fixed;
+    top: max(44px, env(safe-area-inset-top, 44px));
+    left: 16px;
+    z-index: 10;
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: transparent;
+    color: #fff;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Тело (скролл) */
+.drv-body {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    padding: max(88px, calc(env(safe-area-inset-top, 44px) + 60px)) 22px 220px;
+    position: relative;
+    z-index: 1;
+}
+
+.drv-body::-webkit-scrollbar { display: none; }
+
+/* ── Герой ── */
+.drv-hero {
+    margin-bottom: 24px;
+}
+
+.drv-hero-title {
+    font-size: 36px;
+    font-weight: 800;
+    color: #fff;
+    line-height: 1.12;
+    letter-spacing: -0.025em;
+    margin: 0;
+}
+
+/* ── Карточка заработка ── */
+.drv-earn-card {
+    background: linear-gradient(135deg, #252528 0%, #2C2C2E 100%);
+    border-radius: 22px;
+    padding: 22px 24px 20px;
+    margin-bottom: 32px;
+    border: 1px solid rgba(255, 216, 77, 0.18);
+    box-shadow: 0 10px 32px rgba(0,0,0,0.45);
+}
+
+.drv-earn-amount {
+    font-size: 32px;
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: -0.03em;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 0;
+    line-height: 1.1;
+}
+
+.drv-earn-label {
+    font-size: 15px;
+    color: rgba(255,255,255,0.55);
+    line-height: 1.4;
+}
+
+/* ── Секция ── */
+.drv-section {
+    margin-bottom: 0;
+}
+
+.drv-section-title {
+    font-size: 20px;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 18px;
+    letter-spacing: -0.01em;
+}
+
+.drv-benefits {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.drv-benefit-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    font-size: 16px;
+    color: rgba(255,255,255,0.88);
+    line-height: 1.55;
+    padding: 14px 16px;
+    background: rgba(255,255,255,0.04);
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.06);
+}
+
+.drv-benefit-dash {
+    color: #ffd84d;
+    font-size: 22px;
+    font-weight: 900;
+    flex-shrink: 0;
+    line-height: 1.35;
+    margin-top: 1px;
+}
+
+/* ── Категории ── */
+.drv-categories {
+    margin-bottom: 16px;
+}
+
+.drv-cat-label {
+    font-size: 18px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 2px;
+}
+
+.drv-cat-sub {
+    font-size: 13px;
+    color: rgba(255,255,255,0.45);
+    margin-bottom: 14px;
+}
+
+.drv-cat-chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.drv-cat-chip {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 16px;
+    border-radius: 50px;
+    background: #2C2C2E;
+    border: 2px solid rgba(255,255,255,0.08);
+    color: rgba(255,255,255,0.65);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.drv-cat-chip.active {
+    background: rgba(255, 216, 77, 0.12);
+    border-color: #ffd84d;
+    color: #ffd84d;
+}
+
+.drv-cat-chip:active { opacity: 0.75; }
+
+/* ── Футер (фиксированный снизу) ── */
+.drv-footer {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 5;
+    background: linear-gradient(to top, #1C1C1E 70%, transparent);
+    padding: 24px 20px max(24px, env(safe-area-inset-bottom, 24px));
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+/* CTA-кнопка */
+.drv-cta-btn {
+    width: 100%;
+    padding: 16px 20px 14px;
+    background: #ffd84d;
+    border: none;
+    border-radius: 18px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    transition: opacity 0.15s, transform 0.12s;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.drv-cta-btn:active { opacity: 0.88; transform: scale(0.99); }
+
+.drv-cta-main {
+    font-size: 18px;
+    font-weight: 800;
+    color: #1a1a1a;
+    letter-spacing: -0.01em;
+}
+
+.drv-cta-sub {
+    font-size: 13px;
+    color: rgba(0,0,0,0.55);
+    font-weight: 500;
+}
+
+/* Ссылка войти */
+.drv-login-link {
+    font-size: 14px;
+    font-weight: 600;
+    color: #ffd84d;
+    text-decoration: none;
+    background: transparent;
+    border: none;
+    font-family: inherit;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Правовой текст */
+.drv-legal {
+    font-size: 11px;
+    color: rgba(255,255,255,0.3);
+    text-align: center;
+    line-height: 1.5;
+    max-width: 340px;
+}
+
+.drv-legal-link {
+    color: rgba(255,255,255,0.5);
+    text-decoration: underline;
+}
+
+/* ── Модалка ── */
+.drv-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 29999;
+    background: rgba(0,0,0,0.65);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+}
+
+.drv-modal-overlay.is-open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.drv-modal {
+    background: #2C2C2E;
+    border-radius: 24px;
+    padding: 32px 24px;
+    text-align: center;
+    max-width: 320px;
+    width: 100%;
+    transform: scale(0.9);
+    transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    border: 1px solid rgba(255,255,255,0.08);
+}
+
+.drv-modal-overlay.is-open .drv-modal {
+    transform: scale(1);
+}
+
+.drv-modal-icon {
+    font-size: 52px;
+    color: #ffd84d;
+    margin-bottom: 16px;
+}
+
+.drv-modal-title {
+    font-size: 22px;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 10px;
+}
+
+.drv-modal-text {
+    font-size: 15px;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 24px;
+    line-height: 1.5;
+}
+
+.drv-modal-btn {
+    width: 100%;
+    padding: 15px;
+    background: #ffd84d;
+    color: #1a1a1a;
+    border: none;
+    border-radius: 14px;
+    font-size: 17px;
+    font-weight: 800;
+    font-family: inherit;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: opacity 0.15s;
+}
+
+.drv-modal-btn:active { opacity: 0.85; }
+
+/* Светлая тема driver screen */
+body.light-theme .drv-screen { background: #f0f1f5; }
+body.light-theme .drv-hero-bg { background: linear-gradient(160deg, #e8ebf5 0%, #f0f1f5 100%); }
+body.light-theme .drv-hero-title { color: #111; }
+body.light-theme .drv-back-btn { color: #111; }
+body.light-theme .drv-earn-card {
+    background: #fff;
+    border-color: rgba(255,200,0,0.25);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+}
+body.light-theme .drv-earn-amount { color: #111; }
+body.light-theme .drv-earn-label { color: rgba(0,0,0,0.55); }
+body.light-theme .drv-section-title,
+body.light-theme .drv-slogan,
+body.light-theme .drv-cat-label { color: #111; }
+body.light-theme .drv-benefit-item { color: rgba(0,0,0,0.8); }
+body.light-theme .drv-cat-sub { color: rgba(0,0,0,0.45); }
+body.light-theme .drv-cat-chip { background: #fff; border-color: rgba(0,0,0,0.1); color: rgba(0,0,0,0.6); }
+body.light-theme .drv-cat-chip.active { background: rgba(255,200,0,0.1); border-color: #e6a800; color: #8a6200; }
+body.light-theme .drv-footer { background: linear-gradient(to top, #f0f1f5 70%, transparent); }
+body.light-theme .drv-legal { color: rgba(0,0,0,0.35); }
+body.light-theme .drv-legal-link { color: rgba(0,0,0,0.5); }
+body.light-theme .drv-modal { background: #fff; }
+body.light-theme .drv-modal-title { color: #111; }
+body.light-theme .drv-modal-text { color: rgba(0,0,0,0.55); }
+
+/* ================================================================
+   ЭКРАН АВТОРИЗАЦИИ — стиль Яндекс ID
+   ================================================================ */
+
+.auth-screen {
+    position: fixed;
+    inset: 0;
+    z-index: 19985;
+    background: #1C1C1E;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transform: translateX(100%);
+    transition: transform 0.34s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+}
+
+.auth-screen.is-open {
+    transform: translateX(0);
+}
+
+body.light-theme .auth-screen {
+    background: #f5f5f7;
+}
+
+/* ── Шапка ── */
+.auth-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: max(50px, env(safe-area-inset-top, 50px)) 16px 16px;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.auth-back-btn {
+    position: absolute;
+    left: 16px;
+    top: max(50px, env(safe-area-inset-top, 50px));
+    width: 40px;
+    height: 40px;
+    background: transparent;
+    border: none;
+    color: #fff;
+    font-size: 19px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body.light-theme .auth-back-btn { color: #111; }
+
+.auth-logo {
+    font-size: 18px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.02em;
+}
+
+body.light-theme .auth-logo { color: #111; }
+
+.auth-logo-id {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffd84d;
+    color: #111;
+    font-size: 11px;
+    font-weight: 900;
+    padding: 2px 6px;
+    border-radius: 6px;
+    margin-left: 4px;
+    vertical-align: middle;
+    letter-spacing: 0.03em;
+}
+
+/* ── Тело ── */
+.auth-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 28px 24px max(32px, env(safe-area-inset-bottom, 32px));
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+}
+
+.auth-body::-webkit-scrollbar { display: none; }
+
+.auth-title {
+    font-size: 32px;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.025em;
+    line-height: 1.12;
+    margin: 0 0 8px;
+}
+
+body.light-theme .auth-title { color: #111; }
+
+.auth-subtitle {
+    font-size: 14px;
+    color: rgba(255,255,255,0.5);
+    margin: 0 0 28px;
+    line-height: 1.4;
+}
+
+body.light-theme .auth-subtitle { color: rgba(0,0,0,0.48); }
+
+/* ── Поле телефона ── */
+.auth-phone-wrap {
+    display: flex;
+    align-items: center;
+    background: #2C2C2E;
+    border-radius: 16px;
+    padding: 4px 4px 4px 8px;
+    border: 1.5px solid rgba(255,255,255,0.1);
+    margin-bottom: 20px;
+    transition: border-color 0.18s;
+}
+
+.auth-phone-wrap:focus-within {
+    border-color: rgba(255, 216, 77, 0.5);
+}
+
+body.light-theme .auth-phone-wrap {
+    background: #fff;
+    border-color: rgba(0,0,0,0.12);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+body.light-theme .auth-phone-wrap:focus-within {
+    border-color: #e6a800;
+}
+
+.auth-flag-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 10px 10px 10px 8px;
+    cursor: pointer;
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+    border-radius: 12px;
+    transition: background 0.15s;
+}
+
+.auth-flag-btn:active { background: rgba(255,255,255,0.08); }
+
+.auth-flag {
+    font-size: 22px;
+    line-height: 1;
+}
+
+.auth-code {
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+}
+
+body.light-theme .auth-code { color: #111; }
+
+.auth-phone-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: 17px;
+    font-weight: 500;
+    color: #fff;
+    font-family: inherit;
+    padding: 12px 4px;
+    min-width: 0;
+    caret-color: #ffd84d;
+}
+
+body.light-theme .auth-phone-input { color: #111; }
+
+.auth-phone-input::placeholder {
+    color: rgba(255,255,255,0.3);
+}
+
+body.light-theme .auth-phone-input::placeholder {
+    color: rgba(0,0,0,0.28);
+}
+
+.auth-clear-btn {
+    width: 36px;
+    height: 36px;
+    background: rgba(255,255,255,0.1);
+    border: none;
+    border-radius: 50%;
+    color: rgba(255,255,255,0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    font-size: 13px;
+    margin-right: 4px;
+    transition: background 0.15s;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.auth-clear-btn:active { background: rgba(255,255,255,0.18); }
+
+body.light-theme .auth-clear-btn {
+    background: rgba(0,0,0,0.08);
+    color: rgba(0,0,0,0.5);
+}
+
+/* ── Соцсети ── */
+.auth-social-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 24px;
+    justify-content: space-between;
+}
+
+.auth-social-btn {
+    flex: 1;
+    height: 48px;
+    border-radius: 14px;
+    background: #2C2C2E;
+    border: 1.5px solid rgba(255,255,255,0.08);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.12s;
+    -webkit-tap-highlight-color: transparent;
+    min-width: 0;
+}
+
+.auth-social-btn:active {
+    background: rgba(255,255,255,0.1);
+    transform: scale(0.94);
+}
+
+body.light-theme .auth-social-btn {
+    background: #fff;
+    border-color: rgba(0,0,0,0.09);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.07);
+}
+
+.auth-social-vk   { color: #2787F5; }
+.auth-social-mail { color: #FF9B00; }
+.auth-social-more { color: rgba(255,255,255,0.5); }
+
+body.light-theme .auth-social-more { color: rgba(0,0,0,0.4); }
+
+/* ── Главная кнопка ── */
+.auth-submit-btn {
+    width: 100%;
+    padding: 17px;
+    border-radius: 16px;
+    border: none;
+    background: #f5f0e8;
+    color: #1a1a1a;
+    font-size: 17px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    margin-bottom: 12px;
+    transition: background 0.15s, transform 0.12s;
+    letter-spacing: -0.01em;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.auth-submit-btn:active {
+    background: #e8e3da;
+    transform: scale(0.99);
+}
+
+/* ── Биометрия ── */
+.auth-bio-btn {
+    width: 100%;
+    padding: 15px 20px;
+    border-radius: 16px;
+    border: 1.5px solid rgba(255,255,255,0.1);
+    background: #2C2C2E;
+    color: rgba(255,255,255,0.85);
+    font-size: 16px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: background 0.15s;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.auth-bio-btn:active { background: rgba(255,255,255,0.08); }
+
+body.light-theme .auth-bio-btn {
+    background: #fff;
+    border-color: rgba(0,0,0,0.1);
+    color: rgba(0,0,0,0.8);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+
+/* ── Ещё ── */
+.auth-more-btn {
+    width: 100%;
+    padding: 15px 20px;
+    border-radius: 16px;
+    border: 1.5px solid rgba(255,255,255,0.1);
+    background: #2C2C2E;
+    color: rgba(255,255,255,0.85);
+    font-size: 16px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.auth-more-btn:active { background: rgba(255,255,255,0.08); }
+
+body.light-theme .auth-more-btn {
+    background: #fff;
+    border-color: rgba(0,0,0,0.1);
+    color: rgba(0,0,0,0.8);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
