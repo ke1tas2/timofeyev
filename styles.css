@@ -1127,7 +1127,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             color: var(--text-primary);
             outline: none;
             font-weight: 400;
-            padding: 10px 0 0 0;
+            padding: 11px 0 0 0;
             font-family: inherit;
             height: 38px;
         }
@@ -1138,7 +1138,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
 
         .address-hint {
             position: absolute;
-            top: -2px;
+            top: -6px;
             left: 0;
             font-size: 11px;
             color: var(--text-muted);
@@ -1152,7 +1152,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
 
         .address-input:focus + .address-hint,
         .address-input:not(:placeholder-shown) + .address-hint {
-            top: -8px;
+            top: -12px;
             font-size: 10px;
         }
 
@@ -2381,16 +2381,16 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             .panel.collapsed .address-input {
                 font-size: 14px;
                 height: 34px;
-                padding-top: 9px;
+                padding-top: 11px;
             }
             .panel.collapsed .address-hint {
                 font-size: 10px;
-                top: -2px;
+                top: -6px;
             }
             .panel.collapsed .address-input:focus + .address-hint,
             .panel.collapsed .address-input:not(:placeholder-shown) + .address-hint {
                 font-size: 9px;
-                top: -8px;
+                top: -12px;
             }
 
             .panel-header-title {
@@ -2506,7 +2506,8 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
                 border-radius: 16px;
                 box-shadow: none;
                 background: #f5c743;
-                padding-bottom: max(12px, env(safe-area-inset-bottom, 0px));
+                padding-top: 12px;
+                padding-bottom: max(18px, env(safe-area-inset-bottom, 0px));
             }
             
             /* В светлой теме делаем мобильную плашку и кнопку единым жёлтым блоком */
