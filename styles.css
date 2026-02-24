@@ -2506,7 +2506,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
                 border-radius: 16px;
                 box-shadow: none;
                 background: #f5c743;
-                padding-top: 12px;
+                padding-top: 18px;
                 padding-bottom: max(18px, env(safe-area-inset-bottom, 0px));
             }
             
@@ -4338,7 +4338,7 @@ body.light-theme .hs-drawer-auth-hint { color: rgba(0,0,0,0.38); }
 /* ── Группа (одна карточка с несколькими пунктами) ── */
 .hs-drawer-group {
     background: #2C2C2E;
-    border-radius: 20px;
+    border-radius: 22px;
     overflow: hidden;
     flex-shrink: 0;
 }
@@ -4381,8 +4381,8 @@ body.light-theme .hs-drawer-divider {
     -webkit-tap-highlight-color: transparent;
     transition: opacity 0.12s;
     user-select: none;
-    height: 58px;
-    min-height: 58px;
+    height: 60px;
+    min-height: 60px;
     position: relative;
 }
 
