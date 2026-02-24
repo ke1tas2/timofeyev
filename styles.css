@@ -1127,9 +1127,9 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             color: var(--text-primary);
             outline: none;
             font-weight: 400;
-            padding: 6px 0 0 0;
+            padding: 10px 0 0 0;
             font-family: inherit;
-            height: 34px;
+            height: 38px;
         }
 
         .address-input::placeholder {
@@ -1138,7 +1138,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
 
         .address-hint {
             position: absolute;
-            top: 0;
+            top: -2px;
             left: 0;
             font-size: 11px;
             color: var(--text-muted);
@@ -1152,7 +1152,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
 
         .address-input:focus + .address-hint,
         .address-input:not(:placeholder-shown) + .address-hint {
-            top: -6px;
+            top: -8px;
             font-size: 10px;
         }
 
@@ -2376,19 +2376,21 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
                 margin-right: 10px;
             }
             .panel.collapsed .address-input-container {
-                min-height: 30px;
+                min-height: 34px;
             }
             .panel.collapsed .address-input {
                 font-size: 14px;
-                height: 30px;
-                padding-top: 5px;
+                height: 34px;
+                padding-top: 9px;
             }
             .panel.collapsed .address-hint {
                 font-size: 10px;
+                top: -2px;
             }
             .panel.collapsed .address-input:focus + .address-hint,
             .panel.collapsed .address-input:not(:placeholder-shown) + .address-hint {
                 font-size: 9px;
+                top: -8px;
             }
 
             .panel-header-title {
