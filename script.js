@@ -210,12 +210,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
 
-            document.getElementById('zoomIn').addEventListener('click', function() {
-                map.setZoom(map.getZoom() + 1, { duration: 200 });
-            });
-            document.getElementById('zoomOut').addEventListener('click', function() {
-                map.setZoom(map.getZoom() - 1, { duration: 200 });
-            });
+            // Кнопки зума удалены (оставлена только геолокация)
 
             function goToUserLocation() {
                 if (!navigator.geolocation) return;
@@ -2199,6 +2194,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
             function applyCollapsed(animate) {
                 panel.classList.add('collapsed');
+                // Немедленно скрываем transition у кнопок и прячем их в правильную позицию
+                // чтобы не было "прыжка" с CSS-дефолта
+                if (mapControls && isMobile()) {
+                    mapControls.style.transition = 'none';
+                    // Используем текущий offsetHeight панели как приблизительный — rAF уточнит
+                    const approxH = panel.getBoundingClientRect().height || 200;
+                    mapControls.style.bottom = (approxH + 16) + 'px';
+                }
                 // Нужно два rAF: first — браузер применяет collapsed CSS (normal flow),
                 // second — высоты элементов пересчитаны
                 requestAnimationFrame(() => requestAnimationFrame(() => {
@@ -2207,7 +2210,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         ? 'height 0.3s cubic-bezier(0.25,0.8,0.25,1)'
                         : 'none';
                     panel.style.height = h + 'px';
-                    syncUI(h, true);
+                    syncUI(h, true, !animate); // instant=true если не анимируем (первая загрузка)
                     if (!animate) requestAnimationFrame(() => { panel.style.transition = ''; });
                 }));
             }
@@ -2219,11 +2222,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     ? 'height 0.3s cubic-bezier(0.25,0.8,0.25,1)'
                     : 'none';
                 panel.style.height = h + 'px';
-                syncUI(h, false);
+                syncUI(h, false, false); // анимация скрытия кнопок через CSS transition
                 if (!animate) requestAnimationFrame(() => { panel.style.transition = ''; });
             }
 
-            function syncUI(panelH, isCollapsed) {
+            function syncUI(panelH, isCollapsed, instant) {
                 const phone      = document.querySelector('.phone-panel');
                 const marker     = document.getElementById('mapMarker');
                 const mapElement = document.getElementById('map');
@@ -2231,12 +2234,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 if (mapControls) {
                     if (isMobile()) {
+                        if (instant) {
+                            mapControls.style.transition = 'none';
+                        } else {
+                            mapControls.style.transition = '';
+                        }
+                        mapControls.style.bottom        = (panelH + 16) + 'px';
                         mapControls.style.opacity       = isCollapsed ? '1' : '0';
                         mapControls.style.visibility    = isCollapsed ? 'visible' : 'hidden';
                         mapControls.style.pointerEvents = isCollapsed ? 'auto' : 'none';
-                        mapControls.style.bottom        = (panelH + 16) + 'px';
                     } else {
-                        // На ПК кнопки карты всегда видимы
+                        mapControls.style.transition    = '';
                         mapControls.style.opacity       = '1';
                         mapControls.style.visibility    = 'visible';
                         mapControls.style.pointerEvents = 'auto';
@@ -2338,7 +2346,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 const maxH = getExpandedH();
                 const newH = Math.max(minH, Math.min(maxH, sh - dy));
                 panel.style.height = newH + 'px';
-                if (mapControls) mapControls.style.bottom = (newH + 16) + 'px';
+                // Синхронизируем кнопки: без transition (instant), opacity пропорционально положению
+                if (mapControls && isMobile()) {
+                    mapControls.style.transition = 'none';
+                    mapControls.style.bottom = (newH + 16) + 'px';
+                    // Плавно скрываем по мере раскрытия панели
+                    const ratio = Math.max(0, Math.min(1, (maxH - newH) / Math.max(1, maxH - minH)));
+                    const opacity = 1 - ratio;
+                    mapControls.style.opacity = opacity.toFixed(3);
+                    mapControls.style.visibility = opacity > 0.01 ? 'visible' : 'hidden';
+                    mapControls.style.pointerEvents = opacity > 0.5 ? 'auto' : 'none';
+                }
             }, { passive: false });
 
             header.addEventListener('touchend', () => {
@@ -2407,14 +2425,18 @@ document.addEventListener('DOMContentLoaded', function() {
     const hs = document.getElementById('homeScreen');
     const calc = document.getElementById('calculator');
     const topbar = document.querySelector('.topbar-wrap');
+    const calcMenuBtn = document.querySelector('.calc-menu-btn');
 
     // При загрузке — НЕ скрываем calculator через display:none!
     // Карта должна инициализироваться нормально. Домашний экран (position:fixed, z-index:9999)
-    // просто перекрывает всё сверху. Топбар скрываем через opacity.
+    // просто перекрывает всё сверху. Кнопку меню скрываем до перехода в калькулятор.
     if (topbar) {
         topbar.style.opacity = '0';
         topbar.style.pointerEvents = 'none';
         topbar.style.transition = 'opacity 0.3s ease';
+    }
+    if (calcMenuBtn) {
+        calcMenuBtn.style.display = 'none';
     }
 
     // Пагинация — анимируется по скроллу ленты тарифов
@@ -2438,16 +2460,23 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // ЗАГЛУШКИ (были нужны для старой логики страниц)
+    var _calcHideTimer = null; // отслеживаем таймер скрытия чтобы отменить при возврате
+
     // Открыть калькулятор (такси)
     window.openCalculator = function() {
         if (!hs) return;
+        if (_calcHideTimer) { clearTimeout(_calcHideTimer); _calcHideTimer = null; }
         hs.classList.add('hs-hidden');
-        // Показываем топбар (плавно)
+        // Показываем кнопку меню в калькуляторе (плавно)
         if (topbar) {
             topbar.style.opacity = '1';
             topbar.style.pointerEvents = 'auto';
         }
-        setTimeout(function() {
+        if (calcMenuBtn) {
+            calcMenuBtn.style.display = 'flex';
+        }
+        _calcHideTimer = setTimeout(function() {
+            _calcHideTimer = null;
             hs.style.display = 'none';
             // После скрытия домашнего экрана — перезапускаем layout панели
             // чтобы она корректно пересчитала высоту
@@ -2455,16 +2484,48 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 360);
     };
 
-    // Кнопка "назад" для возврата на главный экран (если нужно в будущем)
+    // Кнопка "назад" для возврата на главный экран
     window.returnToHomeScreen = function() {
         if (!hs) return;
-        hs.style.display = '';
+
+        // Отменяем таймер скрытия из openCalculator (если ещё не сработал)
+        if (_calcHideTimer) { clearTimeout(_calcHideTimer); _calcHideTimer = null; }
+
+        // Скрываем кнопку меню калькулятора
+        if (calcMenuBtn) {
+            calcMenuBtn.style.display = 'none';
+        }
+
+        // Скрываем кнопки карты при возврате
+        var mc = document.getElementById('mapControls');
+        if (mc) {
+            mc.style.opacity = '0';
+            mc.style.visibility = 'hidden';
+            mc.style.pointerEvents = 'none';
+        }
+
+        // Скрываем topbar
         if (topbar) {
             topbar.style.opacity = '0';
             topbar.style.pointerEvents = 'none';
         }
+
+        // Ставим начальное состояние: снизу и прозрачный — без анимации
+        hs.style.opacity = '0';
+        hs.style.transform = 'translateY(30px)';
+        hs.style.transition = 'none';
+        hs.style.display = '';
+        // Убираем hs-hidden если вдруг остался
+        hs.classList.remove('hs-hidden');
+
+        // Двойной rAF: гарантирует что браузер отрисовал начальный кадр,
+        // потом включаем transition и сбрасываем стили → плавный вход снизу
         requestAnimationFrame(function() {
-            hs.classList.remove('hs-hidden');
+            requestAnimationFrame(function() {
+                hs.style.transition = '';
+                hs.style.opacity = '';
+                hs.style.transform = '';
+            });
         });
     };
 

@@ -43,10 +43,10 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             height: 100vh;
             height: 100dvh;
             overflow: hidden;
-            /* Yandex Go тёмная тема: мягкий градиент */
-            background: #1C1C1E;
+            /* Yandex Go тёмная тема: единая серая палитра */
+            background: #1c1c1c;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            color: #f5f5f7;
+            color: #f0f0f0;
             position: relative;
             width: 100%;
             transition: background 0.3s ease, color 0.3s ease;
@@ -73,23 +73,23 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             /* Расстояние между основной панелью и плашкой телефона (desktop) */
             --panel-phone-gap: 8px;
 
-            /* Темная тема (СЕРАЯ — как Яндекс Go) */
-            --bg-main: #1C1C1E;
-            --bg-surface: #252528;
-            --bg-card: #2C2C2E;
+            /* Тёмная тема — серая палитра Яндекс Go (точная копия) */
+            --bg-main: #1c1c1c;
+            --bg-surface: #252525;
+            --bg-card: #383838;
             --accent-primary: #ffd84d;
             --accent-primary-soft: rgba(255, 216, 77, 0.15);
             --accent-secondary: #c8a251;
-            --text-primary: #f5f5f7;
-            --text-muted: rgba(255, 255, 255, 0.6);
-            --border-subtle: rgba(255, 255, 255, 0.06);
+            --text-primary: #f0f0f0;
+            --text-muted: rgba(255, 255, 255, 0.55);
+            --border-subtle: rgba(255, 255, 255, 0.08);
 
             --panel-bg: var(--bg-surface);
             --card-bg: var(--bg-card);
             --card-radius: 22px;
             --card-shadow: 0 18px 40px rgba(0, 0, 0, 0.6);
             --cta-bg: var(--accent-primary);
-            --cta-text: #1C1C1E;
+            --cta-text: #141414;
             --panel-inset: 12px;
             --panel-top-h: 140px;
             --panel-bottom-h: 76px;
@@ -164,8 +164,8 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             height: var(--topbar-height);
             /* Более тёмный, ближе к общему фону панели */
             background:
-                radial-gradient(circle at top left, rgba(255, 216, 77, 0.16), transparent 55%),
-                linear-gradient(135deg, #1C1C1E, #141416);
+                radial-gradient(circle at top left, rgba(255, 216, 77, 0.12), transparent 55%),
+                linear-gradient(180deg, #252525 0%, #1c1c1c 100%);
             backdrop-filter: blur(18px);
             border-radius: 20px;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.9);
@@ -262,7 +262,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             padding: 10px 14px;
             border-radius: 14px;
             border: 1px solid var(--border-subtle);
-            background: #1C1C1E;
+            background: #252525;
             color: var(--text-primary);
             font-size: 14px;
             text-decoration: none;
@@ -270,7 +270,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
         }
 
         .topbar-login:hover {
-            background: #222224;
+            background: #2a2a2a;
             box-shadow: 0 0 18px rgba(255, 216, 77, 0.35);
             transform: translateY(-1px);
         }
@@ -294,7 +294,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             height: 42px;
             border-radius: 14px;
             border: 1px solid var(--border-subtle);
-            background: #1C1C1E;
+            background: #252525;
             color: var(--text-primary);
             font-size: 16px;
             cursor: pointer;
@@ -303,7 +303,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
         }
 
         .topbar-menu-btn:hover {
-            background: #222224;
+            background: #2a2a2a;
             box-shadow: 0 0 18px rgba(255, 216, 77, 0.25);
         }
 
@@ -378,8 +378,9 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
         body.light-theme .map-zoom-capsule,
         body.light-theme .map-geo-btn {
             background: #ffffff !important;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
-            border: 1px solid rgba(0, 0, 0, 0.08) !important;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08),
+                        0 6px 16px rgba(0, 0, 0, 0.12) !important;
+            border: none !important;
         }
 
         body.light-theme .map-zoom-capsule button:hover {
@@ -387,9 +388,9 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
         }
 
         body.light-theme .map-geo-btn:hover {
-            background: #fafafa !important;
-            border-color: rgba(255, 200, 0, 0.4) !important;
-            box-shadow: 0 2px 12px rgba(255, 200, 0, 0.2) !important;
+            background: #f5f5f5 !important;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1),
+                        0 8px 20px rgba(0, 0, 0, 0.14) !important;
         }
 
         body.light-theme .tariff-card {
@@ -842,23 +843,23 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             padding: 0;
             border-radius: 12px;
             border: 1px solid var(--border-subtle);
-            background: #1C1C1E;
+            background: #252525;
             color: var(--accent-primary);
             font-size: 16px;
             cursor: pointer;
             transition: background 0.15s, box-shadow 0.15s, border-color 0.15s, color 0.15s;
             margin-right: 10px;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6);
+            box-shadow: 0 14px 32px rgba(0, 0, 0, 0.85);
         }
 
         .theme-toggle:hover {
-            background: #323235;
+            background: #2a2a2a;
             border-color: rgba(255, 216, 77, 0.45);
             box-shadow: 0 0 20px rgba(255, 216, 77, 0.55);
         }
 
         .theme-toggle:active {
-            background: #2C2C2E;
+            background: #1c1c1c;
             box-shadow: 0 0 14px rgba(255, 216, 77, 0.4);
         }
 
@@ -886,12 +887,46 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
         }
 
 
+        /* Кнопка меню в калькуляторе (верхний левый угол, стиль Яндекс Go) */
+        .calc-menu-btn {
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            z-index: 200;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            color: #fff;
+            font-size: 20px;
+            text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.2s;
+        }
+
+        .calc-menu-btn:active {
+            opacity: 0.7;
+        }
+
+        body.light-theme .calc-menu-btn {
+            color: #1a1a1a;
+            text-shadow: 0 1px 4px rgba(255,255,255,0.4);
+        }
+
+        /* Скрываем topbar-wrap */
+        .topbar-wrap { display: none !important; }
+
         /* Панель телефона — как в test.html: градиент + полупрозрачный тёмный фон */
         .phone-panel {
             position: fixed;
             top: calc(var(--topbar-gap) + var(--topbar-height) + var(--panel-vertical-gap));
             left: calc(var(--panel-left-gap) + var(--panel-width) + var(--panel-phone-gap));
-            background: radial-gradient(circle at top left, rgba(255, 216, 77, 0.2), rgba(28, 28, 30, 0.98));
+            background: radial-gradient(circle at top left, rgba(255, 216, 77, 0.1), rgba(28, 28, 28, 0.98));
             border-radius: 16px;
             padding: 12px 20px;
             /* Поверх панели заказа и жёлтой кнопки в обеих темах */
@@ -1146,7 +1181,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
         .map-select-button {
             width: 32px;
             height: 32px;
-            background: #1C1C1E;
+            background: #252525;
             border: 1px solid var(--border-subtle);
             border-radius: 10px;
             color: var(--accent-primary);
@@ -1161,7 +1196,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
         }
 
         .map-select-button:hover {
-            background: #323235;
+            background: #2a2a2a;
             border-color: rgba(255, 216, 77, 0.5);
             box-shadow: 0 0 18px rgba(255, 216, 77, 0.5);
             transform: translateY(-1px);
@@ -1320,7 +1355,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             top: -8px;
             right: 8px;
             background: var(--accent-primary);
-            color: #1C1C1E;
+            color: #141414;
             font-size: 10px;
             font-weight: 600;
             padding: 2px 6px;
@@ -1363,7 +1398,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             border-radius: 999px;
             overflow: hidden;
             border: 1px solid rgba(255, 255, 255, 0.12);
-            background: #111113;
+            background: #080a12;
             position: relative;
         }
         .transport-class-option {
@@ -1570,7 +1605,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             align-items: center;
             justify-content: space-between;
             padding: 16px;
-            background: #1A1A1C;
+            background: #252525;
             border-radius: 12px;
             cursor: pointer;
             transition: all 0.2s;
@@ -1578,7 +1613,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
         }
 
         .payment-button:hover {
-            background: #323235;
+            background: #2a2a2a;
             border-color: rgba(255, 216, 77, 0.4);
             box-shadow: 0 0 18px rgba(255, 216, 77, 0.4);
         }
@@ -1786,7 +1821,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: #1C1C1E;
+            background: #252525;
             padding: 32px;
             border-radius: 16px;
             z-index: 1000;
@@ -1958,11 +1993,11 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             cursor: pointer;
             transition: all 0.2s;
             border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-            background: rgba(8, 10, 18, 0.95);
+            background: rgba(28, 28, 28, 0.98);
         }
 
         .payment-method-item:hover {
-            background: #323235;
+            background: #2a2a2a;
         }
 
         .payment-method-item.active {
@@ -2024,11 +2059,11 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             cursor: pointer;
             transition: all 0.2s;
             border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-            background: rgba(8, 10, 18, 0.95);
+            background: rgba(28, 28, 28, 0.98);
         }
 
         .add-card-button:hover {
-            background: #323235;
+            background: #2a2a2a;
         }
 
         .add-card-icon {
@@ -2492,12 +2527,15 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
 
             .map-controls {
                 position: fixed !important;
-                right: 12px !important;
+                left: 0 !important;
+                right: 0 !important;
                 top: auto !important;
-                bottom: 440px !important;
+                /* bottom задаётся через JS по высоте панели — не переопределять */
                 transform: none !important;
                 z-index: 50 !important;
-                transition: bottom 0.35s cubic-bezier(0.25, 0.8, 0.25, 1), opacity 0.35s cubic-bezier(0.25, 0.8, 0.25, 1), visibility 0.35s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
+                transition: bottom 0.3s cubic-bezier(0.25,0.8,0.25,1),
+                            opacity 0.25s ease,
+                            visibility 0.25s ease !important;
             }
 
             /* ====== РЕЖИМ ВЫБОРА ТОЧКИ Б НА КАРТЕ ====== */
@@ -2639,91 +2677,92 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
         }
 
 
+        /* ── Map controls: positioned above the bottom panel ── */
         .map-controls {
             position: absolute;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
+            left: 0;
+            right: 0;
+            bottom: 200px; /* разумный дефолт; JS мгновенно перепишет */
             z-index: 15;
             display: flex;
-            flex-direction: column;
+            flex-direction: row;
             align-items: center;
-            gap: 12px;
+            justify-content: space-between;
+            padding: 0 16px;
+            pointer-events: none;
+            /* Плавное появление/исчезновение при сворачивании/разворачивании */
+            transition: bottom 0.3s cubic-bezier(0.25,0.8,0.25,1),
+                        opacity 0.25s ease,
+                        visibility 0.25s ease;
         }
 
-        .map-zoom-capsule {
-            display: flex;
-            flex-direction: column;
-            width: 44px;
-            background: #1C1C1E;
-            border-radius: 22px;
-            box-shadow: 0 14px 32px rgba(0, 0, 0, 0.85);
-            overflow: hidden;
-            border: 1px solid var(--border-subtle);
-        }
-
-        .map-zoom-capsule button {
-            width: 44px;
-            height: 40px;
+        /* ── Map controls: кнопки в стиле Яндекс Go (точная копия) ── */
+        .map-back-btn,
+        .map-geo-btn {
+            pointer-events: auto;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: #383838;
             border: none;
-            background: transparent;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25),
+                        0 6px 16px rgba(0, 0, 0, 0.35);
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--accent-primary);
-            padding: 0;
-            transition: background 0.15s, color 0.15s;
+            color: #ffffff;
+            transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
         }
 
-        .map-zoom-capsule button svg {
-            width: 18px;
-            height: 18px;
+        .map-back-btn:hover,
+        .map-geo-btn:hover {
+            background: #454545;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3),
+                        0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .map-back-btn:active,
+        .map-geo-btn:active {
+            background: #2a2a2a;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35),
+                        0 4px 12px rgba(0, 0, 0, 0.3);
+            transform: scale(0.96);
+        }
+
+        .map-back-btn svg {
+            width: 22px;
+            height: 22px;
             flex-shrink: 0;
         }
 
-        .map-zoom-capsule button:hover {
-            background: rgba(255, 216, 77, 0.08);
-        }
-
-        .map-zoom-capsule button:active {
-            background: rgba(255, 216, 77, 0.16);
-        }
-
-        .map-zoom-capsule .zoom-divider {
-            height: 1px;
-            background: rgba(255, 255, 255, 0.08);
-        }
-
-        .map-geo-btn {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background: #1C1C1E;
-            border: 1px solid var(--border-subtle);
-            box-shadow: 0 14px 32px rgba(0, 0, 0, 0.85);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--accent-primary);
-            transition: background 0.15s, box-shadow 0.15s, border-color 0.15s;
-        }
-
-        .map-geo-btn:hover {
-            background: #323235;
-            border-color: rgba(255, 216, 77, 0.45);
-            box-shadow: 0 0 20px rgba(255, 216, 77, 0.55);
-        }
-
-        .map-geo-btn:active {
-            background: #2C2C2E;
-            box-shadow: 0 0 14px rgba(255, 216, 77, 0.4);
-        }
-
+        /* Иконка «Моё местоположение» — стиль Яндекс Go (стрелка-указатель) */
         .map-geo-btn svg {
             width: 20px;
             height: 20px;
+            flex-shrink: 0;
+            opacity: 1;
+        }
+
+        body.light-theme .map-back-btn,
+        body.light-theme .map-geo-btn {
+            background: #ffffff;
+            color: #1a1a1a;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08),
+                        0 6px 16px rgba(0, 0, 0, 0.12);
+        }
+
+        body.light-theme .map-back-btn:hover,
+        body.light-theme .map-geo-btn:hover {
+            background: #f5f5f5;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1),
+                        0 8px 20px rgba(0, 0, 0, 0.14);
+        }
+
+        body.light-theme .map-back-btn:active,
+        body.light-theme .map-geo-btn:active {
+            background: #ebebeb;
         }
 
 
@@ -2939,7 +2978,7 @@ input[type="tel"] {
     z-index: 750;  /* Выше панели телефона */
     display: flex;
     flex-direction: column;
-    background: var(--card-bg, #22252f);
+    background: var(--card-bg, #383838);
     border-radius: 24px 24px 0 0;  /* Скругление только сверху */
     box-shadow: 0 -10px 40px rgba(0,0,0,0.45);
     overflow: hidden;
@@ -3016,12 +3055,12 @@ body.light-theme .srch-header {
     .srch-header { padding: 14px 16px 14px; }
 }
 
-/* Карточка адресных строк (как на скрине) */
+/* Карточка адресных строк — серая палитра */
 .srch-address-card {
     border-radius: 20px;
     overflow: hidden;
     border: 1px solid rgba(255,255,255,0.08);
-    background: rgba(0,0,0,0.28);
+    background: #2a2a2a;
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
 }
@@ -3252,7 +3291,7 @@ body.light-theme .srch-item-distance { color: #666; }
     left: 0;
     right: 0;
     bottom: 0;
-    background: var(--card-bg, #22252f);
+    background: var(--card-bg, #383838);
     border-radius: 20px 20px 0 0;
     padding: 18px 16px max(20px, env(safe-area-inset-bottom, 20px));
     z-index: 300;
@@ -3299,7 +3338,7 @@ body.light-theme .map-pick-bar {
     width: 44px;
     height: 44px;
     border-radius: 50%;
-    background: #1C1C1E;
+    background: #383838;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -3328,19 +3367,19 @@ body.light-theme .mpb-panel-title {
     color: rgba(0,0,0,0.7);
 }
 
-/* Карточка адреса */
+/* Карточка адреса — серая палитра */
 .mpb-address-card {
     display: flex;
     align-items: center;
     gap: 12px;
     padding: 12px 14px;
     border-radius: 16px;
-    background: rgba(0,0,0,0.35);
+    background: #2a2a2a;
     margin-bottom: 16px;
 }
 
 body.light-theme .mpb-address-card {
-    background: #1C1C1E;
+    background: #141414;
     border-radius: 18px;
 }
 
@@ -3408,7 +3447,7 @@ body.light-theme .mpb-addr-b.mpb-has-addr {
     width: 100%;
     height: 54px;
     background: #ffd84d;
-    color: #1C1C1E;
+    color: #141414;
     border: none;
     border-radius: 14px;
     font-size: 17px;
@@ -3521,8 +3560,8 @@ body.light-theme .srch-item-main { color: #1a1a1a; }
     position: fixed;
     inset: 0;
     z-index: 9999;
-    /* Yandex Go тёмная тема: мягкий тёмно-серый фон */
-    background: #1C1C1E;
+    /* Yandex Go тёмная тема: единая серая палитра */
+    background: #1c1c1c;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -3675,8 +3714,8 @@ body.light-theme .srch-item-main { color: #1a1a1a; }
     -webkit-tap-highlight-color: transparent;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     height: 148px;
-    /* Слегка приподнятая карточка — как в Яндекс Go */
-    background: #2C2C2E;
+    /* Слегка приподнятая карточка — серая палитра Яндекс Go */
+    background: #383838;
     border: 1px solid rgba(255,255,255,0.04);
 }
 
@@ -3685,11 +3724,11 @@ body.light-theme .srch-item-main { color: #1a1a1a; }
     box-shadow: 0 4px 20px rgba(0,0,0,0.4);
 }
 
-/* Мягкие градиенты для каждой карточки — не страшные, приятные */
-.hs-card-relay    { background: linear-gradient(165deg, #323235 0%, #2C2C2E 50%, #222224 100%); }
-.hs-card-transfer { background: linear-gradient(165deg, #323235 0%, #2C2C2E 50%, #222224 100%); }
-.hs-card-tours    { background: linear-gradient(165deg, #323235 0%, #2C2C2E 50%, #222224 100%); }
-.hs-card-driver   { background: linear-gradient(165deg, #323235 0%, #2C2C2E 50%, #222224 100%); }
+/* Единая серая палитра карточек */
+.hs-card-relay    { background: linear-gradient(165deg, #383838 0%, #2a2a2a 50%, #252525 100%); }
+.hs-card-transfer { background: linear-gradient(165deg, #383838 0%, #2a2a2a 50%, #252525 100%); }
+.hs-card-tours    { background: linear-gradient(165deg, #383838 0%, #2a2a2a 50%, #252525 100%); }
+.hs-card-driver   { background: linear-gradient(165deg, #383838 0%, #2a2a2a 50%, #252525 100%); }
 
 /* Внутренний контейнер — управляет позицией картинки и текста */
 .hs-card-inner {
@@ -3791,7 +3830,7 @@ body.light-theme .srch-item-main { color: #1a1a1a; }
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
     padding: 12px 14px 10px;
-    background: #2C2C2E;
+    background: #383838;
     border-radius: 16px;
     min-width: 80px;
     border: 2px solid rgba(255,255,255,0.06);
@@ -3799,7 +3838,7 @@ body.light-theme .srch-item-main { color: #1a1a1a; }
 }
 
 .hs-tariff-chip:hover {
-    background: #2a2d36;
+    background: #454545;
 }
 
 .hs-tariff-chip.active {
@@ -3858,12 +3897,12 @@ body.light-theme .srch-item-main { color: #1a1a1a; }
     background: #ffd84d;
 }
 
-/* ─── Строка поиска — Яндекс Go: очень скруглённая, мягкая ─── */
+/* ─── Строка поиска — серая палитра Яндекс Go ─── */
 .hs-search-bar {
     display: flex;
     align-items: center;
     gap: 12px;
-    background: #2C2C2E;
+    background: #383838;
     border-radius: 14px;
     padding: 16px 20px;
     margin-bottom: 14px;
@@ -3873,7 +3912,7 @@ body.light-theme .srch-item-main { color: #1a1a1a; }
     transition: background 0.2s, border-color 0.2s;
 }
 .hs-search-bar:hover,
-.hs-search-bar:active { background: #2a2d36; border-color: rgba(255,255,255,0.08); }
+.hs-search-bar:active { background: #454545; border-color: rgba(255,255,255,0.08); }
 
 .hs-search-icon {
     font-size: 16px;
@@ -3900,7 +3939,7 @@ body.light-theme .srch-item-main { color: #1a1a1a; }
 }
 
 .hs-recent-list {
-    background: #2C2C2E;
+    background: #383838;
     border-radius: 16px;
     overflow: hidden;
     border: 1px solid rgba(255,255,255,0.05);
@@ -3956,14 +3995,14 @@ body.light-theme .srch-item-main { color: #1a1a1a; }
     white-space: nowrap;
 }
 
-/* ─── Нижняя навигация — Yandex Go стиль ─── */
+/* ─── Нижняя навигация — серая палитра Яндекс Go ─── */
 .hs-bottom-nav {
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
     display: flex;
-    background: #1C1C1E;
+    background: #1c1c1c;
     border-top: 1px solid rgba(255,255,255,0.06);
     padding: 12px 0 max(16px, env(safe-area-inset-bottom, 16px));
     z-index: 10;
@@ -4109,7 +4148,7 @@ body.light-theme .hs-bottom-nav {
 body.light-theme .hs-nav-item        { color: rgba(0,0,0,0.35); }
 body.light-theme .hs-nav-item.active { color: #e6b800; }
 /* ================================================================
-   БОКОВОЕ МЕНЮ (DRAWER) — стиль Яндекс Go
+   БОКОВОЕ МЕНЮ (DRAWER) — точный стиль Яндекс Go
    ================================================================ */
 
 /* ── Затемнение фона ── */
@@ -4136,7 +4175,7 @@ body.light-theme .hs-nav-item.active { color: #e6b800; }
     bottom: 0;
     width: 100vw;
     z-index: 19999;
-    background: #222224;
+    background: #1C1C1E;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -4150,11 +4189,11 @@ body.light-theme .hs-nav-item.active { color: #e6b800; }
     transform: translateX(0);
 }
 
-/* Когда открыт с основной карты — выдвигается справа */
+/* Когда открыт с основной карты — тоже выдвигается слева */
 .hs-drawer.from-map {
-    left: auto;
-    right: 0;
-    transform: translateX(100%);
+    left: 0;
+    right: auto;
+    transform: translateX(-100%);
 }
 
 .hs-drawer.from-map.is-open {
@@ -4163,7 +4202,7 @@ body.light-theme .hs-nav-item.active { color: #e6b800; }
 
 /* Светлая тема drawer */
 body.light-theme .hs-drawer {
-    background: #f5f5f7;
+    background: #F2F2F7;
     box-shadow: none;
 }
 
@@ -4172,14 +4211,14 @@ body.light-theme .hs-drawer {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 52px 20px 24px;
+    padding: 52px 20px 20px;
     position: relative;
     flex-shrink: 0;
-    background: #222224;
+    background: #1C1C1E;
 }
 
 body.light-theme .hs-drawer-header {
-    background: #f5f5f7;
+    background: #F2F2F7;
 }
 
 .hs-drawer-back {
@@ -4191,7 +4230,7 @@ body.light-theme .hs-drawer-header {
     background: transparent;
     border: none;
     color: #fff;
-    font-size: 18px;
+    font-size: 19px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -4206,45 +4245,47 @@ body.light-theme .hs-drawer-header {
 body.light-theme .hs-drawer-back { color: #1a1a1a; }
 body.light-theme .hs-drawer-back:active { background: rgba(0,0,0,0.06); }
 
+/* Аватар — точно как в Яндекс Go: большой круг, серый градиент */
 .hs-drawer-avatar {
-    width: 88px;
-    height: 88px;
+    width: 80px;
+    height: 80px;
     border-radius: 50%;
     background: radial-gradient(circle at 40% 35%, #48484A, #3A3A3C);
     display: flex;
     align-items: flex-end;
     justify-content: center;
     overflow: hidden;
-    font-size: 52px;
-    color: rgba(255,255,255,0.45);
-    padding-top: 12px;
-    margin-top: 8px;
-    border: 2px solid rgba(255,255,255,0.08);
+    font-size: 46px;
+    color: rgba(255,255,255,0.4);
+    padding-top: 10px;
+    margin-top: 4px;
+    border: none;
 }
 
 body.light-theme .hs-drawer-avatar {
-    background: radial-gradient(circle at 40% 35%, #b0b8cc, #8090a8);
-    border-color: rgba(0,0,0,0.06);
+    background: radial-gradient(circle at 40% 35%, #C7C7CC, #AEAEB2);
+    color: rgba(255,255,255,0.6);
 }
 
 /* ── Кнопка входа ── */
 .hs-drawer-auth {
-    padding: 0 16px 20px;
+    padding: 16px 16px 4px;
     flex-shrink: 0;
-    background: #222224;
+    background: #1C1C1E;
 }
 
 body.light-theme .hs-drawer-auth {
-    background: #f5f5f7;
+    background: #F2F2F7;
 }
 
+/* Кнопка "Войти или зарегистрироваться" — точно как в YGo: светло-бежевая/кремовая */
 .hs-drawer-login-btn {
     width: 100%;
-    padding: 16px;
-    border-radius: 16px;
+    padding: 17px 20px;
+    border-radius: 20px;
     border: none;
-    background: #f0ece4;
-    color: #1a1a1a;
+    background: #F0EDE6;
+    color: #1C1C1E;
     font-size: 16px;
     font-weight: 700;
     font-family: inherit;
@@ -4252,98 +4293,112 @@ body.light-theme .hs-drawer-auth {
     transition: background 0.18s, transform 0.12s;
     letter-spacing: -0.01em;
     -webkit-tap-highlight-color: transparent;
+    text-align: center;
 }
 
 .hs-drawer-login-btn:active {
-    background: #e4e0d8;
+    background: #E5E2DA;
     transform: scale(0.99);
 }
 
 body.light-theme .hs-drawer-login-btn {
-    background: #ebe8e0;
+    background: #EDE9E1;
 }
 
+/* Подсказка под кнопкой */
 .hs-drawer-auth-hint {
     text-align: center;
     font-size: 13px;
-    color: rgba(255,255,255,0.45);
+    color: rgba(255,255,255,0.4);
     margin-top: 10px;
+    margin-bottom: 8px;
     padding: 0 8px;
     line-height: 1.4;
 }
 
-body.light-theme .hs-drawer-auth-hint { color: rgba(0,0,0,0.42); }
+body.light-theme .hs-drawer-auth-hint { color: rgba(0,0,0,0.38); }
 
 /* ── Тело: список пунктов ── */
 .hs-drawer-body {
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
-    padding: 4px 14px 24px;
+    padding: 8px 16px 24px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
     -webkit-overflow-scrolling: touch;
 }
 
 .hs-drawer-body::-webkit-scrollbar { display: none; }
 
-/* ── Группа (одна карточка = один пункт) ── */
+/* ── Группа (одна карточка с несколькими пунктами) ── */
 .hs-drawer-group {
     background: #2C2C2E;
-    border-radius: 16px;
+    border-radius: 20px;
     overflow: hidden;
-    border: 1px solid rgba(255,255,255,0.05);
     flex-shrink: 0;
 }
 
 body.light-theme .hs-drawer-group {
-    background: #ffffff;
-    border-color: rgba(0,0,0,0.04);
-    box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+    background: #FFFFFF;
 }
 
-/* Жёлтая группа "Работа в такси" */
+/* Жёлтая группа "Работа водителем" */
 .hs-drawer-group--yellow {
-    background: #ffd84d;
-    border-color: transparent;
-    box-shadow: 0 4px 18px rgba(255, 216, 77, 0.35);
+    background: #FFD84D;
 }
 
 body.light-theme .hs-drawer-group--yellow {
-    background: #ffd84d;
-    box-shadow: 0 4px 18px rgba(255, 216, 77, 0.45);
+    background: #FFD84D;
+}
+
+/* ── Тонкий разделитель внутри группы ── */
+.hs-drawer-divider {
+    height: 0.5px;
+    background: rgba(255,255,255,0.08);
+    margin-left: 68px; /* выравнивание от иконки, как в YGo */
+}
+
+body.light-theme .hs-drawer-divider {
+    background: rgba(0,0,0,0.10);
+}
+
+.hs-drawer-group--yellow .hs-drawer-divider {
+    background: rgba(0,0,0,0.12);
 }
 
 /* ── Пункт меню ── */
 .hs-drawer-item {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 13px 14px 13px 12px;
+    gap: 14px;
+    padding: 0 16px 0 14px;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
     transition: opacity 0.12s;
     user-select: none;
-    min-height: 56px;
+    height: 58px;
+    min-height: 58px;
+    position: relative;
 }
 
-.hs-drawer-item:active { opacity: 0.72; }
+.hs-drawer-item:active { opacity: 0.65; }
 
-/* ── Иконка пункта ── */
+/* ── Иконка пункта — квадратная с закруглением ── */
 .hs-drawer-item-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 12px;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 16px;
+    font-size: 15px;
     flex-shrink: 0;
     position: relative;
 }
 
-/* Цвета иконок — все одинаковые нейтральные */
+/* Все иконки: без фона, белая иконка */
 .hs-di-bell,
 .hs-di-discount,
 .hs-di-payment,
@@ -4352,17 +4407,22 @@ body.light-theme .hs-drawer-group--yellow {
 .hs-di-family,
 .hs-di-security,
 .hs-di-settings,
-.hs-di-theme    { background: rgba(255,255,255,0.09); color: rgba(255,255,255,0.85); }
-
-/* Иконка "Работа в такси" — круглая тёмная на жёлтом */
-.hs-di-work {
-    background: rgba(0,0,0,0.2);
-    color: #1a1a1a;
-    border-radius: 50%;
-    font-size: 18px;
+.hs-di-theme    {
+    background: transparent;
+    color: rgba(255,255,255,0.80);
 }
 
-/* Светлая тема — иконки */
+/* Иконка "Работа водителем" — тёмный круг на жёлтом */
+.hs-di-work {
+    background: rgba(0,0,0,0.18);
+    color: #1C1C1E;
+    border-radius: 50%;
+    font-size: 16px;
+    width: 38px;
+    height: 38px;
+}
+
+/* Светлая тема — иконки без фона */
 body.light-theme .hs-di-bell,
 body.light-theme .hs-di-discount,
 body.light-theme .hs-di-payment,
@@ -4372,20 +4432,20 @@ body.light-theme .hs-di-family,
 body.light-theme .hs-di-security,
 body.light-theme .hs-di-settings,
 body.light-theme .hs-di-theme {
-    background: rgba(0,0,0,0.07);
-    color: #444;
+    background: transparent;
+    color: #3C3C43;
 }
 
-/* Значок уведомления на колоколе */
+/* Красная точка-бейдж на колоколе */
 .hs-di-badge {
     position: absolute;
-    top: 7px;
-    right: 7px;
+    top: 5px;
+    right: 5px;
     width: 8px;
     height: 8px;
-    background: #ff3a30;
+    background: #FF3B30;
     border-radius: 50%;
-    border: 2px solid #2C2C2E;
+    border: 1.5px solid #2C2C2E;
 }
 
 body.light-theme .hs-di-badge { border-color: #fff; }
@@ -4400,33 +4460,36 @@ body.light-theme .hs-di-badge { border-color: #fff; }
 }
 
 .hs-di-title {
-    font-size: 15px;
-    font-weight: 600;
-    color: #fff;
-    line-height: 1.3;
+    font-size: 16px;
+    font-weight: 500;
+    color: #FFFFFF;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
 }
 
-body.light-theme .hs-di-title { color: #1a1a1a; }
+body.light-theme .hs-di-title { color: #1C1C1E; }
 
-.hs-di-title--dark { color: #1a1a1a !important; }
+.hs-di-title--dark { color: #1C1C1E !important; }
 
 .hs-di-subtitle {
-    font-size: 12px;
-    color: rgba(255,255,255,0.45);
+    font-size: 13px;
+    color: rgba(255,255,255,0.40);
+    font-weight: 400;
 }
 
-body.light-theme .hs-di-subtitle { color: rgba(0,0,0,0.45); }
+body.light-theme .hs-di-subtitle { color: rgba(0,0,0,0.40); }
 
 /* ── Шеврон ── */
 .hs-drawer-chevron {
-    font-size: 13px;
-    color: rgba(255,255,255,0.35);
+    font-size: 12px;
+    color: rgba(255,255,255,0.28);
     flex-shrink: 0;
+    margin-left: 4px;
 }
 
-body.light-theme .hs-drawer-chevron { color: rgba(0,0,0,0.3); }
+body.light-theme .hs-drawer-chevron { color: rgba(0,0,0,0.22); }
 
-.hs-drawer-chevron--dark { color: rgba(0,0,0,0.4) !important; }
+.hs-drawer-chevron--dark { color: rgba(0,0,0,0.35) !important; }
 
 /* ── Переключатель темы (toggle) ── */
 .hs-drawer-toggle-wrap {
@@ -4436,8 +4499,8 @@ body.light-theme .hs-drawer-chevron { color: rgba(0,0,0,0.3); }
 .hs-drawer-toggle {
     position: relative;
     display: inline-flex;
-    width: 50px;
-    height: 28px;
+    width: 51px;
+    height: 31px;
     cursor: pointer;
 }
 
@@ -4451,7 +4514,7 @@ body.light-theme .hs-drawer-chevron { color: rgba(0,0,0,0.3); }
 .hs-drawer-toggle-slider {
     position: absolute;
     inset: 0;
-    background: rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.14);
     border-radius: 50px;
     transition: background 0.22s;
 }
@@ -4459,27 +4522,27 @@ body.light-theme .hs-drawer-chevron { color: rgba(0,0,0,0.3); }
 .hs-drawer-toggle-slider::before {
     content: '';
     position: absolute;
-    width: 22px;
-    height: 22px;
-    left: 3px;
-    top: 3px;
+    width: 27px;
+    height: 27px;
+    left: 2px;
+    top: 2px;
     border-radius: 50%;
     background: #fff;
     transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
 }
 
 .hs-drawer-toggle input:checked + .hs-drawer-toggle-slider {
-    background: #ffd84d;
+    background: #34C759;
 }
 
 .hs-drawer-toggle input:checked + .hs-drawer-toggle-slider::before {
-    transform: translateX(22px);
-    background: #1a1a1a;
+    transform: translateX(20px);
+    background: #fff;
 }
 
 body.light-theme .hs-drawer-toggle-slider {
-    background: rgba(0,0,0,0.15);
+    background: rgba(0,0,0,0.14);
 }
 
 body.light-theme .hs-drawer-toggle-slider::before {
@@ -4488,16 +4551,19 @@ body.light-theme .hs-drawer-toggle-slider::before {
 
 /* ── Футер ── */
 .hs-drawer-footer {
-    padding: 14px 20px max(18px, env(safe-area-inset-bottom, 18px));
+    padding: 14px 20px max(20px, env(safe-area-inset-bottom, 20px));
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-top: 1px solid rgba(255,255,255,0.06);
+    border-top: 0.5px solid rgba(255,255,255,0.08);
     flex-shrink: 0;
+    font-size: 13px;
+    color: rgba(255,255,255,0.3);
 }
 
 body.light-theme .hs-drawer-footer {
-    border-color: rgba(0,0,0,0.07);
+    border-color: rgba(0,0,0,0.08);
+    color: rgba(0,0,0,0.3);
 }
 
 .hs-drawer-footer span {
@@ -4534,12 +4600,12 @@ body.light-theme .hs-drawer-footer span { color: rgba(0,0,0,0.3); }
     transform: translateX(0);
 }
 
-/* Фоновый градиент */
+/* Фоновый градиент — серая палитра */
 .drv-hero-bg {
     position: absolute;
     top: 0; left: 0; right: 0;
     height: 340px;
-    background: linear-gradient(160deg, #222224 0%, #1C1C1E 100%);
+    background: linear-gradient(160deg, #252525 0%, #1c1c1c 100%);
     z-index: 0;
     pointer-events: none;
 }
@@ -4599,9 +4665,9 @@ body.light-theme .hs-drawer-footer span { color: rgba(0,0,0,0.3); }
     margin: 0;
 }
 
-/* ── Карточка заработка ── */
+/* ── Карточка заработка — серая палитра ── */
 .drv-earn-card {
-    background: linear-gradient(135deg, #252528 0%, #2C2C2E 100%);
+    background: linear-gradient(135deg, #252525 0%, #2a2a2a 100%);
     border-radius: 22px;
     padding: 22px 24px 20px;
     margin-bottom: 32px;
@@ -4698,7 +4764,7 @@ body.light-theme .hs-drawer-footer span { color: rgba(0,0,0,0.3); }
     gap: 7px;
     padding: 10px 16px;
     border-radius: 50px;
-    background: #2C2C2E;
+    background: #2a2a2a;
     border: 2px solid rgba(255,255,255,0.08);
     color: rgba(255,255,255,0.65);
     font-size: 14px;
@@ -4810,7 +4876,7 @@ body.light-theme .hs-drawer-footer span { color: rgba(0,0,0,0.3); }
 }
 
 .drv-modal {
-    background: #2C2C2E;
+    background: #2a2a2a;
     border-radius: 24px;
     padding: 32px 24px;
     text-align: center;
@@ -5002,7 +5068,7 @@ body.light-theme .auth-subtitle { color: rgba(0,0,0,0.48); }
 .auth-phone-wrap {
     display: flex;
     align-items: center;
-    background: #2C2C2E;
+    background: #2a2a2a;
     border-radius: 16px;
     padding: 4px 4px 4px 8px;
     border: 1.5px solid rgba(255,255,255,0.1);
@@ -5113,7 +5179,7 @@ body.light-theme .auth-clear-btn {
     flex: 1;
     height: 48px;
     border-radius: 14px;
-    background: #2C2C2E;
+    background: #2a2a2a;
     border: 1.5px solid rgba(255,255,255,0.08);
     color: #fff;
     display: flex;
@@ -5172,7 +5238,7 @@ body.light-theme .auth-social-more { color: rgba(0,0,0,0.4); }
     padding: 15px 20px;
     border-radius: 16px;
     border: 1.5px solid rgba(255,255,255,0.1);
-    background: #2C2C2E;
+    background: #2a2a2a;
     color: rgba(255,255,255,0.85);
     font-size: 16px;
     font-weight: 500;
@@ -5202,7 +5268,7 @@ body.light-theme .auth-bio-btn {
     padding: 15px 20px;
     border-radius: 16px;
     border: 1.5px solid rgba(255,255,255,0.1);
-    background: #2C2C2E;
+    background: #2a2a2a;
     color: rgba(255,255,255,0.85);
     font-size: 16px;
     font-weight: 500;

@@ -13,32 +13,7 @@
 <body>
     <!-- Обертка для работы в Tilda -->
     <div id="tilda-calculator-wrapper">
-<!-- Верхняя панель (визуал как на референсе, без функционала) -->
-    <div class="topbar-wrap">
-        <div class="topbar">
-            <div class="topbar-logo">Timofeyev</div>
 
-            <nav class="topbar-nav" aria-label="Навигация">
-                <a class="topbar-link" href="javascript:void(0)">Пользователям <span style="font-size:12px; opacity:.65;">▾</span></a>
-                <a class="topbar-link" href="javascript:void(0)">Водителям <span style="font-size:12px; opacity:.65;">▾</span></a>
-                <a class="topbar-link" href="javascript:void(0)">Бизнесу <span style="font-size:12px; opacity:.65;">▾</span></a>
-                <a class="topbar-link" href="javascript:void(0)">Партнёрам <span style="font-size:12px; opacity:.65;">▾</span></a>
-
-            </nav>
-
-            <div class="topbar-actions">
-                <!-- Кнопка переключения темы -->
-                <button class="theme-toggle" onclick="toggleTheme()" aria-label="Переключить тему">
-                    <i class="theme-icon fas fa-moon" aria-hidden="true"></i>
-                </button>
-                
-                <!-- Бургер-меню (открывает тот же drawer) -->
-                <button class="topbar-menu-btn" onclick="toggleHsMenu()" aria-label="Меню">
-                    <i class="fas fa-bars"></i>
-                </button>
-            </div>
-        </div>
-    </div>
 
     <!-- ===== ГЛАВНЫЙ ЭКРАН (Яндекс Go стиль) ===== -->
     <div id="homeScreen" class="home-screen">
@@ -277,7 +252,7 @@
         <!-- ── Список пунктов меню ── -->
         <div class="hs-drawer-body">
 
-            <!-- Уведомления -->
+            <!-- Группа 1: Уведомления (отдельная) -->
             <div class="hs-drawer-group">
                 <div class="hs-drawer-item" onclick="closeHsMenu()">
                     <div class="hs-drawer-item-icon hs-di-bell">
@@ -291,7 +266,7 @@
                 </div>
             </div>
 
-            <!-- Скидки и подарки -->
+            <!-- Группа 2: Скидки + Способы оплаты (вместе) -->
             <div class="hs-drawer-group">
                 <div class="hs-drawer-item" onclick="closeHsMenu()">
                     <div class="hs-drawer-item-icon hs-di-discount">
@@ -303,10 +278,7 @@
                     </div>
                     <i class="fas fa-chevron-right hs-drawer-chevron"></i>
                 </div>
-            </div>
-
-            <!-- Способы оплаты -->
-            <div class="hs-drawer-group">
+                <div class="hs-drawer-divider"></div>
                 <div class="hs-drawer-item" onclick="closeHsMenu()">
                     <div class="hs-drawer-item-icon hs-di-payment">
                         <i class="fas fa-credit-card"></i>
@@ -318,7 +290,7 @@
                 </div>
             </div>
 
-            <!-- Поддержка -->
+            <!-- Группа 3: Поддержка (отдельная) -->
             <div class="hs-drawer-group">
                 <div class="hs-drawer-item" onclick="closeHsMenu()">
                     <div class="hs-drawer-item-icon hs-di-support">
@@ -331,7 +303,7 @@
                 </div>
             </div>
 
-            <!-- Работа водителем (жёлтая) -->
+            <!-- Группа 4: Работа водителем (жёлтая — отдельная) -->
             <div class="hs-drawer-group hs-drawer-group--yellow">
                 <div class="hs-drawer-item" onclick="openDriverScreen()">
                     <div class="hs-drawer-item-icon hs-di-work">
@@ -344,7 +316,7 @@
                 </div>
             </div>
 
-            <!-- Бизнес-аккаунт -->
+            <!-- Группа 5: Бизнес + Семейный + Безопасность + Настройки (вместе) -->
             <div class="hs-drawer-group">
                 <div class="hs-drawer-item" onclick="closeHsMenu()">
                     <div class="hs-drawer-item-icon hs-di-business">
@@ -355,10 +327,7 @@
                     </div>
                     <i class="fas fa-chevron-right hs-drawer-chevron"></i>
                 </div>
-            </div>
-
-            <!-- Семейный аккаунт -->
-            <div class="hs-drawer-group">
+                <div class="hs-drawer-divider"></div>
                 <div class="hs-drawer-item" onclick="closeHsMenu()">
                     <div class="hs-drawer-item-icon hs-di-family">
                         <i class="fas fa-user-group"></i>
@@ -368,10 +337,7 @@
                     </div>
                     <i class="fas fa-chevron-right hs-drawer-chevron"></i>
                 </div>
-            </div>
-
-            <!-- Безопасность -->
-            <div class="hs-drawer-group">
+                <div class="hs-drawer-divider"></div>
                 <div class="hs-drawer-item" onclick="closeHsMenu()">
                     <div class="hs-drawer-item-icon hs-di-security">
                         <i class="fas fa-shield-halved"></i>
@@ -381,10 +347,7 @@
                     </div>
                     <i class="fas fa-chevron-right hs-drawer-chevron"></i>
                 </div>
-            </div>
-
-            <!-- Настройки -->
-            <div class="hs-drawer-group">
+                <div class="hs-drawer-divider"></div>
                 <div class="hs-drawer-item" onclick="closeHsMenu()">
                     <div class="hs-drawer-item-icon hs-di-settings">
                         <i class="fas fa-gear"></i>
@@ -396,7 +359,7 @@
                 </div>
             </div>
 
-            <!-- Тёмная тема — переключатель -->
+            <!-- Группа 6: Тёмная тема (переключатель) -->
             <div class="hs-drawer-group">
                 <div class="hs-drawer-item hs-drawer-item--notap" onclick="toggleTheme()">
                     <div class="hs-drawer-item-icon hs-di-theme">
@@ -610,14 +573,10 @@
             <div class="loading-subtext">Разрешите доступ для автоматического заполнения адреса</div>
         </div>
 
-        <!-- Панель телефона -->
-        <div class="phone-panel">
-            <i class="fas fa-phone-alt phone-icon"></i>
-            <div>
-                <div class="phone-number">+7 (777) 779-64-44</div>
-                <div class="phone-label">Заказ трансфера по телефону</div>
-            </div>
-        </div>
+        <!-- Кнопка меню (верхний левый угол) -->
+        <button class="calc-menu-btn" onclick="toggleHsMenu()" aria-label="Меню">
+            <i class="fas fa-bars"></i>
+        </button>
 
         <!-- Основная панель заказа -->
         <div class="panel" id="panel">
@@ -972,23 +931,16 @@
 
         <!-- Кастомные контролы карты -->
         <div class="map-controls" id="mapControls">
-            <div class="map-zoom-capsule">
-                <button type="button" id="zoomIn" title="Приблизить">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-                        <line x1="12" y1="5" x2="12" y2="19"/>
-                        <line x1="5" y1="12" x2="19" y2="12"/>
-                    </svg>
-                </button>
-                <div class="zoom-divider"></div>
-                <button type="button" id="zoomOut" title="Отдалить">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
-                        <line x1="5" y1="12" x2="19" y2="12"/>
-                    </svg>
-                </button>
-            </div>
+            <!-- Кнопка назад (возврат на главный экран) -->
+            <button type="button" class="map-back-btn" id="mapBackBtn" title="На главную" onclick="returnToHomeScreen()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6"/>
+                </svg>
+            </button>
+            <!-- Кнопка геолокации (стиль Яндекс Go) -->
             <button type="button" class="map-geo-btn" id="geoBtn" title="Моё местоположение">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                <svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M2.5 12.5L21 3L11.5 21.5L9.5 14.5L2.5 12.5Z"/>
                 </svg>
             </button>
         </div>
