@@ -470,11 +470,17 @@
     <!-- ═══════════════════════════════════════════════════
          ЭКРАН АВТОРИЗАЦИИ — стиль Яндекс ID
          ═══════════════════════════════════════════════════ -->
+    <!-- ═══════════════════════════════════════════════════════════
+     ОБНОВЛЁННЫЙ ЭКРАН АВТОРИЗАЦИИ — Timofeyev ID
+     Вставить вместо <div class="auth-screen" id="authScreen">...</div>
+     в index.html
+     ═══════════════════════════════════════════════════════════ -->
+
     <div class="auth-screen" id="authScreen">
 
         <!-- Шапка -->
         <div class="auth-header">
-            <button class="auth-back-btn" onclick="closeAuthScreen()">
+            <button class="auth-back-btn" onclick="authGoBack()">
                 <i class="fas fa-arrow-left"></i>
             </button>
             <div class="auth-logo">
@@ -488,77 +494,112 @@
             <h1 class="auth-title">Введите номер<br>телефона</h1>
             <p class="auth-subtitle">Чтобы войти или зарегистрироваться</p>
 
-            <!-- Поле ввода телефона -->
-            <div class="auth-phone-wrap">
-                <div class="auth-flag-btn" onclick="toggleCountryPicker()">
-                    <span class="auth-flag">🇰🇿</span>
-                    <span class="auth-code">+7</span>
+            <!-- Сообщение об ошибке -->
+            <div id="authErrorMsg" class="auth-error-msg" style="display:none;"></div>
+
+            <!-- ════ БЛОК 1: ТЕЛЕФОН ════ -->
+            <div id="authPhoneBlock">
+                <div class="auth-phone-wrap">
+                    <div class="auth-flag-btn" onclick="toggleCountryPicker()">
+                        <span class="auth-flag">🇰🇿</span>
+                        <span class="auth-code">+7</span>
+                    </div>
+                    <input
+                        class="auth-phone-input"
+                        id="authPhoneInput"
+                        type="tel"
+                        placeholder="(777) 000-00-00"
+                        maxlength="15"
+                        oninput="formatPhone(this)"
+                        onkeydown="if(event.key==='Enter') submitPhone()"
+                    >
+                    <button class="auth-clear-btn" id="authClearBtn" onclick="clearPhone()" style="display:none;">
+                        <i class="fas fa-times"></i>
+                    </button>
                 </div>
-                <input
-                    class="auth-phone-input"
-                    id="authPhoneInput"
-                    type="tel"
-                    placeholder="(000) 000-00-00"
-                    maxlength="15"
-                    oninput="formatPhone(this)"
-                >
-                <button class="auth-clear-btn" id="authClearBtn" onclick="clearPhone()" style="display:none;">
-                    <i class="fas fa-times"></i>
+
+                <!-- Социальные кнопки (только UI) -->
+                <div class="auth-social-row">
+                    <button class="auth-social-btn" title="Apple"><i class="fab fa-apple"></i></button>
+                    <button class="auth-social-btn auth-social-vk" title="ВКонтакте">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M15.07 2H8.93C3.33 2 2 3.33 2 8.93v6.14C2 20.67 3.33 22 8.93 22h6.14C20.67 22 22 20.67 22 15.07V8.93C22 3.33 20.67 2 15.07 2zm2.85 13.27h-1.5c-.57 0-.74-.45-1.77-1.5-.89-.87-1.27-.99-1.49-.99-.3 0-.39.09-.39.51v1.38c0 .36-.12.57-1.08.57-1.59 0-3.35-.96-4.59-2.76C5.37 10.5 5 8.82 5 8.46c0-.21.09-.42.51-.42h1.5c.39 0 .54.18.69.6.75 2.16 2.01 4.05 2.52 4.05.18 0 .27-.09.27-.57v-2.22c-.06-1.02-.6-1.11-.6-1.47 0-.18.15-.36.39-.36h2.37c.33 0 .45.18.45.57v3c0 .33.15.45.24.45.18 0 .33-.12.66-.45 1.02-1.14 1.74-2.88 1.74-2.88.09-.21.27-.42.66-.42h1.5c.45 0 .54.24.45.57-.18.84-2.01 3.45-2.01 3.45-.15.27-.21.39 0 .69.15.21.66.66.99 1.05.63.69 1.11 1.26 1.23 1.65.15.39-.06.6-.48.6z"/>
+                        </svg>
+                    </button>
+                    <button class="auth-social-btn auth-social-google" title="Google">
+                        <svg width="20" height="20" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                        </svg>
+                    </button>
+                    <button class="auth-social-btn auth-social-mail" title="Mail.ru"><i class="fas fa-at"></i></button>
+                </div>
+
+                <button class="auth-submit-btn" onclick="submitPhone()">Войти</button>
+
+                <button class="auth-bio-btn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                        <path d="M7 9.5C7 7 9.2 5 12 5s5 2 5 4.5"/>
+                        <path d="M5.5 8C5.5 5 8.5 2.5 12 2.5S18.5 5 18.5 8"/>
+                        <path d="M9 13c0-1.7 1.3-3 3-3s3 1.3 3 3-.5 3.5-1.5 5"/>
+                        <path d="M12 10v4M12 16v1"/>
+                        <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
+                    </svg>
+                    По лицу или отпечатку
                 </button>
             </div>
 
-            <!-- Сторонние провайдеры -->
-            <div class="auth-social-row">
-                <button class="auth-social-btn" title="Apple">
-                    <i class="fab fa-apple"></i>
-                </button>
-                <button class="auth-social-btn auth-social-vk" title="ВКонтакте">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M15.07 2H8.93C3.33 2 2 3.33 2 8.93v6.14C2 20.67 3.33 22 8.93 22h6.14C20.67 22 22 20.67 22 15.07V8.93C22 3.33 20.67 2 15.07 2zm2.85 13.27h-1.5c-.57 0-.74-.45-1.77-1.5-.89-.87-1.27-.99-1.49-.99-.3 0-.39.09-.39.51v1.38c0 .36-.12.57-1.08.57-1.59 0-3.35-.96-4.59-2.76C5.37 10.5 5 8.82 5 8.46c0-.21.09-.42.51-.42h1.5c.39 0 .54.18.69.6.75 2.16 2.01 4.05 2.52 4.05.18 0 .27-.09.27-.57v-2.22c-.06-1.02-.6-1.11-.6-1.47 0-.18.15-.36.39-.36h2.37c.33 0 .45.18.45.57v3c0 .33.15.45.24.45.18 0 .33-.12.66-.45 1.02-1.14 1.74-2.88 1.74-2.88.09-.21.27-.42.66-.42h1.5c.45 0 .54.24.45.57-.18.84-2.01 3.45-2.01 3.45-.15.27-.21.39 0 .69.15.21.66.66.99 1.05.63.69 1.11 1.26 1.23 1.65.15.39-.06.6-.48.6z"/>
-                    </svg>
-                </button>
-                <button class="auth-social-btn auth-social-google" title="Google">
-                    <svg width="20" height="20" viewBox="0 0 24 24">
-                        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                        <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                    </svg>
-                </button>
-                <button class="auth-social-btn auth-social-mail" title="Mail.ru">
-                    <i class="fas fa-at"></i>
-                </button>
-                <button class="auth-social-btn auth-social-more" title="Ещё">
-                    <i class="fas fa-ellipsis"></i>
+            <!-- ════ БЛОК 2: OTP ════ -->
+            <div id="authOtpBlock" style="display:none;">
+                <div class="auth-otp-inputs">
+                    <input type="text" inputmode="numeric" id="otpDigit0" class="otp-digit"
+                        maxlength="1" oninput="onOtpInput(this,0)" onkeydown="onOtpKeydown(this,0,event)">
+                    <input type="text" inputmode="numeric" id="otpDigit1" class="otp-digit"
+                        maxlength="1" oninput="onOtpInput(this,1)" onkeydown="onOtpKeydown(this,1,event)">
+                    <input type="text" inputmode="numeric" id="otpDigit2" class="otp-digit"
+                        maxlength="1" oninput="onOtpInput(this,2)" onkeydown="onOtpKeydown(this,2,event)">
+                    <input type="text" inputmode="numeric" id="otpDigit3" class="otp-digit"
+                        maxlength="1" oninput="onOtpInput(this,3)" onkeydown="onOtpKeydown(this,3,event)">
+                    <input type="text" inputmode="numeric" id="otpDigit4" class="otp-digit"
+                        maxlength="1" oninput="onOtpInput(this,4)" onkeydown="onOtpKeydown(this,4,event)">
+                    <input type="text" inputmode="numeric" id="otpDigit5" class="otp-digit"
+                        maxlength="1" oninput="onOtpInput(this,5)" onkeydown="onOtpKeydown(this,5,event)">
+                </div>
+
+                <button class="auth-submit-btn" id="otpSubmitBtn" onclick="submitOtp()">Подтвердить</button>
+
+                <button class="auth-resend-btn" id="otpResendBtn" onclick="resendOtp()" disabled>
+                    Повторить через 60 сек
                 </button>
             </div>
 
-            <!-- Основная кнопка -->
-            <button class="auth-submit-btn" onclick="submitPhone()">
-                Войти
-            </button>
+            <!-- ════ БЛОК 3: ИМЯ (только при первой регистрации) ════ -->
+            <div id="authNameBlock" style="display:none;">
+                <div class="auth-name-wrap">
+                    <input
+                        type="text"
+                        id="authNameInput"
+                        class="auth-name-input"
+                        placeholder="Ваше имя"
+                        maxlength="60"
+                        onkeydown="if(event.key==='Enter') submitName()"
+                    >
+                </div>
+                <button class="auth-submit-btn" onclick="submitName()">Продолжить</button>
+                <button class="auth-more-btn" onclick="submitName()">Пропустить</button>
+            </div>
 
-            <!-- Биометрия -->
-            <button class="auth-bio-btn">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <path d="M12 1C5.9 1 1 5.9 1 12s4.9 11 11 11 11-4.9 11-11S18.1 1 12 1z" stroke-opacity=".0" fill="none"/>
-                    <path d="M7 9.5C7 7 9.2 5 12 5s5 2 5 4.5"/>
-                    <path d="M5.5 8C5.5 5 8.5 2.5 12 2.5S18.5 5 18.5 8"/>
-                    <path d="M9 13c0-1.7 1.3-3 3-3s3 1.3 3 3-.5 3.5-1.5 5"/>
-                    <path d="M12 10v4M12 16v1"/>
-                    <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
-                </svg>
-                По лицу или отпечатку
-            </button>
-
-            <!-- Кнопка Ещё -->
-            <button class="auth-more-btn">
-                Ещё
-            </button>
+            <p class="auth-legal">
+                Продолжая, вы соглашаетесь с
+                <a href="javascript:void(0)">условиями использования</a>
+                и <a href="javascript:void(0)">политикой конфиденциальности</a>
+            </p>
 
         </div><!-- /auth-body -->
-
     </div><!-- /authScreen -->
+
 
     <div id="calculator">
         <!-- Красная метка на карте -->
@@ -1000,6 +1041,7 @@
     <script src="https://api-maps.yandex.ru/2.1/?apikey=69c18fe9-15b1-4391-b4e7-2a005a4fb22d&lang=ru_RU"></script>
     
     </div>
+    <script src="api.js?v=1.0.0"></script>
     <script src="script.js?v=4.0.0"></script>
 </body>
 </html>

@@ -2650,45 +2650,10 @@ window.closeDrvModal = function() {
 /* ================================================================
    ЭКРАН АВТОРИЗАЦИИ
    ================================================================ */
-// Форматирование номера телефона
-window.formatPhone = function(input) {
-    var clearBtn = document.getElementById('authClearBtn');
-    var val = input.value.replace(/\D/g, '').slice(0, 10);
-    var formatted = '';
-    if (val.length > 0) formatted = '(' + val.slice(0, 3);
-    if (val.length >= 4) formatted += ') ' + val.slice(3, 6);
-    if (val.length >= 7) formatted += '-' + val.slice(6, 8);
-    if (val.length >= 9) formatted += '-' + val.slice(8, 10);
-    input.value = formatted;
-    if (clearBtn) clearBtn.style.display = val.length > 0 ? 'flex' : 'none';
-};
 
-window.clearPhone = function() {
-    var input = document.getElementById('authPhoneInput');
-    var clearBtn = document.getElementById('authClearBtn');
-    if (input) { input.value = ''; input.focus(); }
-    if (clearBtn) clearBtn.style.display = 'none';
-};
 
-window.submitPhone = function() {
-    var input = document.getElementById('authPhoneInput');
-    var val = input ? input.value.replace(/\D/g, '') : '';
-    if (val.length < 10) {
-        // Подсветить поле
-        var wrap = document.querySelector('.auth-phone-wrap');
-        if (wrap) {
-            wrap.style.borderColor = '#ff4444';
-            setTimeout(function() { wrap.style.borderColor = ''; }, 1500);
-        }
-        return;
-    }
-    // Имитация успешного входа
-    closeAuthScreen();
-};
 
-window.toggleCountryPicker = function() {
-    // Заглушка — можно расширить
-};
+
 
 // Свайп вправо для закрытия
 (function() {
@@ -2705,3 +2670,22 @@ window.toggleCountryPicker = function() {
         if (dx > 80 && dy < 80) closeAuthScreen();
     }, { passive: true });
 })();
+
+window.formatPhone = function(input) {
+    var clearBtn = document.getElementById('authClearBtn');
+    var val = input.value.replace(/\D/g, '').slice(0, 10);
+    var formatted = '';
+    if (val.length > 0) formatted = '(' + val.slice(0, 3);
+    if (val.length >= 4) formatted += ') ' + val.slice(3, 6);
+    if (val.length >= 7) formatted += '-' + val.slice(6, 8);
+    if (val.length >= 9) formatted += '-' + val.slice(8, 10);
+    input.value = formatted;
+    if (clearBtn) clearBtn.style.display = val.length > 0 ? 'flex' : 'none';
+};
+window.clearPhone = function() {
+    var input = document.getElementById('authPhoneInput');
+    var clearBtn = document.getElementById('authClearBtn');
+    if (input) { input.value = ''; input.focus(); }
+    if (clearBtn) clearBtn.style.display = 'none';
+};
+window.toggleCountryPicker = function() {};

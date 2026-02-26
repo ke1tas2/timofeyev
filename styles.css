@@ -5289,3 +5289,151 @@ body.light-theme .auth-more-btn {
     color: rgba(0,0,0,0.8);
     box-shadow: 0 2px 6px rgba(0,0,0,0.06);
 }
+
+/* =============================================================
+   auth_additions.css — Добавить в конец styles.css
+   Стили для OTP, улучшенного экрана авторизации и панели профиля
+   ============================================================= */
+
+/* ── OTP поля ────────────────────────────────────────────────── */
+.auth-otp-inputs {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin: 28px 0 24px;
+}
+
+.otp-digit {
+    width: 46px;
+    height: 54px;
+    border-radius: 12px;
+    border: 2px solid var(--clr-border, rgba(255,255,255,0.12));
+    background: var(--clr-surface, rgba(255,255,255,0.06));
+    color: var(--clr-text, #fff);
+    font-size: 22px;
+    font-weight: 600;
+    text-align: center;
+    outline: none;
+    transition: border-color .15s;
+    caret-color: transparent;
+}
+
+.otp-digit:focus {
+    border-color: #ffd84d;
+    background: rgba(255, 216, 77, 0.08);
+}
+
+.otp-digit.has-value {
+    border-color: rgba(255,255,255,0.3);
+}
+
+/* ── Кнопка повторной отправки ──────────────────────────────── */
+.auth-resend-btn {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    margin-top: 12px;
+    background: transparent;
+    border: none;
+    color: var(--clr-hint, rgba(255,255,255,0.45));
+    font-size: 14px;
+    cursor: pointer;
+    transition: color .15s;
+}
+
+.auth-resend-btn:not(:disabled) {
+    color: #ffd84d;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.auth-resend-btn:disabled {
+    cursor: default;
+}
+
+/* ── Ввод имени ─────────────────────────────────────────────── */
+.auth-name-wrap {
+    margin-bottom: 20px;
+}
+
+.auth-name-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 16px 16px;
+    border-radius: 14px;
+    border: 2px solid var(--clr-border, rgba(255,255,255,0.12));
+    background: var(--clr-surface, rgba(255,255,255,0.06));
+    color: var(--clr-text, #fff);
+    font-size: 17px;
+    outline: none;
+    transition: border-color .15s;
+}
+
+.auth-name-input:focus {
+    border-color: #ffd84d;
+}
+
+/* ── Сообщение об ошибке ────────────────────────────────────── */
+.auth-error-msg {
+    background: rgba(255, 68, 68, 0.12);
+    border: 1px solid rgba(255, 68, 68, 0.3);
+    border-radius: 10px;
+    padding: 12px 16px;
+    color: #ff8080;
+    font-size: 14px;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+/* ── Анимация тряски ────────────────────────────────────────── */
+@keyframes authShake {
+    0%, 100% { transform: translateX(0); }
+    20%       { transform: translateX(-8px); }
+    40%       { transform: translateX(8px); }
+    60%       { transform: translateX(-5px); }
+    80%       { transform: translateX(5px); }
+}
+.auth-shake {
+    animation: authShake 0.5s ease;
+}
+
+/* ── Legal текст ────────────────────────────────────────────── */
+.auth-legal {
+    font-size: 11px;
+    color: var(--clr-hint, rgba(255,255,255,0.3));
+    text-align: center;
+    margin-top: 24px;
+    line-height: 1.5;
+    padding: 0 10px;
+}
+.auth-legal a {
+    color: rgba(255,255,255,0.5);
+    text-decoration: underline;
+}
+
+/* ── Профиль в drawer после входа ──────────────────────────── */
+.hs-drawer-user-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--clr-text, #fff);
+    margin-bottom: 2px;
+}
+
+/* ── Световая тема: OTP ─────────────────────────────────────── */
+.light-theme .otp-digit {
+    border-color: rgba(0,0,0,0.15);
+    background: rgba(0,0,0,0.04);
+    color: #141414;
+}
+.light-theme .otp-digit:focus {
+    border-color: #141414;
+    background: rgba(0,0,0,0.06);
+}
+.light-theme .auth-name-input {
+    border-color: rgba(0,0,0,0.15);
+    background: rgba(0,0,0,0.04);
+    color: #141414;
+}
+.light-theme .auth-name-input:focus {
+    border-color: #141414;
+}
