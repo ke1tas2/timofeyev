@@ -145,16 +145,21 @@ if ($method === 'POST' && $action === 'verify-otp') {
     Database::exec('UPDATE otp_codes SET used=1 WHERE id=?', [$otp['id']]);
 
     // Получаем или создаём пользователя
-    $user = Database::row('SELECT * FROM users WHERE phone=?', [$phone]);
+    // INSERT IGNORE защищает от дублей даже при одновременных запросах
     $isNew = false;
+    $user  = Database::row('SELECT * FROM users WHERE phone=?', [$phone]);
 
     if (!$user) {
-        $isNew = true;
-        $userId = Database::insert(
-            'INSERT INTO users (phone, role, status) VALUES (?,?,?)',
+        // Атомарная вставка — если другой запрос успел вставить раньше, молча игнорируем
+        Database::exec(
+            'INSERT IGNORE INTO users (phone, role, status) VALUES (?,?,?)',
             [$phone, 'client', 'active']
         );
-        $user = Database::row('SELECT * FROM users WHERE id=?', [$userId]);
+        // Читаем запись — либо только что созданную, либо уже существующую
+        $user = Database::row('SELECT * FROM users WHERE phone=?', [$phone]);
+        if ($user && is_null($user['name'])) {
+            $isNew = true;
+        }
     }
 
     if ($user['status'] !== 'active') {

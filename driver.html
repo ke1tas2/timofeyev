@@ -1,0 +1,1619 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Timofeyev — Водитель</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+/* ═══════════════════════════════════════════════
+   VARIABLES & RESET
+═══════════════════════════════════════════════ */
+:root {
+  --bg:          #1c1c1c;
+  --surface:     #252525;
+  --card:        #2e2e2e;
+  --card2:       #383838;
+  --border:      rgba(255,255,255,0.08);
+  --accent:      #ffd84d;
+  --accent-dim:  rgba(255,216,77,0.15);
+  --green:       #34c759;
+  --green-dim:   rgba(52,199,89,0.15);
+  --red:         #ff453a;
+  --red-dim:     rgba(255,69,58,0.15);
+  --orange:      #ff9f0a;
+  --text:        #f0f0f0;
+  --muted:       rgba(255,255,255,0.45);
+  --radius:      20px;
+  --panel-h:     320px;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  height: 100%; width: 100%;
+  overflow: hidden;
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+button { font-family: inherit; cursor: pointer; border: none; outline: none; background: none; }
+input  { font-family: inherit; outline: none; border: none; background: none; }
+
+/* ═══════════════════════════════════════════════
+   UTILITY
+═══════════════════════════════════════════════ */
+.hidden { display: none !important; }
+@keyframes fadeIn   { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:none; } }
+@keyframes fadeInUp { from { opacity:0; transform:translateY(40px); } to { opacity:1; transform:none; } }
+@keyframes spin     { to { transform: rotate(360deg); } }
+@keyframes pulse    { 0%,100% { transform:scale(1); } 50% { transform:scale(1.04); } }
+@keyframes timerShrink { from { width:100%; } to { width:0%; } }
+.spin { animation: spin 0.8s linear infinite; }
+
+/* ═══════════════════════════════════════════════
+   LOGIN SCREEN
+═══════════════════════════════════════════════ */
+#loginScreen {
+  position: fixed; inset: 0; z-index: 1000;
+  display: flex; align-items: flex-end;
+  background: radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255,216,77,0.08) 0%, transparent 60%), var(--bg);
+}
+.login-map-bg {
+  position: absolute; inset: 0;
+  background: url('') center/cover;
+  opacity: 0.04;
+}
+.login-sheet {
+  position: relative; z-index: 1;
+  width: 100%;
+  background: var(--surface);
+  border-radius: 28px 28px 0 0;
+  padding: 12px 24px 40px;
+  border-top: 1px solid var(--border);
+}
+.login-handle {
+  width: 36px; height: 4px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 2px;
+  margin: 0 auto 28px;
+}
+.login-logo {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 20px; font-weight: 700;
+  margin-bottom: 4px;
+}
+.login-logo span { color: var(--accent); }
+.login-tagline { font-size: 13px; color: var(--muted); margin-bottom: 28px; }
+
+.login-error {
+  background: var(--red-dim);
+  border: 1px solid rgba(255,69,58,0.25);
+  color: var(--red);
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-size: 13px;
+  margin-bottom: 14px;
+}
+.login-label {
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 8px;
+}
+.login-input-wrap { position: relative; margin-bottom: 14px; }
+.login-prefix {
+  position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+  font-size: 16px; color: var(--muted); pointer-events: none;
+}
+.login-input {
+  width: 100%;
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  padding: 15px 16px;
+  font-size: 17px; color: var(--text);
+  transition: border-color 0.2s;
+}
+.login-input.with-prefix { padding-left: 40px; }
+.login-input:focus { border-color: var(--accent); }
+.login-input::placeholder { color: var(--muted); }
+
+.otp-row { display: flex; gap: 8px; margin-bottom: 16px; }
+.otp-digit {
+  flex: 1;
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: 14px;
+  height: 58px;
+  text-align: center;
+  font-size: 24px; font-weight: 700;
+  color: var(--text);
+  transition: border-color 0.2s;
+}
+.otp-digit:focus { border-color: var(--accent); }
+
+.login-btn {
+  width: 100%;
+  background: var(--accent); color: #111;
+  font-size: 16px; font-weight: 700;
+  border-radius: 14px; padding: 16px;
+  transition: opacity 0.2s, transform 0.1s;
+}
+.login-btn:hover  { opacity: 0.9; }
+.login-btn:active { transform: scale(0.98); }
+.login-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.login-resend {
+  width: 100%; padding: 12px;
+  color: var(--muted); font-size: 13px;
+  margin-top: 4px; transition: color 0.2s;
+}
+.login-resend:not(:disabled):hover { color: var(--text); }
+.login-back {
+  display: flex; align-items: center; gap: 6px;
+  color: var(--muted); font-size: 13px;
+  margin-bottom: 20px; transition: color 0.2s;
+}
+.login-back:hover { color: var(--text); }
+.login-hint { font-size: 12px; color: var(--muted); margin-top: 6px; }
+
+/* ═══════════════════════════════════════════════
+   MAP
+═══════════════════════════════════════════════ */
+#driverMap {
+  position: fixed; inset: 0;
+  z-index: 0;
+}
+#driverMap .ymaps-2-1-79-map { filter: brightness(0.85); }
+
+/* ═══════════════════════════════════════════════
+   TOPBAR
+═══════════════════════════════════════════════ */
+.topbar {
+  position: fixed; top: 0; left: 0; right: 0;
+  z-index: 50;
+  padding: 16px 16px 0;
+  display: flex; align-items: center; gap: 10px;
+  pointer-events: none;
+}
+.topbar > * { pointer-events: auto; }
+.tb-btn {
+  width: 44px; height: 44px;
+  background: var(--surface);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; color: var(--text);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  transition: transform 0.15s;
+}
+.tb-btn:active { transform: scale(0.93); }
+.tb-status-pill {
+  background: var(--surface);
+  border-radius: 99px;
+  padding: 0 16px;
+  height: 44px;
+  display: flex; align-items: center; gap: 8px;
+  font-size: 13px; font-weight: 600;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  flex: 1; max-width: 200px;
+}
+.tb-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--muted); flex-shrink: 0;
+  transition: background 0.3s;
+}
+.tb-dot.online { background: var(--green); animation: pulse 2s ease-in-out infinite; }
+
+/* ═══════════════════════════════════════════════
+   BOTTOM PANEL
+═══════════════════════════════════════════════ */
+.bottom-panel {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  z-index: 50;
+  background: var(--surface);
+  border-radius: 24px 24px 0 0;
+  border-top: 1px solid var(--border);
+  padding: 12px 20px 34px;
+  transform: translateY(0);
+  transition: transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+  box-shadow: 0 -8px 40px rgba(0,0,0,0.5);
+}
+.panel-handle {
+  width: 36px; height: 4px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 2px;
+  margin: 0 auto 20px;
+}
+
+/* ── OFFLINE STATE ── */
+.offline-panel {}
+.offline-greeting {
+  font-size: 13px; color: var(--muted); margin-bottom: 4px;
+}
+.offline-name {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 20px; font-weight: 700;
+  margin-bottom: 20px;
+}
+.online-btn {
+  width: 100%;
+  background: var(--green); color: #0a1a0a;
+  font-size: 17px; font-weight: 700;
+  border-radius: 16px; padding: 18px;
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  transition: opacity 0.2s, transform 0.1s;
+  box-shadow: 0 6px 24px rgba(52,199,89,0.3);
+}
+.online-btn:active { transform: scale(0.97); }
+.online-btn i { font-size: 18px; }
+
+.stats-row {
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px; margin-top: 16px;
+}
+.stat-mini {
+  background: var(--card);
+  border-radius: 14px; padding: 12px;
+  text-align: center;
+}
+.stat-mini-val {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 17px; font-weight: 700;
+  margin-bottom: 3px;
+}
+.stat-mini-val.green { color: var(--green); }
+.stat-mini-val.yellow { color: var(--accent); }
+.stat-mini-label { font-size: 10px; color: var(--muted); font-weight: 500; }
+
+/* ── ONLINE STATE ── */
+.online-panel {}
+.waiting-anim {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 20px;
+}
+.waiting-dots { display: flex; gap: 5px; }
+.w-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--green);
+  animation: wdot 1.4s ease-in-out infinite;
+}
+.w-dot:nth-child(2) { animation-delay: 0.2s; }
+.w-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes wdot { 0%,80%,100%{transform:scale(0.6);opacity:0.4} 40%{transform:scale(1);opacity:1} }
+.waiting-text { font-size: 15px; font-weight: 600; }
+.waiting-sub  { font-size: 12px; color: var(--muted); }
+
+.offline-btn {
+  width: 100%;
+  background: var(--card); color: var(--muted);
+  font-size: 15px; font-weight: 600;
+  border-radius: 14px; padding: 15px;
+  border: 1px solid var(--border);
+  transition: background 0.2s;
+}
+.offline-btn:hover { background: var(--card2); color: var(--text); }
+
+/* ── TRIP ACTIVE ── */
+.trip-panel {}
+.trip-client-row {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 16px;
+}
+.trip-avatar {
+  width: 46px; height: 46px; border-radius: 50%;
+  background: var(--accent-dim);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Unbounded', sans-serif;
+  font-size: 17px; font-weight: 700; color: var(--accent);
+  flex-shrink: 0;
+}
+.trip-client-name { font-size: 16px; font-weight: 600; }
+.trip-client-phone { font-size: 13px; color: var(--muted); }
+.trip-call-btn {
+  margin-left: auto;
+  width: 44px; height: 44px; border-radius: 50%;
+  background: var(--green-dim); color: var(--green);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+  transition: background 0.2s;
+}
+.trip-call-btn:hover { background: rgba(52,199,89,0.25); }
+
+.trip-route {
+  background: var(--card);
+  border-radius: 16px; padding: 14px 16px;
+  margin-bottom: 16px;
+}
+.trip-route-row {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 5px 0;
+}
+.trip-route-row + .trip-route-row {
+  border-top: 1px solid var(--border);
+  margin-top: 5px; padding-top: 10px;
+}
+.route-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  flex-shrink: 0; margin-top: 4px;
+}
+.route-dot.from { background: var(--accent); }
+.route-dot.to   { background: var(--green); }
+.route-addr { font-size: 14px; line-height: 1.4; }
+.route-label { font-size: 11px; color: var(--muted); margin-bottom: 2px; }
+
+.trip-price-row {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 16px;
+}
+.trip-price {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 22px; font-weight: 700; color: var(--accent);
+}
+.trip-pay-type {
+  font-size: 12px; color: var(--muted);
+  background: var(--card); border-radius: 8px; padding: 4px 10px;
+}
+.trip-distance {
+  font-size: 13px; color: var(--muted); margin-left: auto;
+}
+
+.trip-action-btn {
+  width: 100%;
+  font-size: 16px; font-weight: 700;
+  border-radius: 16px; padding: 17px;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  transition: opacity 0.2s, transform 0.1s;
+}
+.trip-action-btn:active { transform: scale(0.97); }
+.btn-arrive   { background: var(--accent); color: #111; }
+.btn-start    { background: var(--green);  color: #0a1a0a; box-shadow: 0 6px 24px rgba(52,199,89,0.3); }
+.btn-complete { background: var(--green);  color: #0a1a0a; box-shadow: 0 6px 24px rgba(52,199,89,0.3); }
+.btn-cancel-trip {
+  width: 100%; margin-top: 8px;
+  font-size: 14px; color: var(--muted);
+  padding: 10px; background: none;
+}
+
+/* ═══════════════════════════════════════════════
+   ORDER INCOMING CARD
+═══════════════════════════════════════════════ */
+.order-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  display: flex; flex-direction: column;
+  align-items: stretch; justify-content: flex-end;
+  background: rgba(0,0,0,0.5);
+  backdrop-filter: blur(3px);
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.25s;
+}
+.order-overlay.show { opacity: 1; pointer-events: auto; }
+
+.order-card {
+  background: var(--surface);
+  border-radius: 28px 28px 0 0;
+  padding: 0 0 34px;
+  overflow: hidden;
+  transform: translateY(100%);
+  transition: transform 0.35s cubic-bezier(0.25, 0.8, 0.25, 1);
+  box-shadow: 0 -12px 60px rgba(0,0,0,0.6);
+}
+.order-overlay.show .order-card { transform: translateY(0); }
+
+/* Таймер-прогресс */
+.order-timer-bar {
+  height: 4px;
+  background: var(--border);
+  position: relative; overflow: hidden;
+}
+.order-timer-fill {
+  height: 100%;
+  background: var(--accent);
+  width: 100%;
+  transform-origin: left;
+  transition: none;
+}
+.order-timer-fill.ticking {
+  animation: timerShrink linear forwards;
+}
+
+.order-card-body { padding: 20px 20px 0; }
+.order-header-row {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 18px;
+}
+.order-label {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 16px; font-weight: 700; flex: 1;
+}
+.order-timer-text {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 22px; font-weight: 700; color: var(--accent);
+  min-width: 36px; text-align: right;
+}
+.order-timer-text.urgent { color: var(--red); animation: pulse 0.5s ease-in-out infinite; }
+
+.order-price-row {
+  display: flex; align-items: center; gap: 10px; margin-bottom: 16px;
+}
+.order-price {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 28px; font-weight: 700; color: var(--accent);
+}
+.order-pay-badge {
+  font-size: 12px; font-weight: 600;
+  background: var(--card); border-radius: 8px;
+  padding: 4px 10px; color: var(--muted);
+}
+.order-class-badge {
+  font-size: 12px; font-weight: 600;
+  background: var(--accent-dim); border-radius: 8px;
+  padding: 4px 10px; color: var(--accent);
+  margin-left: auto;
+}
+
+.order-route {
+  background: var(--card);
+  border-radius: 16px; padding: 14px 16px;
+  margin-bottom: 12px;
+}
+.order-route-row {
+  display: flex; align-items: flex-start; gap: 10px; padding: 4px 0;
+}
+.order-route-row + .order-route-row {
+  border-top: 1px solid var(--border);
+  margin-top: 6px; padding-top: 10px;
+}
+.order-route-dot {
+  width: 10px; height: 10px; border-radius: 50%;
+  flex-shrink: 0; margin-top: 4px;
+}
+.order-route-dot.from { background: var(--accent); }
+.order-route-dot.to   { background: var(--green); }
+.order-route-info {}
+.order-route-label { font-size: 11px; color: var(--muted); margin-bottom: 2px; }
+.order-route-addr  { font-size: 14px; line-height: 1.4; }
+
+.order-meta-row {
+  display: flex; gap: 8px; margin-bottom: 18px;
+}
+.order-meta-chip {
+  display: flex; align-items: center; gap: 5px;
+  background: var(--card); border-radius: 10px;
+  padding: 7px 12px; font-size: 12px; color: var(--muted);
+}
+.order-meta-chip i { font-size: 11px; }
+
+.order-btns {
+  padding: 0 20px;
+  display: flex; gap: 10px;
+}
+.order-accept-btn {
+  flex: 2;
+  background: var(--green); color: #0a1a0a;
+  font-size: 16px; font-weight: 700;
+  border-radius: 16px; padding: 17px;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  box-shadow: 0 6px 24px rgba(52,199,89,0.35);
+  transition: opacity 0.2s, transform 0.1s;
+}
+.order-accept-btn:active { transform: scale(0.97); }
+.order-decline-btn {
+  flex: 1;
+  background: var(--card); color: var(--muted);
+  font-size: 15px; font-weight: 600;
+  border-radius: 16px; padding: 17px;
+  border: 1px solid var(--border);
+  transition: background 0.2s;
+}
+.order-decline-btn:hover { background: var(--card2); color: var(--text); }
+
+/* ═══════════════════════════════════════════════
+   MENU DRAWER
+═══════════════════════════════════════════════ */
+.menu-overlay {
+  position: fixed; inset: 0; z-index: 150;
+  background: rgba(0,0,0,0.6); backdrop-filter: blur(3px);
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.25s;
+}
+.menu-overlay.open { opacity: 1; pointer-events: auto; }
+.menu-drawer {
+  position: absolute; top: 0; left: 0; bottom: 0;
+  width: min(320px, 85vw);
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  transform: translateX(-100%);
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  display: flex; flex-direction: column;
+  overflow-y: auto;
+}
+.menu-overlay.open .menu-drawer { transform: translateX(0); }
+
+.menu-header {
+  padding: 56px 24px 24px;
+  border-bottom: 1px solid var(--border);
+}
+.menu-avatar {
+  width: 64px; height: 64px; border-radius: 50%;
+  background: var(--accent-dim);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Unbounded', sans-serif;
+  font-size: 24px; font-weight: 700; color: var(--accent);
+  margin-bottom: 14px;
+}
+.menu-name { font-size: 18px; font-weight: 700; margin-bottom: 3px; }
+.menu-phone { font-size: 14px; color: var(--muted); margin-bottom: 12px; }
+.menu-driver-status {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 600;
+  border-radius: 99px; padding: 4px 12px;
+}
+.menu-driver-status.approved { background: var(--green-dim); color: var(--green); }
+.menu-driver-status.pending  { background: var(--accent-dim); color: var(--accent); }
+
+.menu-stats {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 10px; padding: 20px 24px;
+  border-bottom: 1px solid var(--border);
+}
+.menu-stat { background: var(--card); border-radius: 14px; padding: 14px; }
+.menu-stat-val {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 20px; font-weight: 700;
+  color: var(--accent); margin-bottom: 4px;
+}
+.menu-stat-label { font-size: 11px; color: var(--muted); }
+
+.menu-items { flex: 1; padding: 12px; }
+.menu-item {
+  display: flex; align-items: center; gap: 14px;
+  padding: 13px 14px; border-radius: 12px;
+  font-size: 15px; font-weight: 500;
+  color: var(--text); cursor: pointer;
+  transition: background 0.15s;
+  margin-bottom: 2px;
+}
+.menu-item:hover { background: var(--card); }
+.menu-item i { width: 20px; text-align: center; color: var(--muted); font-size: 16px; }
+.menu-item.red { color: var(--red); }
+.menu-item.red i { color: var(--red); }
+
+.menu-footer {
+  padding: 16px 24px 34px;
+  border-top: 1px solid var(--border);
+}
+.menu-version { font-size: 11px; color: var(--muted); text-align: center; }
+
+/* ═══════════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════════ */
+#toast {
+  position: fixed; top: 72px; left: 50%;
+  transform: translateX(-50%) translateY(-20px);
+  background: var(--card2);
+  border: 1px solid var(--border);
+  color: var(--text); font-size: 14px; font-weight: 500;
+  padding: 11px 18px; border-radius: 12px;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.25s, transform 0.25s;
+  z-index: 300; white-space: nowrap;
+  display: flex; align-items: center; gap: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+#toast.success i { color: var(--green); }
+#toast.error   i { color: var(--red); }
+#toast.info    i { color: var(--accent); }
+
+/* ═══════════════════════════════════════════════
+   HISTORY PAGE
+═══════════════════════════════════════════════ */
+.history-screen {
+  position: fixed; inset: 0; z-index: 100;
+  background: var(--bg);
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.25,0.8,0.25,1);
+  overflow-y: auto;
+}
+.history-screen.open { transform: translateX(0); }
+.history-topbar {
+  position: sticky; top: 0; z-index: 1;
+  background: var(--bg);
+  padding: 16px 20px 12px;
+  display: flex; align-items: center; gap: 14px;
+  border-bottom: 1px solid var(--border);
+}
+.history-back {
+  width: 40px; height: 40px; border-radius: 50%;
+  background: var(--card);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; flex-shrink: 0;
+}
+.history-title {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 17px; font-weight: 700;
+}
+.history-list { padding: 16px 20px 40px; }
+.history-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px;
+  margin-bottom: 10px; animation: fadeIn 0.3s ease both;
+}
+.history-item-top {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 10px;
+}
+.history-item-price {
+  font-family: 'Unbounded', sans-serif;
+  font-size: 18px; font-weight: 700; color: var(--accent);
+}
+.history-item-date { font-size: 12px; color: var(--muted); }
+.history-item-addr { font-size: 13px; color: var(--muted); margin-top: 4px; }
+.history-empty { text-align: center; padding: 80px 24px; color: var(--muted); }
+.history-empty i { font-size: 48px; opacity: 0.2; display: block; margin-bottom: 16px; }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     КАРТА
+══════════════════════════════════════════════ -->
+<div id="driverMap"></div>
+
+<!-- ═══════════════════════════════════════════
+     ТОПБАР
+══════════════════════════════════════════════ -->
+<div class="topbar" id="topbar">
+  <button class="tb-btn" onclick="openMenu()">
+    <i class="fas fa-bars"></i>
+  </button>
+  <div class="tb-status-pill">
+    <div class="tb-dot" id="statusDot"></div>
+    <span id="statusText">Оффлайн</span>
+  </div>
+  <button class="tb-btn" onclick="centerOnMe()" id="geoBtn">
+    <i class="fas fa-crosshairs"></i>
+  </button>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     НИЖНЯЯ ПАНЕЛЬ
+══════════════════════════════════════════════ -->
+<div class="bottom-panel" id="bottomPanel">
+  <div class="panel-handle"></div>
+
+  <!-- ОФФЛАЙН -->
+  <div id="panelOffline" class="offline-panel">
+    <div class="offline-greeting">Добро пожаловать,</div>
+    <div class="offline-name" id="driverName">Водитель</div>
+    <button class="online-btn" onclick="goOnline()">
+      <i class="fas fa-power-off"></i>
+      Выйти на линию
+    </button>
+    <div class="stats-row">
+      <div class="stat-mini">
+        <div class="stat-mini-val green" id="statEarningsToday">0 ₸</div>
+        <div class="stat-mini-label">Сегодня</div>
+      </div>
+      <div class="stat-mini">
+        <div class="stat-mini-val yellow" id="statTripsToday">0</div>
+        <div class="stat-mini-label">Поездок</div>
+      </div>
+      <div class="stat-mini">
+        <div class="stat-mini-val" id="statRating">—</div>
+        <div class="stat-mini-label">Рейтинг</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ОНЛАЙН — ОЖИДАНИЕ -->
+  <div id="panelOnline" class="online-panel hidden">
+    <div class="waiting-anim">
+      <div class="waiting-dots">
+        <div class="w-dot"></div>
+        <div class="w-dot"></div>
+        <div class="w-dot"></div>
+      </div>
+      <div>
+        <div class="waiting-text">Ищем заказы...</div>
+        <div class="waiting-sub">Вы онлайн — заказы придут автоматически</div>
+      </div>
+    </div>
+    <button class="offline-btn" onclick="goOffline()">
+      <i class="fas fa-power-off"></i> Уйти с линии
+    </button>
+  </div>
+
+  <!-- АКТИВНАЯ ПОЕЗДКА -->
+  <div id="panelTrip" class="trip-panel hidden">
+    <!-- Клиент -->
+    <div class="trip-client-row">
+      <div class="trip-avatar" id="tripAvatar">?</div>
+      <div>
+        <div class="trip-client-name" id="tripClientName">—</div>
+        <div class="trip-client-phone" id="tripClientPhone">—</div>
+      </div>
+      <a class="trip-call-btn" id="tripCallBtn" href="#">
+        <i class="fas fa-phone"></i>
+      </a>
+    </div>
+    <!-- Маршрут -->
+    <div class="trip-route">
+      <div class="trip-route-row">
+        <div class="route-dot from"></div>
+        <div>
+          <div class="route-label">Откуда</div>
+          <div class="route-addr" id="tripFrom">—</div>
+        </div>
+      </div>
+      <div class="trip-route-row">
+        <div class="route-dot to"></div>
+        <div>
+          <div class="route-label">Куда</div>
+          <div class="route-addr" id="tripTo">—</div>
+        </div>
+      </div>
+    </div>
+    <!-- Цена -->
+    <div class="trip-price-row">
+      <div class="trip-price" id="tripPrice">0 ₸</div>
+      <div class="trip-pay-type" id="tripPayType">Наличные</div>
+      <div class="trip-distance" id="tripDist"></div>
+    </div>
+    <!-- Кнопка действия -->
+    <button class="trip-action-btn btn-arrive" id="tripActionBtn" onclick="tripAction()">
+      <i class="fas fa-map-marker-alt"></i> Я на месте
+    </button>
+    <button class="btn-cancel-trip" onclick="confirmCancelTrip()">Отменить поездку</button>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════
+     КАРТОЧКА ВХОДЯЩЕГО ЗАКАЗА
+══════════════════════════════════════════════ -->
+<div class="order-overlay" id="orderOverlay">
+  <div class="order-card" onclick="event.stopPropagation()">
+    <!-- Таймер-полоска -->
+    <div class="order-timer-bar">
+      <div class="order-timer-fill" id="orderTimerFill"></div>
+    </div>
+    <div class="order-card-body">
+      <!-- Заголовок -->
+      <div class="order-header-row">
+        <div class="order-label">Новый заказ</div>
+        <div class="order-timer-text" id="orderTimerText">25</div>
+      </div>
+      <!-- Цена -->
+      <div class="order-price-row">
+        <div class="order-price" id="orderPrice">0 ₸</div>
+        <div class="order-pay-badge" id="orderPayBadge">Наличные</div>
+        <div class="order-class-badge" id="orderClassBadge">Комфорт</div>
+      </div>
+      <!-- Маршрут -->
+      <div class="order-route">
+        <div class="order-route-row">
+          <div class="order-route-dot from"></div>
+          <div class="order-route-info">
+            <div class="order-route-label">Откуда забрать</div>
+            <div class="order-route-addr" id="orderFrom">—</div>
+          </div>
+        </div>
+        <div class="order-route-row">
+          <div class="order-route-dot to"></div>
+          <div class="order-route-info">
+            <div class="order-route-label">Куда везти</div>
+            <div class="order-route-addr" id="orderTo">—</div>
+          </div>
+        </div>
+      </div>
+      <!-- Мета -->
+      <div class="order-meta-row">
+        <div class="order-meta-chip" id="orderDist">
+          <i class="fas fa-road"></i> — км
+        </div>
+        <div class="order-meta-chip" id="orderClient">
+          <i class="fas fa-user"></i> —
+        </div>
+      </div>
+    </div>
+    <!-- Кнопки -->
+    <div class="order-btns">
+      <button class="order-accept-btn" onclick="acceptOrder()">
+        <i class="fas fa-check"></i> Принять
+      </button>
+      <button class="order-decline-btn" onclick="declineOrder()">
+        Пропустить
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     МЕНЮ
+══════════════════════════════════════════════ -->
+<div class="menu-overlay" id="menuOverlay" onclick="closeMenu()">
+  <div class="menu-drawer" onclick="event.stopPropagation()">
+    <div class="menu-header">
+      <div class="menu-avatar" id="menuAvatar">?</div>
+      <div class="menu-name" id="menuName">Водитель</div>
+      <div class="menu-phone" id="menuPhone">—</div>
+      <div class="menu-driver-status approved">
+        <i class="fas fa-check-circle"></i>
+        Одобрен
+      </div>
+    </div>
+    <div class="menu-stats">
+      <div class="menu-stat">
+        <div class="menu-stat-val" id="menuEarnings">0 ₸</div>
+        <div class="menu-stat-label">Заработок сегодня</div>
+      </div>
+      <div class="menu-stat">
+        <div class="menu-stat-val" id="menuTrips">0</div>
+        <div class="menu-stat-label">Поездок всего</div>
+      </div>
+    </div>
+    <div class="menu-items">
+      <div class="menu-item" onclick="openHistory(); closeMenu();">
+        <i class="fas fa-clock"></i> История поездок
+      </div>
+      <div class="menu-item" onclick="closeMenu()">
+        <i class="fas fa-car"></i> Мой автомобиль
+      </div>
+      <div class="menu-item" onclick="closeMenu()">
+        <i class="fas fa-headset"></i> Поддержка
+      </div>
+      <div class="menu-item red" onclick="driverLogout()">
+        <i class="fas fa-sign-out-alt"></i> Выйти
+      </div>
+    </div>
+    <div class="menu-footer">
+      <div class="menu-version">Timofeyev Driver v1.0</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     ИСТОРИЯ ПОЕЗДОК
+══════════════════════════════════════════════ -->
+<div class="history-screen" id="historyScreen">
+  <div class="history-topbar">
+    <button class="history-back" onclick="closeHistory()">
+      <i class="fas fa-arrow-left"></i>
+    </button>
+    <div class="history-title">История поездок</div>
+  </div>
+  <div class="history-list" id="historyList">
+    <div class="history-empty">
+      <i class="fas fa-route"></i>
+      <p>Поездок пока нет</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     ЭКРАН ВХОДА
+══════════════════════════════════════════════ -->
+<div id="loginScreen">
+  <div class="login-sheet">
+    <div class="login-handle"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+      <div class="login-logo">Timofeyev <span>Водитель</span></div>
+      <button onclick="clearAllAndGoHome()" style="display:flex;align-items:center;gap:5px;font-size:13px;color:rgba(255,255,255,0.45);padding:6px 12px;background:rgba(255,255,255,0.07);border-radius:10px;border:none;cursor:pointer;">
+        <i class="fas fa-arrow-left"></i> На главную
+      </button>
+    </div>
+    <div class="login-tagline">Войдите чтобы начать принимать заказы</div>
+
+    <div id="loginError" class="login-error hidden"></div>
+
+    <!-- ШАГ 1: Телефон -->
+    <div id="step1">
+      <div class="login-label">Ваш номер телефона</div>
+      <div class="login-input-wrap">
+        <span class="login-prefix">+7</span>
+        <input type="tel" id="phoneInput" class="login-input with-prefix"
+          placeholder="(700) 000-00-00" maxlength="15"
+          oninput="fmtPhone(this)"
+          onkeydown="if(event.key==='Enter') sendOtp()">
+      </div>
+      <button class="login-btn" id="sendBtn" onclick="sendOtp()">Получить код</button>
+    </div>
+
+    <!-- ШАГ 2: OTP -->
+    <div id="step2" class="hidden">
+      <button class="login-back" onclick="goBack()">
+        <i class="fas fa-arrow-left"></i> Назад
+      </button>
+      <div class="login-label">Код из SMS</div>
+      <div class="otp-row">
+        <input type="text" inputmode="numeric" class="otp-digit" id="d0" maxlength="1"
+          oninput="otpIn(this,0)" onkeydown="otpKey(this,0,event)">
+        <input type="text" inputmode="numeric" class="otp-digit" id="d1" maxlength="1"
+          oninput="otpIn(this,1)" onkeydown="otpKey(this,1,event)">
+        <input type="text" inputmode="numeric" class="otp-digit" id="d2" maxlength="1"
+          oninput="otpIn(this,2)" onkeydown="otpKey(this,2,event)">
+        <input type="text" inputmode="numeric" class="otp-digit" id="d3" maxlength="1"
+          oninput="otpIn(this,3)" onkeydown="otpKey(this,3,event)">
+        <input type="text" inputmode="numeric" class="otp-digit" id="d4" maxlength="1"
+          oninput="otpIn(this,4)" onkeydown="otpKey(this,4,event)">
+        <input type="text" inputmode="numeric" class="otp-digit" id="d5" maxlength="1"
+          oninput="otpIn(this,5)" onkeydown="otpKey(this,5,event)">
+      </div>
+      <button class="login-btn" id="verifyBtn" onclick="verifyOtp()">Войти</button>
+      <button class="login-resend" id="resendBtn" disabled onclick="resendOtp()">
+        Отправить ещё раз через <span id="resendCount">60</span> сек
+      </button>
+      <div class="login-hint">Код отправлен на <span id="phoneShow"></span></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"><i class="fas fa-check" id="toastIcon"></i><span id="toastMsg"></span></div>
+
+<script src="https://api-maps.yandex.ru/2.1/?apikey=69c18fe9-15b1-4391-b4e7-2a005a4fb22d&lang=ru_RU"></script>
+<script>
+/* ═══════════════════════════════════════════════════════════
+   CONFIG
+═══════════════════════════════════════════════════════════ */
+const API        = 'https://calc.timofeev.kz/api';
+const POLL_INTERVAL = 5000;   // мс — опрос заказов
+const ORDER_TTL     = 25;     // секунд на принятие заказа
+
+/* ═══════════════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════════════ */
+let driverUser    = null;
+let driverProfile = null;
+let isOnline      = false;
+let activeOrder   = null;      // текущая активная поездка
+let pendingOrder  = null;      // входящий заказ (ожидает принятия)
+let pollTimer     = null;
+let orderTimer    = null;
+let orderTimerSec = 0;
+let geoWatcher    = null;
+let map           = null;
+let myMarker      = null;
+let routeObj      = null;
+let loginPhone    = '';
+let resendTimer   = null;
+
+// Статистика (сессия)
+let earningsToday = 0;
+let tripsToday    = 0;
+
+/* ═══════════════════════════════════════════════════════════
+   HTTP
+═══════════════════════════════════════════════════════════ */
+async function api(method, ep, data) {
+  const opts = { method, headers: { 'Content-Type': 'application/json' } };
+  const tok  = localStorage.getItem('driver_token');
+  if (tok)  opts.headers['Authorization'] = `Bearer ${tok}`;
+  if (data) opts.body = JSON.stringify(data);
+  const res  = await fetch(`${API}/${ep}`, opts);
+  const json = await res.json();
+  if (!json.success) throw { status: res.status, message: json.message };
+  return json.data;
+}
+const GET   = ep      => api('GET', ep);
+const POST  = (ep, d) => api('POST', ep, d);
+const PATCH = (ep, d) => api('PATCH', ep, d);
+
+/* ═══════════════════════════════════════════════════════════
+   BOOT
+═══════════════════════════════════════════════════════════ */
+ymaps.ready(function() {
+  initMap();
+  (async function boot() {
+    const tok = localStorage.getItem('driver_token');
+    if (!tok) return;
+    try {
+      const me = await GET('auth/me');
+      if (me.role !== 'driver') {
+        localStorage.removeItem('driver_token');
+        return;
+      }
+      driverUser    = me;
+      driverProfile = me.driver;
+      enterApp();
+    } catch(e) {
+      localStorage.removeItem('driver_token');
+    }
+  })();
+});
+
+/* ═══════════════════════════════════════════════════════════
+   MAP
+═══════════════════════════════════════════════════════════ */
+function initMap() {
+  map = new ymaps.Map('driverMap', {
+    center: [43.238949, 76.889709],
+    zoom: 14,
+    controls: []
+  }, {
+    suppressMapOpenBlock: true,
+    openBalloonOnClick: false
+  });
+  map.behaviors.disable('scrollZoom');
+}
+
+function centerOnMe() {
+  if (!navigator.geolocation) return;
+  navigator.geolocation.getCurrentPosition(pos => {
+    const c = [pos.coords.latitude, pos.coords.longitude];
+    map.setCenter(c, 15, { duration: 400 });
+  });
+}
+
+function startGeoTracking() {
+  if (!navigator.geolocation) return;
+  geoWatcher = navigator.geolocation.watchPosition(
+    pos => {
+      const c = [pos.coords.latitude, pos.coords.longitude];
+      updateMyPosition(c);
+      sendLocationToServer(c);
+    },
+    null,
+    { enableHighAccuracy: true, maximumAge: 3000 }
+  );
+}
+
+function stopGeoTracking() {
+  if (geoWatcher !== null) {
+    navigator.geolocation.clearWatch(geoWatcher);
+    geoWatcher = null;
+  }
+}
+
+function updateMyPosition(coords) {
+  if (!myMarker) {
+    const layout = ymaps.templateLayoutFactory.createClass(
+      `<div style="
+        width:18px;height:18px;border-radius:50%;
+        background:#34c759;
+        border:3px solid white;
+        box-shadow:0 2px 8px rgba(0,0,0,0.5);
+      "></div>`
+    );
+    myMarker = new ymaps.Placemark(coords, {}, {
+      iconLayout: layout,
+      iconOffset: [-9, -9]
+    });
+    map.geoObjects.add(myMarker);
+    map.setCenter(coords, 15);
+  } else {
+    myMarker.geometry.setCoordinates(coords);
+  }
+}
+
+async function sendLocationToServer(coords) {
+  try {
+    await PATCH('drivers/location', { lat: coords[0], lng: coords[1] });
+  } catch(e) {}
+}
+
+function showRouteOnMap(fromAddr, toAddr) {
+  clearRoute();
+  const coords = getOrderCoords();
+  if (!coords) return;
+  ymaps.route([coords.from, coords.to], { mapStateAutoApply: false }).then(route => {
+    routeObj = route;
+    route.options.set({
+      routeActiveStrokeWidth: 5,
+      routeActiveStrokeColor: '#ffd84d',
+      routeStrokeWidth: 4,
+      routeStrokeColor: '#ffd84d',
+      pinVisible: false
+    });
+    if (route.getWayPoints) {
+      try { route.getWayPoints().each(p => p.options.set('visible', false)); }
+      catch(e) {}
+    }
+    map.geoObjects.add(route);
+    const bounds = route.getBounds && route.getBounds();
+    if (bounds) map.setBounds(bounds, { checkZoomRange: true, zoomMargin: 60 });
+  }).catch(() => {});
+}
+
+function clearRoute() {
+  if (routeObj) { map.geoObjects.remove(routeObj); routeObj = null; }
+}
+
+// Вспомогательно — в реальности координаты берём из заказа
+function getOrderCoords() {
+  if (!activeOrder) return null;
+  return {
+    from: [parseFloat(activeOrder.from_lat), parseFloat(activeOrder.from_lng)],
+    to:   [parseFloat(activeOrder.to_lat),   parseFloat(activeOrder.to_lng)]
+  };
+}
+
+/* ═══════════════════════════════════════════════════════════
+   LOGIN
+═══════════════════════════════════════════════════════════ */
+function fmtPhone(input) {
+  const d = input.value.replace(/\D/g,'').slice(0,10);
+  let f = '';
+  if (d.length > 0) f = '(' + d.slice(0,3);
+  if (d.length >= 4) f += ') ' + d.slice(3,6);
+  if (d.length >= 7) f += '-' + d.slice(6,8);
+  if (d.length >= 9) f += '-' + d.slice(8,10);
+  input.value = f;
+}
+
+async function sendOtp() {
+  const digits = document.getElementById('phoneInput').value.replace(/\D/g,'');
+  if (digits.length < 10) { showLoginErr('Введите номер телефона'); return; }
+  loginPhone = '+7' + digits.slice(-10);
+  const btn = document.getElementById('sendBtn');
+  btn.disabled = true; btn.textContent = 'Отправка...';
+  clearLoginErr();
+  try {
+    await POST('auth/send-otp', { phone: loginPhone });
+    document.getElementById('phoneShow').textContent = loginPhone;
+    document.getElementById('step1').classList.add('hidden');
+    document.getElementById('step2').classList.remove('hidden');
+    document.getElementById('d0').focus();
+    startResend(60);
+  } catch(e) {
+    showLoginErr(e.message || 'Ошибка отправки');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Получить код';
+  }
+}
+
+function otpIn(el, idx) {
+  el.value = el.value.replace(/\D/,'').slice(-1);
+  if (el.value && idx < 5) document.getElementById('d'+(idx+1)).focus();
+  if (getCode().length === 6) setTimeout(verifyOtp, 80);
+}
+function otpKey(el, idx, e) {
+  if (e.key === 'Backspace' && !el.value && idx > 0) {
+    const p = document.getElementById('d'+(idx-1));
+    p.value = ''; p.focus();
+  }
+}
+function getCode() {
+  let c = '';
+  for (let i=0;i<6;i++) c += (document.getElementById('d'+i).value||'');
+  return c;
+}
+
+async function verifyOtp() {
+  const code = getCode();
+  if (code.length < 6) return;
+  const btn = document.getElementById('verifyBtn');
+  btn.disabled = true; btn.textContent = 'Проверяем...';
+  clearLoginErr();
+  try {
+    const data = await POST('auth/verify-otp', { phone: loginPhone, code });
+    if (data.user.role !== 'driver') {
+      await POST('auth/logout');
+      throw { message: 'Этот номер не зарегистрирован как водитель' };
+    }
+    localStorage.setItem('driver_token', data.token);
+    driverUser    = data.user;
+    driverProfile = data.user.driver;
+    enterApp();
+  } catch(e) {
+    showLoginErr(e.message || 'Неверный код');
+    for (let i=0;i<6;i++) document.getElementById('d'+i).value = '';
+    document.getElementById('d0').focus();
+  } finally {
+    btn.disabled = false; btn.textContent = 'Войти';
+  }
+}
+
+function startResend(sec) {
+  if (resendTimer) clearInterval(resendTimer);
+  const btn = document.getElementById('resendBtn');
+  const cnt = document.getElementById('resendCount');
+  let left = sec;
+  btn.disabled = true;
+  resendTimer = setInterval(() => {
+    left--;
+    cnt.textContent = left;
+    if (left <= 0) {
+      clearInterval(resendTimer); resendTimer = null;
+      btn.disabled = false;
+      btn.textContent = 'Отправить ещё раз';
+    }
+  }, 1000);
+}
+
+async function resendOtp() {
+  try {
+    await POST('auth/send-otp', { phone: loginPhone });
+    startResend(60);
+    for (let i=0;i<6;i++) document.getElementById('d'+i).value = '';
+    document.getElementById('d0').focus();
+  } catch(e) { showLoginErr(e.message || 'Ошибка'); }
+}
+
+function goBack() {
+  if (resendTimer) { clearInterval(resendTimer); resendTimer = null; }
+  document.getElementById('step2').classList.add('hidden');
+  document.getElementById('step1').classList.remove('hidden');
+  clearLoginErr();
+}
+
+function showLoginErr(msg) {
+  const el = document.getElementById('loginError');
+  el.textContent = msg; el.classList.remove('hidden');
+}
+function clearLoginErr() {
+  document.getElementById('loginError').classList.add('hidden');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   APP ENTRY
+═══════════════════════════════════════════════════════════ */
+function enterApp() {
+  // Скрываем логин
+  document.getElementById('loginScreen').classList.add('hidden');
+
+  // Заполняем UI данными водителя
+  const name = driverUser.name || driverUser.phone;
+  document.getElementById('driverName').textContent = name;
+  document.getElementById('menuName').textContent   = name;
+  document.getElementById('menuPhone').textContent  = driverUser.phone;
+  document.getElementById('menuAvatar').textContent = name.charAt(0).toUpperCase();
+
+  // Рейтинг
+  const rating = driverProfile?.rating;
+  document.getElementById('statRating').textContent = rating ? '★ ' + parseFloat(rating).toFixed(1) : '—';
+
+  // Проверяем — нет ли уже активного заказа (водитель перезашёл в середине поездки)
+  checkActiveOrder();
+
+  showToast('Добро пожаловать, ' + name + '!', 'info');
+}
+
+async function checkActiveOrder() {
+  try {
+    const order = await GET('orders/active');
+    if (order) {
+      activeOrder = order;
+      isOnline    = true;
+      // Восстанавливаем статус поездки
+      showTripPanel(order);
+      updateStatusBar(true);
+      startGeoTracking();
+      showRouteOnMap();
+    }
+  } catch(e) {}
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ONLINE / OFFLINE
+═══════════════════════════════════════════════════════════ */
+async function goOnline() {
+  try {
+    await PATCH('drivers/status', { is_online: true });
+    isOnline = true;
+    updateStatusBar(true);
+    showPanel('online');
+    startGeoTracking();
+    startPolling();
+    showToast('Вы на линии — ждём заказы', 'success');
+  } catch(e) {
+    showToast(e.message || 'Ошибка', 'error');
+  }
+}
+
+async function goOffline() {
+  try {
+    await PATCH('drivers/status', { is_online: false });
+  } catch(e) {}
+  isOnline = false;
+  updateStatusBar(false);
+  showPanel('offline');
+  stopGeoTracking();
+  stopPolling();
+  showToast('Вы ушли с линии', 'info');
+}
+
+function updateStatusBar(online) {
+  document.getElementById('statusDot').className  = 'tb-dot' + (online ? ' online' : '');
+  document.getElementById('statusText').textContent = online ? 'На линии' : 'Оффлайн';
+}
+
+function showPanel(which) {
+  document.getElementById('panelOffline').classList.toggle('hidden', which !== 'offline');
+  document.getElementById('panelOnline') .classList.toggle('hidden', which !== 'online');
+  document.getElementById('panelTrip')   .classList.toggle('hidden', which !== 'trip');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   POLLING — опрос новых заказов
+═══════════════════════════════════════════════════════════ */
+function startPolling() {
+  stopPolling();
+  pollTimer = setInterval(pollOrders, POLL_INTERVAL);
+  pollOrders(); // первый раз сразу
+}
+
+function stopPolling() {
+  if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+}
+
+async function pollOrders() {
+  // Не опрашиваем если уже есть активная поездка или входящий заказ
+  if (activeOrder || pendingOrder) return;
+  try {
+    const orders = await GET('drivers/orders');
+    if (orders && orders.length > 0) {
+      showIncomingOrder(orders[0]);
+    }
+  } catch(e) {}
+}
+
+/* ═══════════════════════════════════════════════════════════
+   INCOMING ORDER CARD
+═══════════════════════════════════════════════════════════ */
+function showIncomingOrder(order) {
+  if (pendingOrder) return; // уже показывается карточка
+  pendingOrder = order;
+
+  // Заполняем карточку
+  const classLabels = { comfort:'Комфорт', business:'Бизнес', minivan:'Минивэн', premium:'Премиум' };
+  const payLabels   = { cash:'Наличные', card:'Карта' };
+
+  document.getElementById('orderPrice').textContent    = fmt(order.price) + ' ₸';
+  document.getElementById('orderPayBadge').textContent = payLabels[order.payment_method] || order.payment_method;
+  document.getElementById('orderClassBadge').textContent = classLabels[order.transport_class] || order.transport_class;
+  document.getElementById('orderFrom').textContent     = order.from_address;
+  document.getElementById('orderTo').textContent       = order.to_address;
+  document.getElementById('orderDist').innerHTML       = `<i class="fas fa-road"></i> ${order.distance_km ? parseFloat(order.distance_km).toFixed(1) + ' км' : '—'}`;
+  document.getElementById('orderClient').innerHTML     = `<i class="fas fa-user"></i> ${order.client_name || 'Клиент'}`;
+
+  // Показываем оверлей
+  document.getElementById('orderOverlay').classList.add('show');
+
+  // Запускаем таймер
+  startOrderTimer(ORDER_TTL);
+}
+
+function startOrderTimer(seconds) {
+  orderTimerSec = seconds;
+  const fill = document.getElementById('orderTimerFill');
+  const text = document.getElementById('orderTimerText');
+
+  // Анимируем полоску
+  fill.style.animation = 'none';
+  fill.offsetHeight; // reflow
+  fill.style.animation = `timerShrink ${seconds}s linear forwards`;
+  fill.classList.add('ticking');
+
+  text.textContent = seconds;
+  text.className = 'order-timer-text';
+
+  if (orderTimer) clearInterval(orderTimer);
+  orderTimer = setInterval(() => {
+    orderTimerSec--;
+    text.textContent = orderTimerSec;
+    if (orderTimerSec <= 7) text.className = 'order-timer-text urgent';
+    if (orderTimerSec <= 0) {
+      clearInterval(orderTimer); orderTimer = null;
+      declineOrder();
+    }
+  }, 1000);
+}
+
+async function acceptOrder() {
+  if (!pendingOrder) return;
+  clearInterval(orderTimer); orderTimer = null;
+
+  try {
+    await PATCH(`orders/${pendingOrder.id}`, { status: 'accepted' });
+    activeOrder  = pendingOrder;
+    pendingOrder = null;
+    document.getElementById('orderOverlay').classList.remove('show');
+    stopPolling();
+    showTripPanel(activeOrder);
+    showRouteOnMap();
+    showToast('Заказ принят! Едьте к клиенту', 'success');
+  } catch(e) {
+    showToast(e.message || 'Ошибка принятия заказа', 'error');
+    pendingOrder = null;
+    document.getElementById('orderOverlay').classList.remove('show');
+  }
+}
+
+function declineOrder() {
+  if (orderTimer) { clearInterval(orderTimer); orderTimer = null; }
+  pendingOrder = null;
+  document.getElementById('orderOverlay').classList.remove('show');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TRIP PANEL
+═══════════════════════════════════════════════════════════ */
+const tripStatuses = {
+  accepted:    { btnClass: 'btn-arrive',   btnText: '<i class="fas fa-map-marker-alt"></i> Я на месте',     next: 'arriving'    },
+  arriving:    { btnClass: 'btn-start',    btnText: '<i class="fas fa-play"></i> Начать поездку',           next: 'in_progress' },
+  in_progress: { btnClass: 'btn-complete', btnText: '<i class="fas fa-flag-checkered"></i> Завершить поездку', next: 'completed' },
+};
+
+function showTripPanel(order) {
+  const name = order.client_name || 'Клиент';
+  document.getElementById('tripAvatar').textContent       = name.charAt(0).toUpperCase();
+  document.getElementById('tripClientName').textContent   = name;
+  document.getElementById('tripClientPhone').textContent  = order.client_phone || '—';
+  document.getElementById('tripCallBtn').href             = order.client_phone ? `tel:${order.client_phone}` : '#';
+  document.getElementById('tripFrom').textContent         = order.from_address;
+  document.getElementById('tripTo').textContent           = order.to_address;
+  document.getElementById('tripPrice').textContent        = fmt(order.price) + ' ₸';
+  document.getElementById('tripPayType').textContent      = order.payment_method === 'cash' ? 'Наличные' : 'Карта';
+  document.getElementById('tripDist').textContent         = order.distance_km ? parseFloat(order.distance_km).toFixed(1) + ' км' : '';
+
+  updateTripBtn(order.status);
+  showPanel('trip');
+}
+
+function updateTripBtn(status) {
+  const cfg = tripStatuses[status];
+  if (!cfg) return;
+  const btn = document.getElementById('tripActionBtn');
+  btn.className = 'trip-action-btn ' + cfg.btnClass;
+  btn.innerHTML = cfg.btnText;
+  btn.dataset.nextStatus = cfg.next;
+}
+
+async function tripAction() {
+  if (!activeOrder) return;
+  const btn        = document.getElementById('tripActionBtn');
+  const nextStatus = btn.dataset.nextStatus;
+  if (!nextStatus) return;
+
+  btn.disabled = true;
+  const orig = btn.innerHTML;
+  btn.innerHTML = '<i class="fas fa-circle-notch spin"></i>';
+
+  try {
+    await PATCH(`orders/${activeOrder.id}`, { status: nextStatus });
+    activeOrder.status = nextStatus;
+
+    if (nextStatus === 'completed') {
+      // Поездка завершена
+      earningsToday += parseFloat(activeOrder.price || 0);
+      tripsToday++;
+      updateStats();
+      activeOrder = null;
+      clearRoute();
+      showPanel('online');
+      startPolling();
+      showToast('Поездка завершена! +' + fmt(activeOrder?.price || 0) + ' ₸', 'success');
+    } else {
+      updateTripBtn(nextStatus);
+      const msgs = {
+        arriving:    'Статус обновлён — вы едете к клиенту',
+        in_progress: 'Поездка началась!'
+      };
+      showToast(msgs[nextStatus] || 'Готово', 'success');
+    }
+  } catch(e) {
+    showToast(e.message || 'Ошибка', 'error');
+  } finally {
+    btn.disabled = false;
+    if (activeOrder) btn.innerHTML = orig;
+  }
+}
+
+function confirmCancelTrip() {
+  if (!confirm('Отменить поездку?')) return;
+  cancelTrip();
+}
+
+async function cancelTrip() {
+  if (!activeOrder) return;
+  try {
+    await PATCH(`orders/${activeOrder.id}`, { status: 'cancelled', reason: 'Отменено водителем' });
+  } catch(e) {}
+  activeOrder = null;
+  clearRoute();
+  showPanel('online');
+  startPolling();
+  showToast('Поездка отменена', 'info');
+}
+
+function updateStats() {
+  document.getElementById('statEarningsToday').textContent = fmt(earningsToday) + ' ₸';
+  document.getElementById('statTripsToday').textContent    = tripsToday;
+  document.getElementById('menuEarnings').textContent      = fmt(earningsToday) + ' ₸';
+  document.getElementById('menuTrips').textContent         = tripsToday;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ИСТОРИЯ
+═══════════════════════════════════════════════════════════ */
+async function openHistory() {
+  document.getElementById('historyScreen').classList.add('open');
+  const list = document.getElementById('historyList');
+  list.innerHTML = '<div class="loading-row" style="display:flex;align-items:center;justify-content:center;gap:10px;padding:40px;color:rgba(255,255,255,0.4);"><i class="fas fa-circle-notch spin"></i> Загрузка...</div>';
+  try {
+    const data = await GET('orders?status=completed');
+    const orders = data.orders || [];
+    if (!orders.length) {
+      list.innerHTML = '<div class="history-empty"><i class="fas fa-route"></i><p>Поездок пока нет</p></div>';
+      return;
+    }
+    list.innerHTML = orders.map(o => `
+      <div class="history-item">
+        <div class="history-item-top">
+          <div class="history-item-price">${fmt(o.price)} ₸</div>
+          <div class="history-item-date">${fmtDate(o.created_at)}</div>
+        </div>
+        <div class="history-item-addr">
+          <i class="fas fa-circle" style="color:var(--accent);font-size:8px;"></i>
+          ${o.from_address}
+        </div>
+        <div class="history-item-addr" style="margin-top:4px;">
+          <i class="fas fa-circle" style="color:var(--green);font-size:8px;"></i>
+          ${o.to_address}
+        </div>
+      </div>
+    `).join('');
+  } catch(e) {
+    list.innerHTML = '<div class="history-empty"><i class="fas fa-exclamation-circle"></i><p>Ошибка загрузки</p></div>';
+  }
+}
+
+function closeHistory() {
+  document.getElementById('historyScreen').classList.remove('open');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MENU
+═══════════════════════════════════════════════════════════ */
+function openMenu()  { document.getElementById('menuOverlay').classList.add('open'); }
+function closeMenu() { document.getElementById('menuOverlay').classList.remove('open'); }
+
+function clearAllAndGoHome() {
+  // Чистим все токены чтобы index.html не редиректил обратно
+  localStorage.removeItem('driver_token');
+  localStorage.removeItem('tf_token');
+  localStorage.removeItem('tf_user');
+  window.location.href = 'index.html';
+}
+
+function driverLogout() {
+  try { POST('auth/logout'); } catch(e) {}
+  stopPolling();
+  stopGeoTracking();
+  clearAllAndGoHome();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════════════════════ */
+let _tt = null;
+function showToast(msg, type = 'success') {
+  const el   = document.getElementById('toast');
+  const icon = document.getElementById('toastIcon');
+  const span = document.getElementById('toastMsg');
+  const icons = { success:'fa-check', error:'fa-exclamation-circle', info:'fa-info-circle' };
+  icon.className = 'fas ' + (icons[type] || 'fa-check');
+  el.className   = 'show ' + type;
+  span.textContent = msg;
+  if (_tt) clearTimeout(_tt);
+  _tt = setTimeout(() => el.classList.remove('show'), 3200);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════════════════════════ */
+function fmt(n) {
+  return (+n || 0).toLocaleString('ru-RU');
+}
+function fmtDate(str) {
+  if (!str) return '';
+  return new Date(str).toLocaleDateString('ru-RU', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+}
+</script>
+</body>
+</html>

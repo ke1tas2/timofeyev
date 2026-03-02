@@ -13,6 +13,31 @@ window.closeAuthScreen = function() {
 };
 
 // Version: 3.1.0 - New point B selection mode: drag map, confirm location
+// ── Редирект по роли при загрузке страницы ───────────────────
+(function() {
+    document.addEventListener('DOMContentLoaded', async function() {
+        if (typeof TF === 'undefined' || !TF.auth.isLoggedIn()) return;
+        try {
+            var me = await TF.auth.me();
+            if (!me) return;
+            localStorage.setItem('tf_user', JSON.stringify(me));
+            if (me.role === 'admin') {
+                window.location.href = 'admin.html';
+                return;
+            }
+            if (me.role === 'driver' && me.driver && me.driver.status === 'approved') {
+                window.location.href = 'driver.html';
+                return;
+            }
+        } catch(e) {
+            if (e && (e.status === 401 || e.status === 403)) {
+                localStorage.removeItem('tf_token');
+                localStorage.removeItem('tf_user');
+            }
+        }
+    });
+})();
+
 document.addEventListener('DOMContentLoaded', function() {
             const allRecords = document.getElementById('allrecords');
             if (allRecords) {
@@ -1898,170 +1923,415 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
 
-        function orderTaxi() {
+        // ─── Маппинг тарифов: id → порядковый номер в БД ──────────────────
+        const TARIFF_ID_MAP = {
+            'sedan':     1,
+            'suv':       2,
+            'sport':     3,
+            'limousine': 4,
+            'bus':       5,
+            'minibus':   6,
+            'helicopter':7,
+            'jet':       8,
+        };
+
+        async function orderTaxi() {
             const from = document.getElementById('fromInput').value;
-            const to = document.getElementById('toInput').value;
-            const price = document.getElementById('priceAmount').textContent;
-            const phoneNumber = document.getElementById('phoneInput').value;
+            const to   = document.getElementById('toInput').value;
+            const rawPrice = document.getElementById('priceAmount').textContent;
 
             if (!from || !to) {
-                alert('Пожалуйста, укажите точки отправления и назначения');
+                showOrderError('Пожалуйста, укажите точки отправления и назначения');
+                return;
+            }
+            if (rawPrice === '—') {
+                showOrderError('Пожалуйста, дождитесь расчёта стоимости');
                 return;
             }
 
-            if (price === '—') {
-                alert('Пожалуйста, дождитесь расчета стоимости');
+            // Требуем авторизацию
+            if (!TF.auth.isLoggedIn()) {
+                openAuthScreen();
                 return;
             }
 
-            const phoneDigits = phoneNumber.replace(/\D/g, '');
-            if (phoneDigits.length !== 11) {
-                alert('Пожалуйста, введите корректный номер телефона');
-                document.getElementById('phoneInput').focus();
-                return;
-            }
-
-            const fromCoordsStr = fromCoords ? `${fromCoords[0]}, ${fromCoords[1]}` : from;
-            const toCoordsStr = toCoords ? `${toCoords[0]}, ${toCoords[1]}` : to;
-
-            const averageCoords = '';
+            const btn = document.getElementById('orderButton');
+            btn.disabled = true;
+            document.getElementById('orderButtonText').textContent = 'Создаём заказ…';
 
             const tariff = tariffs.find(t => t.id === selectedTariff);
-            const transportType = tariff ? tariff.name : 'Седан';
+            const tariffDbId = TARIFF_ID_MAP[selectedTariff] || 1;
             const transportClass = selectedTransportClass || 'comfort';
+            const priceNum = parseInt(rawPrice.replace(/\D/g, ''), 10) || 0;
 
             const options = [];
-            if (document.getElementById('animalOption') && document.getElementById('animalOption').checked)
-                options.push('Перевозка животного');
-            if (document.getElementById('skiOption') && document.getElementById('skiOption').checked)
-                options.push('Лыжи/сноуборд');
-            if (document.getElementById('wheelchairOption') && document.getElementById('wheelchairOption').checked)
-                options.push('Инвалидное кресло');
-            if (document.getElementById('childSeatOption') && document.getElementById('childSeatOption').checked)
-                options.push('Детское кресло');
-            if (document.getElementById('findCarOption') && document.getElementById('findCarOption').checked)
-                options.push('Помогите найти машину');
-            if (document.getElementById('textOnlyOption') && document.getElementById('textOnlyOption').checked)
-                options.push('Общаюсь только текстом');
-            if (document.getElementById('dontSpeakOption') && document.getElementById('dontSpeakOption').checked)
-                options.push('Не говорю, но слышу');
-            if (document.getElementById('allowOrderRidesOption') && document.getElementById('allowOrderRidesOption').checked)
-                options.push('Разрешить поездки по заказу');
-            if (document.getElementById('bicycleOption') && document.getElementById('bicycleOption').checked)
-                options.push('Велосипед');
+            ['animalOption','skiOption','wheelchairOption','childSeatOption',
+             'findCarOption','textOnlyOption','dontSpeakOption','bicycleOption'].forEach(id => {
+                const el = document.getElementById(id);
+                const labels = {
+                    animalOption:'Перевозка животного', skiOption:'Лыжи/сноуборд',
+                    wheelchairOption:'Инвалидное кресло', childSeatOption:'Детское кресло',
+                    findCarOption:'Помогите найти машину', textOnlyOption:'Общаюсь только текстом',
+                    dontSpeakOption:'Не говорю, но слышу', bicycleOption:'Велосипед',
+                };
+                if (el && el.checked) options.push(labels[id]);
+            });
 
-            const comment = options.length > 0 ? options.join(', ') : '';
+            const orderPayload = {
+                tariff_id:       tariffDbId,
+                transport_class: transportClass,
+                from_address:    from,
+                from_lat:        fromCoords ? fromCoords[0] : 0,
+                from_lng:        fromCoords ? fromCoords[1] : 0,
+                to_address:      to,
+                to_lat:          toCoords ? toCoords[0] : 0,
+                to_lng:          toCoords ? toCoords[1] : 0,
+                distance_km:     window._lastDistanceKm || null,
+                duration_min:    window._lastDurationMin || null,
+                price:           priceNum,
+                payment_method:  currentPayment || 'cash',
+                options:         options,
+                comment:         options.join(', '),
+            };
 
-            submitToTildaForm({
-                from: fromCoordsStr,
-                average: averageCoords,
-                to: toCoordsStr,
-                name: transportType,
-                class: transportClass,
-                price: price.replace(/\s/g, '') + ' ₸',
-                comment: comment,
-                number: phoneNumber
+            try {
+                const result = await TF.orders.create(orderPayload);
+                btn.disabled = false;
+                document.getElementById('orderButtonText').textContent = 'Заказать трансфер';
+                openOrderTracking(result.order_id, {
+                    from, to, tariff: tariff ? tariff.name : 'Трансфер',
+                    price: rawPrice, transportClass, payment: currentPayment || 'cash'
+                });
+            } catch (err) {
+                btn.disabled = false;
+                document.getElementById('orderButtonText').textContent = 'Заказать трансфер';
+                showOrderError(err.message || 'Не удалось создать заказ. Попробуйте ещё раз.');
+            }
+        }
+
+        function showOrderError(msg) {
+            let box = document.getElementById('orderErrorBox');
+            if (!box) {
+                box = document.createElement('div');
+                box.id = 'orderErrorBox';
+                box.style.cssText = 'background:#ff4444;color:#fff;padding:10px 16px;border-radius:12px;font-size:13px;margin:8px 0;text-align:center;';
+                const section = document.querySelector('.order-section');
+                if (section) section.insertAdjacentElement('beforebegin', box);
+            }
+            box.textContent = msg;
+            box.style.display = 'block';
+            setTimeout(() => { box.style.display = 'none'; }, 4000);
+        }
+
+        // ══════════════════════════════════════════════════════════════════
+        // ЭКРАН ОТСЛЕЖИВАНИЯ ЗАКАЗА
+        // ══════════════════════════════════════════════════════════════════
+        let _trackingInterval  = null;
+        let _trackingOrderId   = null;
+        let _trackingMap       = null;
+        let _driverPlacemark   = null;
+
+        const ORDER_STATUS_LABELS = {
+            pending:     { text: 'Ищем водителя…',       icon: 'fa-circle-notch fa-spin', color: '#ffd84d' },
+            accepted:    { text: 'Водитель едет к вам',  icon: 'fa-car',                  color: '#34c759' },
+            arriving:    { text: 'Водитель на месте',     icon: 'fa-map-marker-alt',        color: '#34c759' },
+            in_progress: { text: 'Поездка началась',      icon: 'fa-route',                 color: '#007aff' },
+            completed:   { text: 'Поездка завершена',     icon: 'fa-check-circle',          color: '#34c759' },
+            cancelled:   { text: 'Заказ отменён',         icon: 'fa-times-circle',          color: '#ff4444' },
+        };
+
+        function openOrderTracking(orderId, info) {
+            _trackingOrderId = orderId;
+
+            let overlay = document.getElementById('orderTrackingOverlay');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.id = 'orderTrackingOverlay';
+                overlay.innerHTML = `
+                <style>
+                #orderTrackingOverlay{position:fixed;inset:0;z-index:9000;background:#141414;display:flex;flex-direction:column;animation:fadeInTrack .3s ease}
+                @keyframes fadeInTrack{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:none}}
+                .otr-header{display:flex;align-items:center;gap:12px;padding:16px 20px;border-bottom:1px solid rgba(255,255,255,.07);flex-shrink:0}
+                .otr-back{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.07);border:none;cursor:pointer;color:#f0f0f0;font-size:16px;display:flex;align-items:center;justify-content:center}
+                .otr-title{font-size:17px;font-weight:600;color:#f0f0f0;font-family:'Unbounded',sans-serif}
+                #otrMapWrap{width:100%;height:220px;background:#1a1a1a;flex-shrink:0;position:relative;overflow:hidden;transition:height .4s ease}
+                #otrMapWrap.hidden{height:0}
+                #otrMapEl{width:100%;height:100%}
+                .otr-eta-badge{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);background:rgba(20,20,20,.92);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.12);border-radius:20px;padding:7px 18px;font-size:13px;font-weight:600;color:#fff;white-space:nowrap;pointer-events:none}
+                .otr-status-strip{display:flex;align-items:center;gap:14px;padding:16px 20px;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0}
+                .otr-status-icon{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;transition:all .4s}
+                .otr-status-text{font-size:16px;font-weight:700;color:#f0f0f0}
+                .otr-status-sub{font-size:12px;color:rgba(255,255,255,.4);margin-top:2px}
+                .otr-order-num{font-size:12px;color:rgba(255,255,255,.3)}
+                .otr-body{flex:1;overflow-y:auto;padding:16px 20px 8px}
+                .otr-card{background:#1e1e1e;border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:16px;margin-bottom:12px}
+                .otr-card-title{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.3);margin-bottom:10px}
+                .otr-route-row{display:flex;gap:12px;align-items:flex-start;margin-bottom:6px}
+                .otr-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:4px}
+                .otr-addr{font-size:13px;color:#f0f0f0;line-height:1.4}
+                .otr-driver-row{display:flex;align-items:center;gap:14px}
+                .otr-avatar{width:48px;height:48px;border-radius:50%;background:#2a2a2a;display:flex;align-items:center;justify-content:center;font-size:20px;color:rgba(255,255,255,.4);flex-shrink:0}
+                .otr-driver-name{font-size:15px;font-weight:600;color:#f0f0f0}
+                .otr-driver-car{font-size:12px;color:rgba(255,255,255,.45);margin-top:2px}
+                .otr-driver-plate{display:inline-block;font-size:11px;color:#aaa;border:1px solid #444;border-radius:5px;padding:1px 7px;margin-top:4px}
+                .otr-driver-phone{margin-left:auto;width:44px;height:44px;border-radius:50%;background:rgba(52,199,89,.12);display:flex;align-items:center;justify-content:center;color:#34c759;font-size:17px;text-decoration:none;flex-shrink:0}
+                .otr-rating{display:flex;gap:4px;margin-top:4px;align-items:center}
+                .otr-star{color:#ffd84d;font-size:12px}
+                .otr-star.empty{color:rgba(255,255,255,.2)}
+                .otr-price-row{display:flex;justify-content:space-between;align-items:center}
+                .otr-price-label{font-size:13px;color:rgba(255,255,255,.45)}
+                .otr-price-val{font-size:20px;font-weight:700;color:#ffd84d}
+                .otr-footer{padding:12px 20px 32px;border-top:1px solid rgba(255,255,255,.07);flex-shrink:0}
+                .otr-cancel-btn{width:100%;padding:15px;background:rgba(255,68,68,.1);border:1px solid rgba(255,68,68,.2);border-radius:14px;color:#ff4444;font-size:15px;font-weight:500;cursor:pointer}
+                .otr-done-btn{width:100%;padding:15px;background:#ffd84d;border:none;border-radius:14px;color:#141414;font-size:15px;font-weight:700;cursor:pointer}
+                .otr-pulse{animation:otrPulse 1.8s ease-in-out infinite}
+                @keyframes otrPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,216,77,.4)}50%{box-shadow:0 0 0 16px rgba(255,216,77,0)}}
+                .otr-rating-section{text-align:center}
+                .otr-rating-title{font-size:15px;font-weight:600;color:#f0f0f0;margin-bottom:14px}
+                .otr-stars-input{display:flex;gap:8px;justify-content:center;margin-bottom:16px}
+                .otr-star-btn{font-size:30px;cursor:pointer;color:rgba(255,255,255,.2);transition:color .15s;background:none;border:none}
+                .otr-star-btn.lit{color:#ffd84d}
+                .otr-rate-btn{padding:13px 32px;background:#ffd84d;border:none;border-radius:14px;color:#141414;font-size:14px;font-weight:700;cursor:pointer}
+                </style>
+                <div class="otr-header">
+                    <button class="otr-back" onclick="closeOrderTracking()"><i class="fas fa-arrow-left"></i></button>
+                    <span class="otr-title">Ваш заказ</span>
+                    <span class="otr-order-num" id="otrOrderNum" style="margin-left:auto"></span>
+                </div>
+                <div id="otrMapWrap" class="hidden"><div id="otrMapEl"></div><div class="otr-eta-badge" id="otrEta" style="display:none"></div></div>
+                <div class="otr-status-strip">
+                    <div class="otr-status-icon" id="otrStatusIcon" style="background:rgba(255,216,77,.15)">
+                        <i class="fas fa-circle-notch fa-spin" style="color:#ffd84d" id="otrStatusIco"></i>
+                    </div>
+                    <div>
+                        <div class="otr-status-text" id="otrStatusText">Загружаем…</div>
+                        <div class="otr-status-sub"  id="otrStatusSub"></div>
+                    </div>
+                </div>
+                <div class="otr-body" id="otrBody"></div>
+                <div class="otr-footer" id="otrFooter"></div>`;
+                document.body.appendChild(overlay);
+            }
+
+            overlay.style.display = 'flex';
+            overlay.style.flexDirection = 'column';
+            document.getElementById('otrOrderNum').textContent = '№' + orderId;
+
+            renderTrackingInfo(orderId, { status:'pending', ...info });
+
+            if (_trackingInterval) clearInterval(_trackingInterval);
+            _trackingInterval = setInterval(() => pollOrderStatus(orderId), 3000);
+            pollOrderStatus(orderId);
+        }
+
+        async function pollOrderStatus(orderId) {
+            try {
+                const order = await TF.orders.active();
+                if (order && order.id == orderId) {
+                    renderTrackingInfo(orderId, order);
+                    if (order.driver_lat && order.driver_lng) updateDriverOnMap(order);
+                    if (['completed','cancelled'].includes(order.status)) {
+                        clearInterval(_trackingInterval); _trackingInterval = null;
+                    }
+                } else if (!order && orderId) {
+                    try {
+                        const full = await TF.orders.get(orderId);
+                        renderTrackingInfo(orderId, full);
+                        clearInterval(_trackingInterval);
+                    } catch {}
+                }
+            } catch (e) { console.warn('Ошибка поллинга:', e); }
+        }
+
+        function renderTrackingInfo(orderId, order) {
+            const body   = document.getElementById('otrBody');
+            const footer = document.getElementById('otrFooter');
+            if (!body) return;
+
+            const st    = ORDER_STATUS_LABELS[order.status] || { text: order.status, icon: 'fa-circle', color: '#ffd84d' };
+            const price = order.price ? Number(order.price).toLocaleString('ru-RU') + ' ₸' : (order.price_val || '—');
+
+            // Обновляем статус-полосу
+            const iconEl  = document.getElementById('otrStatusIco');
+            const textEl  = document.getElementById('otrStatusText');
+            const subEl   = document.getElementById('otrStatusSub');
+            const iconWrap = document.getElementById('otrStatusIcon');
+            if (iconEl)   { iconEl.className = 'fas ' + st.icon; iconEl.style.color = st.color; }
+            if (iconWrap) { iconWrap.style.background = st.color + '22'; }
+            if (textEl)   textEl.textContent = st.text;
+            const subs = {
+                pending:     'Ожидайте — назначаем водителя',
+                accepted:    'Водитель выехал к точке подачи',
+                arriving:    'Выходите — водитель уже ждёт вас',
+                in_progress: 'Хорошей поездки!',
+                completed:   'Надеемся, поездка понравилась',
+                cancelled:   order.cancel_reason || 'Заказ был отменён',
+            };
+            if (subEl) subEl.textContent = subs[order.status] || '';
+
+            // Карта: показываем когда водитель назначен
+            const mapWrap = document.getElementById('otrMapWrap');
+            if (mapWrap) {
+                const showMap = ['accepted','arriving','in_progress'].includes(order.status);
+                if (showMap && mapWrap.classList.contains('hidden')) {
+                    mapWrap.classList.remove('hidden');
+                    setTimeout(() => initTrackingMap(order), 200);
+                } else if (!showMap) {
+                    mapWrap.classList.add('hidden');
+                }
+            }
+
+            // Перерисовываем body только при смене статуса
+            const prevStatus = body.dataset.lastStatus;
+            if (prevStatus === order.status) return;
+            body.dataset.lastStatus = order.status;
+
+            const stars = (r) => [1,2,3,4,5].map(i =>
+                `<i class="fas fa-star otr-star ${i <= Math.round(r||0) ? '' : 'empty'}"></i>`
+            ).join('');
+
+            let driverBlock = '';
+            if (order.driver_name || order.car_make) {
+                const r = parseFloat(order.driver_rating) || 0;
+                driverBlock = `
+                <div class="otr-card">
+                    <div class="otr-card-title">Водитель</div>
+                    <div class="otr-driver-row">
+                        <div class="otr-avatar"><i class="fas fa-user"></i></div>
+                        <div style="flex:1">
+                            <div class="otr-driver-name">${order.driver_name || 'Водитель'}</div>
+                            <div class="otr-driver-car">${[order.car_make,order.car_model,order.car_color].filter(Boolean).join(' ')}</div>
+                            ${order.car_number ? `<div class="otr-driver-plate">${order.car_number}</div>` : ''}
+                            ${r ? `<div class="otr-rating">${stars(r)}<span style="font-size:11px;color:rgba(255,255,255,.35);margin-left:5px">${r.toFixed(1)}</span></div>` : ''}
+                        </div>
+                        ${order.driver_phone ? `<a href="tel:${order.driver_phone}" class="otr-driver-phone"><i class="fas fa-phone"></i></a>` : ''}
+                    </div>
+                </div>`;
+            }
+
+            let ratingSection = '';
+            if (order.status === 'completed') {
+                ratingSection = `
+                <div class="otr-card otr-rating-section">
+                    <div class="otr-rating-title">Оцените поездку</div>
+                    <div class="otr-stars-input" id="otrStarsInput">
+                        ${[1,2,3,4,5].map(i=>`<button class="otr-star-btn" onclick="selectRatingStar(${i})">★</button>`).join('')}
+                    </div>
+                    <button class="otr-rate-btn" onclick="submitOrderRating(${orderId})">Отправить</button>
+                </div>`;
+            }
+
+            body.innerHTML = `
+            <div class="otr-card">
+                <div class="otr-card-title">Маршрут</div>
+                <div class="otr-route-row"><div class="otr-dot" style="background:#34c759"></div><div class="otr-addr">${order.from_address || order.from || '—'}</div></div>
+                <div class="otr-route-row"><div class="otr-dot" style="background:#ffd84d"></div><div class="otr-addr">${order.to_address || order.to || '—'}</div></div>
+            </div>
+            ${driverBlock}
+            <div class="otr-card">
+                <div class="otr-card-title">Детали</div>
+                <div class="otr-price-row"><span class="otr-price-label">Стоимость</span><span class="otr-price-val">${price}</span></div>
+                ${order.payment_method ? `<div style="margin-top:8px;font-size:12px;color:rgba(255,255,255,.35)">Оплата: ${order.payment_method==='cash'?'Наличными':'Картой'}</div>` : ''}
+            </div>
+            ${ratingSection}`;
+
+            if (['completed','cancelled'].includes(order.status)) {
+                footer.innerHTML = `<button class="otr-done-btn" onclick="closeOrderTracking()">Закрыть</button>`;
+            } else if (['pending','accepted'].includes(order.status)) {
+                footer.innerHTML = `<button class="otr-cancel-btn" onclick="cancelActiveOrder(${orderId})">Отменить заказ</button>`;
+            } else {
+                footer.innerHTML = '';
+            }
+        }
+
+        function initTrackingMap(order) {
+            if (_trackingMap) { updateDriverOnMap(order); return; }
+            if (typeof ymaps === 'undefined') return;
+            const lat = parseFloat(order.driver_lat) || parseFloat(order.from_lat) || 43.238;
+            const lng = parseFloat(order.driver_lng) || parseFloat(order.from_lng) || 76.889;
+            ymaps.ready(function() {
+                _trackingMap = new ymaps.Map('otrMapEl', { center:[lat,lng], zoom:14, controls:[] }, { suppressMapOpenBlock:true });
+                if (order.from_lat) {
+                    _trackingMap.geoObjects.add(new ymaps.Placemark(
+                        [parseFloat(order.from_lat), parseFloat(order.from_lng)],
+                        { hintContent:'Точка подачи' }, { preset:'islands#greenDotIcon' }
+                    ));
+                }
+                if (order.driver_lat) {
+                    _driverPlacemark = new ymaps.Placemark(
+                        [parseFloat(order.driver_lat), parseFloat(order.driver_lng)],
+                        { hintContent: order.driver_name || 'Водитель' },
+                        { preset:'islands#carIcon', iconColor:'#ffd84d' }
+                    );
+                    _trackingMap.geoObjects.add(_driverPlacemark);
+                    calcETA([parseFloat(order.driver_lat), parseFloat(order.driver_lng)],
+                            [parseFloat(order.from_lat),   parseFloat(order.from_lng)]);
+                }
             });
         }
 
-        function submitToTildaForm(data) {
-            const tildaFormBlock = document.getElementById('rec1770122941');
-
-            if (!tildaFormBlock) {
-                console.error('❌ Блок формы Tilda не найден (ID: rec1770122941)');
-                console.log('Доступные элементы с rec:', 
-                    Array.from(document.querySelectorAll('[id^="rec"]')).map(el => el.id)
+        function updateDriverOnMap(order) {
+            if (!order.driver_lat) return;
+            const pos = [parseFloat(order.driver_lat), parseFloat(order.driver_lng)];
+            if (_trackingMap && _driverPlacemark) {
+                _driverPlacemark.geometry.setCoordinates(pos);
+                _trackingMap.setCenter(pos, _trackingMap.getZoom(), { duration:600 });
+            } else if (_trackingMap && !_driverPlacemark) {
+                _driverPlacemark = new ymaps.Placemark(pos,
+                    { hintContent: order.driver_name || 'Водитель' },
+                    { preset:'islands#carIcon', iconColor:'#ffd84d' }
                 );
-                alert('Ошибка: форма отправки не найдена. Проверьте ID блока формы в Tilda.');
-                return;
+                _trackingMap.geoObjects.add(_driverPlacemark);
             }
-            
-
-            const form = tildaFormBlock.querySelector('form');
-
-            if (!form) {
-                console.error('❌ Тег <form> не найден внутри блока');
-                alert('Ошибка: элемент формы не найден внутри блока Tilda.');
-                return;
+            if (order.status === 'accepted' && order.from_lat) {
+                calcETA(pos, [parseFloat(order.from_lat), parseFloat(order.from_lng)]);
             }
-            
-
-            function findAndFillField(fieldName, value) {
-                const selectors = [
-                    `input[name="${fieldName}"]`,
-                    `textarea[name="${fieldName}"]`,
-                    `select[name="${fieldName}"]`,
-                    `input[data-name="${fieldName}"]`,
-                    `textarea[data-name="${fieldName}"]`,
-                    `input[placeholder*="${fieldName}"]`,
-                    `#${fieldName}`,
-                    `input.${fieldName}`
-                ];
-                
-                let field = null;
-                
-                for (const selector of selectors) {
-                    field = form.querySelector(selector);
-                    
-                }
-                
-                if (field) {
-                    field.value = value;
-                    
-                    const event = new Event('input', { bubbles: true });
-                    field.dispatchEvent(event);
-                    const changeEvent = new Event('change', { bubbles: true });
-                    field.dispatchEvent(changeEvent);
-                    
-                    console.log(`   Значение установлено: "${value}"`);
-                    return true;
-                } else {
-                    console.warn(`⚠️ Поле "${fieldName}" не найдено. Попробуйте проверить имена полей в Tilda.`);
-                    return false;
-                }
-            }
-
-          
-            findAndFillField('from', data.from);
-            findAndFillField('average', data.average);
-            findAndFillField('to', data.to);
-            findAndFillField('name', data.name);
-            findAndFillField('class', data.class);
-            findAndFillField('price', data.price);
-            findAndFillField('comment', data.comment);
-            findAndFillField('number', data.number);
-            
-          
-            
-            setTimeout(() => {
-                const submitButton = form.querySelector('button[type="submit"]') || 
-                                   form.querySelector('input[type="submit"]') ||
-                                   form.querySelector('.t-submit') ||
-                                   form.querySelector('button.t-submit');
-                
-                if (submitButton) {
-                    console.log('✅ Кнопка отправки найдена:', submitButton);
-                    console.log('Нажимаем на кнопку...');
-                    
-                    submitButton.click();
-                    
-                    console.log('✅ Форма отправлена!');
-                    
-                    
-                } else {
-                    console.warn('⚠️ Кнопка отправки не найдена, пробуем form.submit()');
-                    
-                    try {
-                        form.submit();
-                        console.log('✅ Форма отправлена через submit()');
-                    } catch (error) {
-                        console.error('❌ Ошибка при отправке:', error);
-                        alert('Не удалось отправить форму. Пожалуйста, проверьте настройки формы в Tilda или обратитесь к администратору.');
-                    }
-                }
-            }, 100);
-            
         }
+
+        function calcETA(from, to) {
+            if (typeof ymaps === 'undefined') return;
+            ymaps.route([from, to]).then(function(route) {
+                const ar = route.getActiveRoute && route.getActiveRoute();
+                if (!ar) return;
+                const dur = ar.properties.get('duration');
+                const etaEl = document.getElementById('otrEta');
+                if (etaEl && dur) {
+                    const mins = Math.ceil(dur.value / 60);
+                    etaEl.textContent = mins <= 1 ? 'Водитель рядом' : `Прибудет через ~${mins} мин`;
+                    etaEl.style.display = 'block';
+                }
+            }).catch(()=>{});
+        }
+
+        window._selectedOrderRating = 0;
+        window.selectRatingStar = function(val) {
+            window._selectedOrderRating = val;
+            document.querySelectorAll('#otrStarsInput .otr-star-btn').forEach((b,i) => b.classList.toggle('lit', i < val));
+        };
+        window.submitOrderRating = async function(orderId) {
+            const rating = window._selectedOrderRating;
+            if (!rating) { alert('Выберите оценку'); return; }
+            try {
+                await TF.orders.rate(orderId, rating, '');
+                const sec = document.querySelector('.otr-rating-section');
+                if (sec) sec.innerHTML = '<div style="color:#34c759;text-align:center;padding:12px"><i class="fas fa-check-circle"></i> Спасибо за оценку!</div>';
+            } catch(e) { alert(e.message || 'Ошибка'); }
+        };
+        window.cancelActiveOrder = async function(orderId) {
+            if (!confirm('Отменить заказ?')) return;
+            try {
+                await TF.orders.cancel(orderId, 'Отменён клиентом');
+                if (_trackingInterval) { clearInterval(_trackingInterval); _trackingInterval = null; }
+                pollOrderStatus(orderId);
+            } catch(e) { alert(e.message || 'Не удалось отменить заказ'); }
+        };
+        window.closeOrderTracking = function() {
+            if (_trackingInterval) { clearInterval(_trackingInterval); _trackingInterval = null; }
+            if (_trackingMap) { _trackingMap.destroy(); _trackingMap = null; _driverPlacemark = null; }
+            const overlay = document.getElementById('orderTrackingOverlay');
+            if (overlay) overlay.style.display = 'none';
+        };
+
         function formatPrice(price) {
             return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
         }
@@ -2607,28 +2877,113 @@ document.addEventListener('DOMContentLoaded', function() {
 /* ================================================================
    ЭКРАН «РАБОТА ВОДИТЕЛЕМ»
    ================================================================ */
-window.openDriverScreen = function() {
-    closeHsMenu();
-    // Небольшая задержка чтобы drawer успел закрыться
-    setTimeout(function() {
-        var screen = document.getElementById('driverScreen');
-        if (screen) screen.classList.add('is-open');
-    }, 200);
-};
+
 
 window.closeDriverScreen = function() {
     var screen = document.getElementById('driverScreen');
     if (screen) screen.classList.remove('is-open');
 };
 
-window.openDriverApplication = function() {
-    var overlay = document.getElementById('drvModalOverlay');
-    if (overlay) overlay.classList.add('is-open');
+window.openDriverApplication = async function() {
+    // 1. Проверяем авторизацию
+    if (!TF.auth.isLoggedIn()) {
+        closeDriverScreen();
+        setTimeout(function() { openAuthScreen(); }, 300);
+        return;
+    }
+
+    var user = TF.auth.getUser();
+
+    // 2. Если уже водитель — открываем приложение водителя
+    if (user.role === 'driver') {
+        window.location.href = 'driver.html';
+        return;
+    }
+
+    // 3. Блокируем кнопку
+    var btn = document.querySelector('.drv-cta-btn');
+    if (btn) { btn.disabled = true; btn.querySelector('.drv-cta-main').textContent = 'Отправляем...'; }
+
+    try {
+        // 4. Отправляем заявку на API (данные авто менеджер уточнит по звонку)
+        await TF.drivers.apply({});
+
+        // 5. Показываем успех
+        var overlay = document.getElementById('drvModalOverlay');
+        if (overlay) overlay.classList.add('is-open');
+
+        // 6. Обновляем кнопку — заявка отправлена
+        if (btn) {
+            btn.disabled = true;
+            btn.querySelector('.drv-cta-main').textContent = 'Заявка на рассмотрении';
+            btn.querySelector('.drv-cta-sub').textContent = 'Мы вам перезвоним';
+            btn.style.opacity = '0.6';
+        }
+    } catch (err) {
+        // Если уже подавал заявку — тоже показываем статус
+        if (err.status === 400 || err.message && err.message.includes('заявка')) {
+            if (btn) {
+                btn.disabled = true;
+                btn.querySelector('.drv-cta-main').textContent = 'Заявка уже отправлена';
+                btn.querySelector('.drv-cta-sub').textContent = 'Ожидайте звонка менеджера';
+                btn.style.opacity = '0.6';
+            }
+        } else {
+            alert(err.message || 'Ошибка. Попробуйте позже.');
+            if (btn) {
+                btn.disabled = false;
+                btn.querySelector('.drv-cta-main').textContent = 'Оставить заявку';
+                btn.querySelector('.drv-cta-sub').textContent = 'Вам перезвонят';
+            }
+        }
+    }
 };
 
 window.closeDrvModal = function() {
     var overlay = document.getElementById('drvModalOverlay');
     if (overlay) overlay.classList.remove('is-open');
+};
+
+// При открытии экрана водителя — проверяем текущий статус заявки
+window.openDriverScreen = function() {
+    closeHsMenu();
+    setTimeout(async function() {
+        var screen = document.getElementById('driverScreen');
+        if (screen) screen.classList.add('is-open');
+
+        // Если пользователь уже водитель — сразу редиректим
+        if (TF.auth.isLoggedIn()) {
+            var user = TF.auth.getUser();
+            if (user.role === 'driver') {
+                try {
+                    // Актуализируем данные с сервера
+                    var me = await TF.auth.me();
+                    if (me.driver && me.driver.status === 'approved') {
+                        window.location.href = 'driver.html';
+                        return;
+                    }
+                    // Статус заявки — обновляем кнопку
+                    var btn = document.querySelector('.drv-cta-btn');
+                    if (btn && me.driver) {
+                        var statusMap = {
+                            pending:  { main: 'Заявка на рассмотрении', sub: 'Мы вам перезвоним' },
+                            approved: { main: 'Открыть приложение водителя', sub: '' },
+                            rejected: { main: 'Подать заявку повторно', sub: 'Обратитесь в поддержку' }
+                        };
+                        var s = statusMap[me.driver.status];
+                        if (s) {
+                            btn.querySelector('.drv-cta-main').textContent = s.main;
+                            btn.querySelector('.drv-cta-sub').textContent  = s.sub;
+                            if (me.driver.status === 'pending') {
+                                btn.disabled = true;
+                                btn.style.opacity = '0.6';
+                            }
+                        }
+                    }
+                } catch(e) {}
+            }
+        }
+    }, 200);
 };
 
 // Свайп вправо чтобы закрыть экран водителя

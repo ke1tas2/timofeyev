@@ -754,6 +754,58 @@ a { color: inherit; text-decoration: none; }
   }
   .sidebar-overlay.open { display: block; }
 }
+
+/* ── Orders page ─────────────────────────────────── */
+.order-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-bottom: 10px;
+  cursor: default;
+  animation: fadeIn .25s ease both;
+}
+.order-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.order-id { font-size: 13px; font-weight: 600; color: var(--muted); }
+.order-status-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+.s-pending    { background: var(--orange-dim); color: var(--orange); }
+.s-accepted   { background: var(--green-dim);  color: var(--green); }
+.s-arriving   { background: var(--green-dim);  color: var(--green); }
+.s-in_progress{ background: rgba(0,122,255,.15); color: #007aff; }
+.s-completed  { background: var(--green-dim);  color: var(--green); }
+.s-cancelled  { background: var(--red-dim);    color: var(--red); }
+.order-route { display: flex; gap: 8px; flex-direction: column; margin-bottom: 10px; }
+.order-route-row { display: flex; gap: 8px; align-items: flex-start; }
+.order-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+.order-addr { font-size: 13px; color: var(--text); line-height: 1.4; }
+.order-meta { display: flex; gap: 16px; flex-wrap: wrap; }
+.order-meta-item { font-size: 12px; color: var(--muted); }
+.order-meta-item strong { color: var(--text); }
+.order-price { font-size: 16px; font-weight: 700; color: var(--accent); }
+.page-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.page-title { font-family: 'Unbounded', sans-serif; font-size: 18px; font-weight: 700; }
+.btn-refresh { background: var(--card); border: 1px solid var(--border); color: var(--muted); padding: 8px 12px; border-radius: 10px; cursor: pointer; }
+.btn-refresh:hover { color: var(--text); }
+.filter-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.pagination-row { display: flex; gap: 8px; justify-content: center; padding: 16px 0; }
+.page-btn { background: var(--card); border: 1px solid var(--border); color: var(--muted); padding: 8px 14px; border-radius: 10px; cursor: pointer; font-size: 13px; }
+.page-btn.active { background: var(--accent); color: #141414; border-color: transparent; font-weight: 700; }
+.page-btn:hover:not(.active) { color: var(--text); }
+
 </style>
 </head>
 <body>
@@ -850,6 +902,12 @@ a { color: inherit; text-decoration: none; }
         <i class="fas fa-users"></i>
         Клиенты
       </div>
+      <div class="nav-section-label">Операции</div>
+      <div class="nav-item" data-page="orders" onclick="showPage('orders')">
+        <i class="fas fa-list-check"></i>
+        Все заказы
+        <span class="nav-badge hidden" id="activeOrdersBadge">0</span>
+      </div>
     </div>
 
     <div class="sidebar-footer">
@@ -921,6 +979,25 @@ a { color: inherit; text-decoration: none; }
       </div>
 
       <!-- КЛИЕНТЫ -->
+
+      <div id="page-orders" class="page">
+        <div class="page-head">
+          <h2 class="page-title">Все заказы</h2>
+          <button class="btn-refresh" onclick="loadOrders()" title="Обновить"><i class="fas fa-sync-alt"></i></button>
+        </div>
+        <div class="filter-row" id="ordersFilterRow">
+          <button class="filter-tab active" onclick="setOrderFilter('', this)">Все</button>
+          <button class="filter-tab" onclick="setOrderFilter('pending', this)">Ожидают</button>
+          <button class="filter-tab" onclick="setOrderFilter('accepted', this)">Приняты</button>
+          <button class="filter-tab" onclick="setOrderFilter('in_progress', this)">В пути</button>
+          <button class="filter-tab" onclick="setOrderFilter('completed', this)">Завершены</button>
+          <button class="filter-tab" onclick="setOrderFilter('cancelled', this)">Отменены</button>
+        </div>
+        <div id="ordersList" class="driver-cards">
+          <div class="loading-row"><i class="fas fa-circle-notch spin"></i> Загрузка...</div>
+        </div>
+        <div class="pagination-row" id="ordersPagination"></div>
+      </div>
       <div id="page-users" class="page">
         <div id="usersList" class="driver-cards">
           <div class="loading-row"><i class="fas fa-circle-notch spin"></i> Загрузка...</div>
@@ -1151,8 +1228,10 @@ function showMain() {
 async function adminLogout() {
   try { await POST('auth/logout'); } catch(e) {}
   localStorage.removeItem('admin_token');
+  localStorage.removeItem('tf_token');
+  localStorage.removeItem('tf_user');
   adminUser = null;
-  location.reload();
+  window.location.href = 'index.html';
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -1162,7 +1241,8 @@ const pageTitles = {
   dashboard: 'Дашборд',
   pending:   'Заявки водителей',
   drivers:   'Все водители',
-  users:     'Клиенты'
+  users:     'Клиенты',
+  orders:    'Все заказы',
 };
 let currentPage = 'dashboard';
 
@@ -1185,6 +1265,7 @@ function showPage(name) {
   if (name === 'pending')   loadDrivers('pending', 'pendingList');
   if (name === 'drivers')   loadDrivers('approved', 'driversList');
   if (name === 'users')     loadUsers();
+  if (name === 'orders')    loadOrders();
 }
 
 function refreshPage() {
@@ -1548,6 +1629,118 @@ function escHtml(str) {
 document.getElementById('confirmDialog').addEventListener('click', function(e) {
   if (e.target === this) closeDialog();
 });
+
+
+// ══════════════════════════════════════════════════════════
+// ORDERS PAGE
+// ══════════════════════════════════════════════════════════
+let _ordersFilter = '';
+let _ordersPage   = 1;
+
+const ORDER_STATUS_TEXT = {
+  pending:     'Ожидает',
+  accepted:    'Принят',
+  arriving:    'Водитель прибывает',
+  in_progress: 'В пути',
+  completed:   'Завершён',
+  cancelled:   'Отменён',
+};
+
+function setOrderFilter(status, el) {
+  _ordersFilter = status;
+  _ordersPage   = 1;
+  document.querySelectorAll('#ordersFilterRow .filter-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  loadOrders();
+}
+
+async function loadOrders() {
+  const container = document.getElementById('ordersList');
+  if (!container) return;
+  container.innerHTML = '<div class="loading-row"><i class="fas fa-circle-notch spin"></i> Загрузка...</div>';
+
+  try {
+    const params = { page: _ordersPage };
+    if (_ordersFilter) params.status = _ordersFilter;
+    const data = await api('GET', 'admin/orders?' + new URLSearchParams(params));
+    renderOrders(data.orders || [], data.total || 0, data.page || 1, Math.ceil((data.total||0)/30));
+
+    // Update badge with active count
+    const activeCount = await api('GET', 'admin/orders?' + new URLSearchParams({ status: 'pending' }));
+    const badge = document.getElementById('activeOrdersBadge');
+    if (badge) {
+      const cnt = activeCount.total || 0;
+      badge.textContent = cnt;
+      badge.classList.toggle('hidden', cnt === 0);
+    }
+  } catch (e) {
+    container.innerHTML = `<div class="loading-row" style="color:var(--red)"><i class="fas fa-exclamation-circle"></i> ${e.message}</div>`;
+  }
+}
+
+function renderOrders(orders, total, page, pages) {
+  const container = document.getElementById('ordersList');
+  const pagination = document.getElementById('ordersPagination');
+  if (!container) return;
+
+  if (!orders.length) {
+    container.innerHTML = '<div class="loading-row" style="color:var(--muted)"><i class="fas fa-inbox"></i> Заказов нет</div>';
+    if (pagination) pagination.innerHTML = '';
+    return;
+  }
+
+  container.innerHTML = orders.map(o => {
+    const stClass = 's-' + o.status;
+    const stText  = ORDER_STATUS_TEXT[o.status] || o.status;
+    const priceStr = o.price ? Number(o.price).toLocaleString('ru-RU') + ' ₸' : '—';
+    const date = formatDate(o.created_at);
+
+    return `
+    <div class="order-card fade-in">
+      <div class="order-card-head">
+        <span class="order-id">#${o.id} &nbsp;•&nbsp; ${o.tariff_name || ''} &nbsp;•&nbsp; ${o.transport_class || ''}</span>
+        <span class="order-status-badge ${stClass}">${stText}</span>
+      </div>
+      <div class="order-route">
+        <div class="order-route-row">
+          <div class="order-dot" style="background:#34c759"></div>
+          <div class="order-addr">${escHtml(o.from_address || '—')}</div>
+        </div>
+        <div class="order-route-row">
+          <div class="order-dot" style="background:var(--accent)"></div>
+          <div class="order-addr">${escHtml(o.to_address || '—')}</div>
+        </div>
+      </div>
+      <div class="order-meta">
+        <div class="order-meta-item">Клиент: <strong>${escHtml(o.client_name || '—')}</strong> ${o.client_phone ? '&nbsp;<a href="tel:'+o.client_phone+'" style="color:var(--accent)">'+o.client_phone+'</a>' : ''}</div>
+        ${o.driver_name ? `<div class="order-meta-item">Водитель: <strong>${escHtml(o.driver_name)}</strong></div>` : '<div class="order-meta-item" style="color:var(--orange)">Водитель не назначен</div>'}
+        ${o.distance_km ? `<div class="order-meta-item">Расстояние: <strong>${o.distance_km} км</strong></div>` : ''}
+        <div class="order-meta-item">Оплата: <strong>${o.payment_method === 'cash' ? 'Наличные' : 'Карта'}</strong></div>
+        <div class="order-meta-item">Дата: <strong>${date}</strong></div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-top:10px">
+        <span class="order-price">${priceStr}</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Pagination
+  if (pagination && pages > 1) {
+    let btns = '';
+    for (let i = 1; i <= pages; i++) {
+      btns += `<button class="page-btn ${i===page?'active':''}" onclick="goOrdersPage(${i})">${i}</button>`;
+    }
+    pagination.innerHTML = btns;
+  } else if (pagination) {
+    pagination.innerHTML = '';
+  }
+}
+
+function goOrdersPage(p) {
+  _ordersPage = p;
+  loadOrders();
+}
+
 </script>
 </body>
 </html>

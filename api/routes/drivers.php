@@ -120,10 +120,9 @@ if ($method === 'GET' && $action === 'orders') {
          JOIN tariffs t ON t.id = o.tariff_id
          JOIN users u ON u.id = o.client_id
          WHERE o.status = 'pending'
-           AND o.transport_class = ?
          ORDER BY o.created_at ASC
          LIMIT 20",
-        [$driver['car_class']]
+        []
     );
 
     Response::ok($orders);

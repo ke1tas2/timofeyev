@@ -142,7 +142,7 @@ if ($method === 'GET' && $sub === 'orders') {
             uc.name AS client_name, uc.phone AS client_phone,
             ud.name AS driver_name, ud.phone AS driver_phone
          FROM orders o
-         JOIN tariffs t ON t.id = o.tariff_id
+         LEFT JOIN tariffs t ON t.id = o.tariff_id
          JOIN users uc ON uc.id = o.client_id
          LEFT JOIN users ud ON ud.id = o.driver_id
          WHERE $where

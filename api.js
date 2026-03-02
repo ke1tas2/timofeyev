@@ -290,7 +290,7 @@ const TF = (function () {
             const data = await TF.auth.verifyOtp(_phone, code);
             clearResendTimer();
 
-            if (data.is_new) {
+            if (data.is_new || !data.user.name) {
                 showState(STATE.NAME);
             } else {
                 finishAuth(data.user);
@@ -310,12 +310,41 @@ const TF = (function () {
         if (name) {
             try { await TF.auth.updateProfile({ name }); } catch {}
         }
+        // Обновляем объект пользователя и сохраняем в localStorage
         const user = TF.auth.getUser();
-        if (user) user.name = name;
+        if (user) {
+            user.name = name;
+            localStorage.setItem('tf_user', JSON.stringify(user));
+        }
         finishAuth(user);
     };
 
     function finishAuth(user) {
+        // Редирект сразу после входа по роли
+        if (user && user.role === 'admin') {
+            window.location.href = 'admin.html';
+            return;
+        }
+        if (user && user.role === 'driver') {
+            // Проверяем статус заявки водителя
+            TF.auth.me().then(function(me) {
+                if (me && me.driver && me.driver.status === 'approved') {
+                    window.location.href = 'driver.html';
+                } else {
+                    window.closeAuthScreen && window.closeAuthScreen();
+                    TF.updateHeaderAuth(user);
+                    showState(STATE.PHONE);
+                    const pi = document.getElementById('authPhoneInput');
+                    if (pi) pi.value = '';
+                }
+            }).catch(function() {
+                window.closeAuthScreen && window.closeAuthScreen();
+                TF.updateHeaderAuth(user);
+                showState(STATE.PHONE);
+            });
+            return;
+        }
+        // Обычный клиент
         window.closeAuthScreen && window.closeAuthScreen();
         TF.updateHeaderAuth(user);
         showState(STATE.PHONE);

@@ -26,7 +26,7 @@ if ($method === 'GET' && $subaction === 'active') {
             d.car_make, d.car_model, d.car_number, d.car_color, d.rating AS driver_rating,
             d.current_lat AS driver_lat, d.current_lng AS driver_lng
          FROM orders o
-         JOIN tariffs t ON t.id = o.tariff_id
+         LEFT JOIN tariffs t ON t.id = o.tariff_id
          JOIN users u_client ON u_client.id = o.client_id
          LEFT JOIN users u_driver ON u_driver.id = o.driver_id
          LEFT JOIN drivers d ON d.user_id = o.driver_id
@@ -80,7 +80,7 @@ if ($method === 'GET' && !$id) {
             u_driver.name AS driver_name,
             d.car_make, d.car_model, d.car_number
          FROM orders o
-         JOIN tariffs t ON t.id = o.tariff_id
+         LEFT JOIN tariffs t ON t.id = o.tariff_id
          JOIN users u_client ON u_client.id = o.client_id
          LEFT JOIN users u_driver ON u_driver.id = o.driver_id
          LEFT JOIN drivers d ON d.user_id = o.driver_id
@@ -177,7 +177,7 @@ if ($method === 'GET' && $id) {
             d.current_lat AS driver_lat, d.current_lng AS driver_lng,
             d.rating AS driver_rating
          FROM orders o
-         JOIN tariffs t ON t.id = o.tariff_id
+         LEFT JOIN tariffs t ON t.id = o.tariff_id
          JOIN users u_client ON u_client.id = o.client_id
          LEFT JOIN users u_driver ON u_driver.id = o.driver_id
          LEFT JOIN drivers d ON d.user_id = o.driver_id
@@ -232,9 +232,10 @@ if ($method === 'PATCH' && $id) {
     $canChange = false;
     if ($user['role'] === 'admin') $canChange = true;
     if ($user['role'] === 'driver' && in_array($newStatus, ['accepted','arriving','in_progress','cancelled','completed'])) {
-        // Водитель принимает заказ
         if ($newStatus === 'accepted' && !$order['driver_id']) {
-            Database::exec('UPDATE orders SET driver_id=? WHERE id=?', [$user['id'], $id]);
+            // Атомарно: driver_id + status в одном UPDATE
+            $updates[] = 'driver_id = ?';
+            $params[]  = $user['id'];
             $canChange = true;
         } elseif ($order['driver_id'] == $user['id']) {
             $canChange = true;
