@@ -14,9 +14,14 @@ $user = Auth::require();
 
 // ── GET /api/orders/active ───────────────────────────────────
 if ($method === 'GET' && $subaction === 'active') {
-    $where = $user['role'] === 'driver'
-        ? 'driver_id = ? AND status IN ("accepted","arriving","in_progress")'
-        : 'client_id = ? AND status IN ("pending","accepted","arriving","in_progress")';
+    // ВАЖНО: используем o.status (с префиксом таблицы), т.к. в JOIN участвуют
+    // users и drivers — у которых тоже есть колонка status, что вызывает
+    // "Column 'status' in where clause is ambiguous" в MySQL.
+    if ($user['role'] === 'driver') {
+        $where  = "o.driver_id = ? AND o.status IN ('accepted','arriving','in_progress')";
+    } else {
+        $where  = "o.client_id = ? AND o.status IN ('pending','accepted','arriving','in_progress')";
+    }
 
     $order = Database::row(
         "SELECT o.*, 
@@ -30,7 +35,7 @@ if ($method === 'GET' && $subaction === 'active') {
          JOIN users u_client ON u_client.id = o.client_id
          LEFT JOIN users u_driver ON u_driver.id = o.driver_id
          LEFT JOIN drivers d ON d.user_id = o.driver_id
-         WHERE o.$where
+         WHERE $where
          ORDER BY o.created_at DESC LIMIT 1",
         [$user['id']]
     );
@@ -228,6 +233,10 @@ if ($method === 'PATCH' && $id) {
         Response::error("Переход $order[status] → $newStatus недопустим", 422);
     }
 
+    // ── ВАЖНО: инициализируем ДО проверки прав, чтобы driver_id не терялся ──
+    $updates = ['status = ?'];
+    $params  = [$newStatus];
+
     // Права
     $canChange = false;
     if ($user['role'] === 'admin') $canChange = true;
@@ -246,9 +255,6 @@ if ($method === 'PATCH' && $id) {
     }
 
     if (!$canChange) Response::forbidden('Нет прав для изменения статуса');
-
-    $updates = ['status = ?'];
-    $params  = [$newStatus];
 
     // Временные метки
     match($newStatus) {

@@ -112,7 +112,8 @@ if ($method === 'GET' && $action === 'orders') {
     }
 
     $orders = Database::query(
-        "SELECT o.id, o.from_address, o.to_address, o.price, o.distance_km, 
+        "SELECT o.id, o.from_address, o.to_address, o.price, o.distance_km,
+            o.from_lat, o.from_lng, o.to_lat, o.to_lng,
             o.transport_class, o.payment_method, o.created_at,
             t.name AS tariff_name,
             u.name AS client_name
