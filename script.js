@@ -245,18 +245,20 @@ document.addEventListener('DOMContentLoaded', function() {
             let centerGeocodeTimer = null;
             map.events.add('boundschange', function() {
                 if (selectingPoint) {
-                    // Любой режим выбора на карте (from / to / stop_N) — только превью в баре
+                    // Режим выбора точки на карте — обновляем превью адреса в баре
                     var coords = getMarkerGeoCoords();
                     previewMpbAddr(coords);
-                } else {
-                    // В обычном режиме — обновляем точку А при перемещении карты.
-                    // updateMap=false чтобы НЕ вызывать setCenter и не создавать бесконечный цикл
+                } else if (!(fromCoords && toCoords)) {
+                    // Обычный режим БЕЗ построенного маршрута —
+                    // обновляем точку А при перемещении карты (как в Яндекс GO)
                     if (centerGeocodeTimer) clearTimeout(centerGeocodeTimer);
                     centerGeocodeTimer = setTimeout(function() {
                         var coords = getMarkerGeoCoords();
                         geocodeCoords('from', coords, false);
                     }, 1000);
                 }
+                // Если маршрут построен (fromCoords && toCoords) и не в режиме выбора —
+                // карта просто прокручивается без изменения адресов (поведение Яндекс GO)
             });
 
             // Кнопки зума удалены (оставлена только геолокация)
@@ -981,8 +983,8 @@ document.addEventListener('DOMContentLoaded', function() {
             // Скрываем основную панель
             document.getElementById('panel').style.display = 'none';
 
-            // Показываем маркер
-            document.getElementById('mapMarker').classList.remove('hidden');
+            // Показываем маркер (даже если маршрут был построен — в режиме выбора он нужен)
+            updateMarkerVisibility();
 
             // Заголовок панели: Точка отправления / Точка назначения
             var titleEl = document.querySelector('.mpb-panel-title');
@@ -1035,6 +1037,9 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('mapPickBar').classList.remove('mpb-open');
             document.getElementById('mapSelectMode').classList.remove('active');
             if (_mpbPreviewTimer) { clearTimeout(_mpbPreviewTimer); _mpbPreviewTimer = null; }
+
+            // Скрываем маркер если маршрут уже построен (оба адреса выбраны)
+            updateMarkerVisibility();
 
             // Возвращаем bottomsheet в нормальное состояние на мобиле
             if (window.innerWidth <= 768) {
@@ -1366,10 +1371,32 @@ document.addEventListener('DOMContentLoaded', function() {
                 map.setCenter(coords, 15);
             }
 
+            // Обновляем видимость маркера (скрываем если маршрут уже построен)
+            updateMarkerVisibility();
+
             updateRoute();
         }
 
-        // Отдельные таймеры для каждой точки — не отменяют друг друга
+        // ── Управление видимостью центрального маркера (поведение Яндекс GO) ──
+        // Маркер виден только когда маршрут ещё не построен (нет обеих точек).
+        // Когда маршрут построен — маркер скрыт, карта просто прокручивается.
+        // При входе в режим выбора точки (openMapPickMode) маркер снова показывается.
+        function updateMarkerVisibility() {
+            const markerEl = document.getElementById('mapMarker');
+            if (!markerEl) return;
+            if (selectingPoint) {
+                // Режим выбора точки — маркер всегда виден
+                markerEl.classList.remove('hidden');
+            } else if (fromCoords && toCoords) {
+                // Маршрут построен — скрываем маркер, карта свободно прокручивается
+                markerEl.classList.add('hidden');
+            } else {
+                // Маршрут не построен — маркер виден (drag = обновление точки А)
+                markerEl.classList.remove('hidden');
+            }
+        }
+
+
         let geocodeTimerFrom = null;
         let geocodeTimerTo = null;
         // ID последнего запроса для каждой точки — чтобы отбрасывать устаревшие ответы
@@ -1516,6 +1543,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
             map.geoObjects.add(toMarker);
 
+            // Маршрут построен — скрываем центральный маркер (поведение Яндекс GO)
+            updateMarkerVisibility();
+
             updateRoute(true);
         }
 
@@ -1553,6 +1583,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
             updateClearButtons();
+            // Маршрут сброшен — возвращаем маркер (снова можно выбирать точку А драгом)
+            updateMarkerVisibility();
             updateRoute();
         }
 

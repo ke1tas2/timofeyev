@@ -2826,7 +2826,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             pointer-events: none;
             /* Анимацию оставляем только для transform/opacity,
                чтобы смена top (перецентровка) происходила без "скачков" */
-            transition: transform 0.3s ease, opacity 0.3s ease;
+            transition: transform 0.35s cubic-bezier(.34,1.26,.64,1), opacity 0.25s ease;
         }
 
 
@@ -2898,6 +2898,7 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
         .map-marker.hidden {
             opacity: 0;
             pointer-events: none;
+            transform: translate(-50%, -80%) scale(0.7);
         }
 
         /* ===== Кастомные маркеры точек А/Б и остановок (визуал как на референсе) ===== */
