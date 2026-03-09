@@ -73,6 +73,13 @@ const TF = (function () {
         },
         me: () => GET('auth/me'),
         updateProfile: (data) => PUT('auth/me', data),
+        // Переключение режима пассажир ↔ водитель
+        switchRole: async (targetRole) => {
+            const data = await POST('auth/switch-role', { target_role: targetRole });
+            // Сохраняем новый токен с обновлённой ролью
+            setSession(data.token, data.user);
+            return data;
+        },
         logout: async () => {
             try { await POST('auth/logout'); } catch {}
             clearSession();
@@ -320,33 +327,18 @@ const TF = (function () {
     };
 
     function finishAuth(user) {
-        // Редирект сразу после входа по роли
         if (user && user.role === 'admin') {
             window.location.href = 'admin.html';
             return;
         }
-        if (user && user.role === 'driver') {
-            // Проверяем статус заявки водителя
-            TF.auth.me().then(function(me) {
-                if (me && me.driver && me.driver.status === 'approved') {
-                    window.location.href = 'driver.html';
-                } else {
-                    window.closeAuthScreen && window.closeAuthScreen();
-                    TF.updateHeaderAuth(user);
-                    showState(STATE.PHONE);
-                    const pi = document.getElementById('authPhoneInput');
-                    if (pi) pi.value = '';
-                }
-            }).catch(function() {
-                window.closeAuthScreen && window.closeAuthScreen();
-                TF.updateHeaderAuth(user);
-                showState(STATE.PHONE);
-            });
-            return;
-        }
-        // Обычный клиент
+        // ★ Водитель остаётся на index.html, переключатель появляется в боковом меню
         window.closeAuthScreen && window.closeAuthScreen();
         TF.updateHeaderAuth(user);
+        if (user && user.role === 'driver') {
+            TF.auth.me().then(function(me) {
+                if (window.updateDrawerModeBlock) window.updateDrawerModeBlock(me);
+            }).catch(function(){});
+        }
         showState(STATE.PHONE);
         const pi = document.getElementById('authPhoneInput');
         if (pi) pi.value = '';

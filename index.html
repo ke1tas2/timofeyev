@@ -303,8 +303,27 @@
                 </div>
             </div>
 
+            <!-- ★ Переключатель режима Пассажир/Водитель (только для одобренных водителей) -->
+            <div class="hs-drawer-group" id="hsModeSwitcherGroup" style="display:none">
+                <div style="padding:14px 16px 12px">
+                    <div style="font-size:11px;color:#8e8e93;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;margin-bottom:10px">
+                        Режим работы
+                    </div>
+                    <div style="display:flex;background:rgba(255,255,255,0.06);border-radius:12px;padding:3px;gap:3px">
+                        <button id="hsModeTabClient" onclick="switchAppMode('client')"
+                            style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:10px 8px;border:none;border-radius:10px;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;transition:all 0.2s;background:#fc3f1e;color:#fff">
+                            <i class="fas fa-user"></i> Пассажир
+                        </button>
+                        <button id="hsModeTabDriver" onclick="switchAppMode('driver')"
+                            style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:10px 8px;border:none;border-radius:10px;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;transition:all 0.2s;background:transparent;color:#8e8e93">
+                            <i class="fas fa-car"></i> Водитель
+                        </button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Группа 4: Работа водителем (жёлтая — отдельная) -->
-            <div class="hs-drawer-group hs-drawer-group--yellow">
+            <div class="hs-drawer-group hs-drawer-group--yellow" id="hsDriverWorkGroup">
                 <div class="hs-drawer-item" onclick="openDriverScreen()">
                     <div class="hs-drawer-item-icon hs-di-work">
                         <i class="fas fa-car-side"></i>
@@ -1041,7 +1060,7 @@
     <script src="https://api-maps.yandex.ru/2.1/?apikey=69c18fe9-15b1-4391-b4e7-2a005a4fb22d&lang=ru_RU"></script>
     
     </div>
-    <script src="api.js?v=1.0.0"></script>
-    <script src="script.js?v=5.2.0"></script>
+    <script src="api.js?v=2.0.0"></script>
+    <script src="script.js?v=6.0.0"></script>
 </body>
 </html>

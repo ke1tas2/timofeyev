@@ -5419,6 +5419,9 @@ body.light-theme .auth-more-btn {
     color: var(--clr-text, #fff);
     margin-bottom: 2px;
 }
+.light-theme .hs-drawer-user-name {
+    color: #1c1c1e;
+}
 
 /* ── Световая тема: OTP ─────────────────────────────────────── */
 .light-theme .otp-digit {

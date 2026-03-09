@@ -33,11 +33,9 @@ $action = $subaction ?: ($segments[1] ?? '');
 if ($method === 'GET' && $action === 'me') {
     $user = Auth::require();
 
-    // Дополнительные данные водителя
-    $driverData = null;
-    if ($user['role'] === 'driver') {
-        $driverData = Database::row('SELECT * FROM drivers WHERE user_id = ?', [$user['id']]);
-    }
+    // Дополнительные данные водителя — возвращаем всегда, даже если роль сейчас 'client'
+    // (водитель мог временно переключиться в режим пассажира, ему нужно знать свой статус)
+    $driverData = Database::row('SELECT * FROM drivers WHERE user_id = ?', [$user['id']]);
 
     Response::ok([
         'id'     => $user['id'],
@@ -214,6 +212,66 @@ if ($method === 'POST' && $action === 'logout') {
         Database::exec('UPDATE auth_tokens SET is_valid=0 WHERE token_hash=?', [$hash]);
     }
     Response::ok(null, 'Выход выполнен');
+}
+
+// POST /api/auth/switch-role — переключение режима пассажир ↔ водитель
+if ($method === 'POST' && $action === 'switch-role') {
+    $user = Auth::require();
+
+    if ($user['role'] === 'driver') {
+        // Водитель → режим пассажира
+        $newRole = 'client';
+    } elseif ($user['role'] === 'client') {
+        // Пассажир → режим водителя (только если есть одобренная заявка)
+        $driver = Database::row(
+            "SELECT id FROM drivers WHERE user_id = ? AND status = 'approved'",
+            [$user['id']]
+        );
+        if (!$driver) {
+            Response::error('У вас нет одобренной заявки водителя', 403);
+        }
+        $newRole = 'driver';
+    } else {
+        Response::error('Переключение недоступно для роли ' . $user['role'], 403);
+    }
+
+    // Меняем роль в БД
+    Database::exec('UPDATE users SET role = ? WHERE id = ?', [$newRole, $user['id']]);
+
+    // Инвалидируем старый токен
+    $oldHeader = $_SERVER['HTTP_AUTHORIZATION'] ?? '';
+    preg_match('/Bearer\s+(.+)/i', $oldHeader, $m);
+    if (!empty($m[1])) {
+        Database::exec('UPDATE auth_tokens SET is_valid = 0 WHERE token_hash = ?', [JWT::hash($m[1])]);
+    }
+
+    // Выпускаем новый JWT с новой ролью
+    $payload   = ['user_id' => $user['id'], 'phone' => $user['phone'], 'role' => $newRole];
+    $token     = JWT::encode($payload, $config['jwt']['expires']);
+    $tokenHash = JWT::hash($token);
+    $expiresAt = date('Y-m-d H:i:s', time() + $config['jwt']['expires']);
+
+    Database::insert(
+        'INSERT INTO auth_tokens (user_id, token_hash, device_info, ip, expires_at) VALUES (?,?,?,?,?)',
+        [
+            $user['id'],
+            $tokenHash,
+            $_SERVER['HTTP_USER_AGENT'] ?? null,
+            $_SERVER['REMOTE_ADDR']     ?? null,
+            $expiresAt,
+        ]
+    );
+
+    Response::ok([
+        'token' => $token,
+        'role'  => $newRole,
+        'user'  => [
+            'id'    => $user['id'],
+            'phone' => $user['phone'],
+            'name'  => $user['name'],
+            'role'  => $newRole,
+        ],
+    ], $newRole === 'driver' ? 'Режим водителя активирован' : 'Режим пассажира активирован');
 }
 
 Response::notFound("Auth: неизвестное действие '$action'");

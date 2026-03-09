@@ -25,31 +25,27 @@ window.closeAuthScreen = function() {
                 window.location.href = 'admin.html';
                 return;
             }
-            if (me.role === 'driver' && me.driver && me.driver.status === 'approved') {
-                window.location.href = 'driver.html';
-                return;
-            }
+            // ★ Водитель остаётся на index.html — режим переключается вручную в боковом меню
+            // Показываем переключатель режимов если водитель одобрен
+            if (typeof updateDrawerModeBlock === 'function') updateDrawerModeBlock(me);
             // Проверяем наличие активного заказа при перезагрузке страницы
-            if (me.role === 'client' || !me.role) {
+            if (me.role === 'client' || me.role === 'driver' || !me.role) {
                 try {
                     var active = await TF.orders.active();
                     if (active && !['completed','cancelled'].includes(active.status)) {
-                        // Восстанавливаем поллинг и показываем мини-карточку
+                        // Восстанавливаем поллинг и открываем трекинг сразу
                         _trackingOrderId = active.id;
                         _lastTrackedStatus = null;
                         _pollFailCount = 0;
-                        showActiveOrderCard();
-                        updateActiveOrderCard(active);
-                        var _oid = String(active.id);
-                        _trackingInterval = setInterval(function() { pollOrderStatus(_oid); }, 2000);
-                        // При клике на мини-карточку открываем полный экран восстановленного заказа
-                        document.getElementById('activeOrderCard') && (document.getElementById('activeOrderCard').onclick = function() {
-                            openOrderTracking(active.id, {
-                                from: active.from_address,
-                                to:   active.to_address,
-                                price: active.price ? Number(active.price).toLocaleString('ru-RU') : '—',
-                            });
+                        // Открываем экран трекинга сразу, в свёрнутом состоянии
+                        openOrderTracking(active.id, {
+                            from: active.from_address,
+                            to:   active.to_address,
+                            price: active.price ? Number(active.price).toLocaleString('ru-RU') : '—',
+                            payment: active.payment_method,
                         });
+                        // Слегка задерживаем сворачивание чтобы карта успела инициализироваться
+                        setTimeout(() => window.collapseOrderSheet && window.collapseOrderSheet(), 800);
                     }
                 } catch(e2) {}
             }
@@ -983,6 +979,10 @@ document.addEventListener('DOMContentLoaded', function() {
             // Скрываем основную панель
             document.getElementById('panel').style.display = 'none';
 
+            // Скрываем кнопки карты (геолокация, зум и т.д.)
+            var mc = document.getElementById('mapControls');
+            if (mc) { mc.style.opacity = '0'; mc.style.pointerEvents = 'none'; mc.style.visibility = 'hidden'; }
+
             // Показываем маркер (даже если маршрут был построен — в режиме выбора он нужен)
             updateMarkerVisibility();
 
@@ -1037,6 +1037,10 @@ document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('mapPickBar').classList.remove('mpb-open');
             document.getElementById('mapSelectMode').classList.remove('active');
             if (_mpbPreviewTimer) { clearTimeout(_mpbPreviewTimer); _mpbPreviewTimer = null; }
+
+            // Возвращаем кнопки карты
+            var mc = document.getElementById('mapControls');
+            if (mc) { mc.style.opacity = ''; mc.style.pointerEvents = ''; mc.style.visibility = ''; }
 
             // Скрываем маркер если маршрут уже построен (оба адреса выбраны)
             updateMarkerVisibility();
@@ -1600,6 +1604,10 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             if (fromCoords && toCoords) {
+                // Помечаем что идёт пересчёт — блокируем кнопку заказа
+                _priceIsCalculating = true;
+                updateOrderButtonState();
+
                 var waypoints = [fromCoords];
                 stops.forEach(function(s){ 
                     if (s.coords) {
@@ -1762,12 +1770,14 @@ document.addEventListener('DOMContentLoaded', function() {
             // Обновляем скрытый элемент для orderTaxi()
             const priceElement = document.getElementById('priceAmount');
             _finalCalculatedPrice = selectedPrice; // сохраняем итоговую цену ДО анимации
+            _priceIsCalculating = false; // маршрут пришёл, финальная цена известна
             if (priceElement) {
                 if (currentAnimatedPrice === 0 && priceElement.textContent === '—') {
                     currentAnimatedPrice = selectedPrice;
                     priceElement.textContent = formatPrice(selectedPrice);
+                    updateOrderButtonState(); // цена готова, разблокируем
                 } else {
-                    animateCounter(priceElement, selectedPrice);
+                    animateCounter(priceElement, selectedPrice, 800, updateOrderButtonState);
                 }
             }
         }
@@ -1784,10 +1794,12 @@ document.addEventListener('DOMContentLoaded', function() {
             if (priceElement) priceElement.textContent = '—';
             currentAnimatedPrice = 0;
             _finalCalculatedPrice = 0;
+            _priceIsCalculating = false;
             if (animationFrame) {
                 cancelAnimationFrame(animationFrame);
                 animationFrame = null;
             }
+            updateOrderButtonState();
         }
 
         function updatePrice() {
@@ -2005,6 +2017,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 showOrderError('Пожалуйста, дождитесь расчёта стоимости');
                 return;
             }
+            // Защита от нажатия во время пересчёта маршрута или анимации счётчика
+            if (_priceIsCalculating || animationFrame !== null) {
+                showOrderError('Пожалуйста, дождитесь окончания расчёта стоимости');
+                return;
+            }
 
             // Требуем авторизацию
             if (!TF.auth.isLoggedIn()) {
@@ -2100,12 +2117,12 @@ document.addEventListener('DOMContentLoaded', function() {
         let _routeRedrawTimer  = null;   // таймер перерисовки маршрута
 
         const ORDER_STATUS_CFG = {
-            pending:     { text: 'Ищем водителя…',        sub: 'Ожидайте — назначаем водителя',         icon: 'fa-circle-notch fa-spin', color: '#ffd84d' },
-            accepted:    { text: 'Водитель едет к вам',   sub: 'Водитель выехал к точке подачи',         icon: 'fa-car',                  color: '#34c759' },
-            arriving:    { text: 'Водитель на месте!',    sub: 'Выходите — водитель ждёт вас',            icon: 'fa-map-marker-alt',        color: '#ffd84d' },
-            in_progress: { text: 'Поездка началась',      sub: 'Хорошей поездки!',                       icon: 'fa-route',                 color: '#007aff' },
-            completed:   { text: 'Поездка завершена',     sub: 'Надеемся, поездка понравилась',           icon: 'fa-check-circle',          color: '#34c759' },
-            cancelled:   { text: 'Заказ отменён',         sub: '',                                        icon: 'fa-times-circle',          color: '#ff4444' },
+            pending:     { text: 'Ищем водителя…',            sub: 'Ожидайте — назначаем водителя',      icon: 'fa-circle-notch fa-spin', color: '#ffd84d' },
+            accepted:    { text: 'Через ~4 мин приедет',       sub: 'Водитель выехал к точке подачи',     icon: 'fa-car',                  color: '#1c1c1e' },
+            arriving:    { text: 'Водитель на месте!',          sub: 'Выходите — водитель ждёт вас',       icon: 'fa-map-marker-alt',        color: '#ffd84d' },
+            in_progress: { text: 'Поездка началась',            sub: 'Хорошей поездки!',                  icon: 'fa-route',                 color: '#007aff' },
+            completed:   { text: 'Поездка завершена',           sub: 'Надеемся, поездка понравилась',      icon: 'fa-check-circle',          color: '#34c759' },
+            cancelled:   { text: 'Заказ отменён',               sub: '',                                   icon: 'fa-times-circle',          color: '#ff3b30' },
         };
 
         // ── SVG-иконка машины (точно как в Яндекс Go) ──────────────────────
@@ -2142,396 +2159,480 @@ document.addEventListener('DOMContentLoaded', function() {
 
         const OTR_STYLES = `
         <style id="otrStyles">
+        /* ══════════════════════════════════════════
+           ORDER TRACKING — Yandex Go точная копия
+           Тёмная и светлая темы + Draggable sheet
+           ══════════════════════════════════════════ */
+
+        #orderTrackingOverlay {
+            --otr-bg:          #f0eff4;
+            --otr-sheet-bg:    #ffffff;
+            --otr-text:        #1c1c1e;
+            --otr-text-muted:  rgba(60,60,67,.55);
+            --otr-sep:         rgba(60,60,67,.10);
+            --otr-row-bg:      #f2f2f7;
+            --otr-handle:      rgba(60,60,67,.18);
+            --otr-btn-bg:      #f2f2f7;
+            --otr-plate-bg:    #f2f2f7;
+            --otr-plate-border:#d1d1d6;
+            --otr-back-bg:     rgba(255,255,255,.92);
+            --otr-back-shadow: 0 2px 12px rgba(0,0,0,.18);
+            --otr-back-color:  #1c1c1e;
+            --otr-badge-bg:    rgba(255,255,255,.96);
+            --otr-badge-text:  #1c1c1e;
+            --otr-cancel-color:#ff3b30;
+            --otr-toggle-off:  #e5e5ea;
+            --otr-chevron:     #c7c7cc;
+            --otr-search-bg:   #fff9e0;
+            --otr-search-ring: rgba(255,216,77,.3);
+            --otr-shadow:      0 -2px 20px rgba(0,0,0,.12);
+        }
+        body:not(.light-theme) #orderTrackingOverlay {
+            --otr-bg:          #1c1c1c;
+            --otr-sheet-bg:    #2a2a2a;
+            --otr-text:        #f0f0f0;
+            --otr-text-muted:  rgba(255,255,255,.48);
+            --otr-sep:         rgba(255,255,255,.08);
+            --otr-row-bg:      #333333;
+            --otr-handle:      rgba(255,255,255,.3);
+            --otr-btn-bg:      #3a3a3a;
+            --otr-plate-bg:    rgba(255,255,255,.1);
+            --otr-plate-border:rgba(255,255,255,.2);
+            --otr-back-bg:     rgba(28,28,28,.88);
+            --otr-back-shadow: 0 2px 12px rgba(0,0,0,.5);
+            --otr-back-color:  #f0f0f0;
+            --otr-badge-bg:    rgba(28,28,28,.92);
+            --otr-badge-text:  #f0f0f0;
+            --otr-cancel-color:#ff453a;
+            --otr-toggle-off:  rgba(255,255,255,.18);
+            --otr-chevron:     rgba(255,255,255,.28);
+            --otr-search-bg:   rgba(255,216,77,.08);
+            --otr-search-ring: rgba(255,216,77,.18);
+            --otr-shadow:      0 -4px 30px rgba(0,0,0,.5);
+        }
+
         /* ── OVERLAY ── */
-        #orderTrackingOverlay{
+        #orderTrackingOverlay {
             position:fixed;inset:0;z-index:9000;
-            background:#000;
-            display:flex;flex-direction:column;
-            animation:otrSlideUp .32s cubic-bezier(.25,.8,.25,1);
+            font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text',Helvetica,sans-serif;
+            animation:otrSlideUp .3s cubic-bezier(.2,.8,.2,1);
         }
-        @keyframes otrSlideUp{from{opacity:0;transform:translateY(60px)}to{opacity:1;transform:none}}
+        @keyframes otrSlideUp{from{opacity:0;transform:translateY(50px)}to{opacity:1;transform:none}}
 
-        /* ── MAP ── */
-        #otrMapWrap{
-            flex:1;position:relative;overflow:hidden;
-            transition:flex .5s cubic-bezier(.4,0,.2,1);
-            min-height:0;
+        /* ── MAP — весь экран как фон (как основная карта) ── */
+        #otrMapWrap {
+            position:absolute;
+            inset:0;
+            overflow:hidden;
         }
-        #otrMapEl{position:absolute;inset:0;}
+        #otrMapEl {position:absolute;inset:0;}
 
-        /* Маркер машины */
-        .otr-car-marker{
-            position:relative;
-            width:52px;height:52px;
-            cursor:default;
-        }
-
-        /* ── ПУЛЬС вокруг машины ── */
-        .otr-car-pulse{
-            position:absolute;inset:-12px;
-            border-radius:50%;
-            background:rgba(52,199,89,0.18);
+        /* ── Маркер машины ── */
+        .otr-car-marker {position:relative;width:52px;height:52px;cursor:default;}
+        .otr-car-pulse {
+            position:absolute;inset:-12px;border-radius:50%;
+            background:rgba(0,122,255,.18);
             animation:otrCarPulse 2s ease-in-out infinite;
         }
-        @keyframes otrCarPulse{
-            0%,100%{transform:scale(1);opacity:1}
-            50%{transform:scale(1.45);opacity:0}
-        }
+        @keyframes otrCarPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.45);opacity:0}}
 
-        /* ── ETA BADGE на карте ── */
-        .otr-eta-badge{
+        /* ── ETA BADGE ── */
+        .otr-eta-badge {
             position:absolute;bottom:16px;left:50%;transform:translateX(-50%);
-            background:rgba(10,10,10,.88);
-            backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
-            border:1px solid rgba(255,255,255,.12);
-            border-radius:24px;
-            padding:9px 22px;
-            font-size:14px;font-weight:700;color:#fff;
-            white-space:nowrap;pointer-events:none;
-            display:none;
-            box-shadow:0 4px 20px rgba(0,0,0,.5);
+            background:var(--otr-badge-bg);border-radius:24px;padding:9px 22px;
+            font-size:14px;font-weight:700;color:var(--otr-badge-text);
+            white-space:nowrap;pointer-events:none;display:none;
+            box-shadow:var(--otr-back-shadow);
         }
-        .otr-eta-badge .otr-eta-car{
-            display:inline-block;margin-right:6px;
-        }
+        .otr-eta-badge .otr-eta-car{display:inline-block;margin-right:6px;}
 
-        /* ── ШАПКА (кнопка назад) ── */
-        .otr-map-topbar{
-            position:absolute;top:0;left:0;right:0;
-            z-index:10;
-            padding:12px 16px;
-            display:flex;align-items:center;gap:10px;
+        /* ── TOP BAR ── */
+        .otr-map-topbar {
+            position:absolute;top:0;left:0;right:0;z-index:10;
+            padding:16px 16px 12px;display:flex;align-items:center;gap:10px;
             pointer-events:none;
         }
-        .otr-back{
+        .otr-back {
             width:40px;height:40px;border-radius:50%;
-            background:rgba(10,10,10,.7);
-            backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
-            border:1px solid rgba(255,255,255,.1);
-            cursor:pointer;color:#f0f0f0;font-size:15px;
+            background:var(--otr-back-bg);box-shadow:var(--otr-back-shadow);border:none;
+            cursor:pointer;color:var(--otr-back-color);font-size:16px;
             display:flex;align-items:center;justify-content:center;
-            transition:background .2s;pointer-events:auto;
+            transition:opacity .15s;pointer-events:auto;
         }
-        .otr-back:active{background:rgba(10,10,10,.9);}
-        .otr-map-order-num{
-            background:rgba(10,10,10,.7);
-            backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);
-            border:1px solid rgba(255,255,255,.1);
+        .otr-back:active{opacity:.65;}
+        .otr-map-order-num {
+            background:var(--otr-back-bg);box-shadow:var(--otr-back-shadow);
             border-radius:20px;padding:0 14px;height:40px;
             display:flex;align-items:center;
-            font-size:13px;color:rgba(255,255,255,.6);
+            font-size:13px;font-weight:600;color:var(--otr-text-muted);
             pointer-events:auto;
         }
 
-        /* ── НИЖНИЙ ЛИСТ (как в Яндекс Go) ── */
-        .otr-sheet{
-            background:#1c1c1e;
-            border-radius:22px 22px 0 0;
-            flex-shrink:0;
+        /* ══════════════════════════════════════════
+           НИЖНИЙ ЛИСТ — DRAGGABLE (поверх карты)
+           ══════════════════════════════════════════ */
+        .otr-sheet {
+            position:absolute;
+            left:0;right:0;bottom:0;
+            background:var(--otr-sheet-bg);
+            border-radius:20px 20px 0 0;
             overflow:hidden;
-            box-shadow:0 -8px 40px rgba(0,0,0,.6);
+            box-shadow:0 -4px 32px rgba(0,0,0,.22);
+            transition:height .38s cubic-bezier(.4,0,.2,1);
+            height:auto;
+            max-height:86vh;
+            z-index:10;
         }
-        .otr-sheet-handle{
-            width:36px;height:4px;
-            background:rgba(255,255,255,.18);
-            border-radius:2px;
-            margin:12px auto 0;
-        }
-
-        /* ── СТАТУС СЕКЦИЯ ── */
-        .otr-status-row{
-            display:flex;align-items:center;gap:0;
-            padding:14px 20px 0;
-        }
-        .otr-status-left{flex:1;min-width:0;}
-        .otr-status-label{
-            font-size:11px;font-weight:600;letter-spacing:.08em;
-            text-transform:uppercase;
-            color:rgba(255,255,255,.35);
-            margin-bottom:3px;
-        }
-        .otr-status-main{
-            font-size:20px;font-weight:800;color:#f0f0f0;
-            line-height:1.2;letter-spacing:-.3px;
-        }
-        .otr-status-sub{
-            font-size:13px;color:rgba(255,255,255,.45);
-            margin-top:3px;
-        }
-        /* ETA справа (большой) */
-        .otr-eta-right{
-            text-align:right;flex-shrink:0;
-            padding-left:16px;
-        }
-        .otr-eta-mins{
-            font-size:36px;font-weight:800;color:#34c759;
-            line-height:1;letter-spacing:-1px;
-        }
-        .otr-eta-unit{
-            font-size:12px;color:rgba(255,255,255,.4);
-            font-weight:500;margin-top:1px;
+        /* СВЁРНУТОЕ состояние — только ручка + статус строка */
+        .otr-sheet.otr-collapsed {
+            height:88px !important;
+            cursor:pointer;
+            overflow:hidden !important;
         }
 
-        /* ── МАШИНА КЛИЕНТ-ИКОНКА (ищем водителя анимация) ── */
-        .otr-search-wrap{
-            display:flex;flex-direction:column;align-items:center;
-            padding:20px 24px 16px;
+        /* Скроллируемая часть */
+        #otrSheetScroll {
+            overflow-y:auto;overflow-x:hidden;
+            max-height:calc(52vh - 150px);
+            -webkit-overflow-scrolling:touch;
         }
-        .otr-search-ring{
-            width:80px;height:80px;border-radius:50%;
-            background:rgba(255,216,77,.08);
+        .otr-sheet.otr-collapsed #otrSheetScroll {
+            overflow:hidden;max-height:0;
+            pointer-events:none;
+        }
+        .otr-sheet.otr-collapsed .otr-footer {
+            display:none;
+        }
+        .otr-sheet.otr-collapsed .otr-status-row {
+            border-bottom:none;
+            pointer-events:none; /* клик обрабатывает весь sheet */
+        }
+
+        /* Мини-полоска в свёрнутом состоянии */
+        .otr-sheet.otr-collapsed .otr-handle-zone {
+            cursor:pointer;
+        }
+
+        /* Стрелка-шеврон в статус-строке (показывает раскрытие/сворачивание) */
+        .otr-chevron-btn {
+            width:36px;height:36px;border-radius:50%;
+            background:var(--otr-btn-bg);
             display:flex;align-items:center;justify-content:center;
-            position:relative;margin-bottom:16px;
+            flex-shrink:0;margin-left:10px;
+            color:var(--otr-text-muted);
+            border:none;cursor:pointer;
+            transition:transform .35s cubic-bezier(.4,0,.2,1), background .2s;
+            -webkit-tap-highlight-color:transparent;
         }
-        .otr-search-ring::before,.otr-search-ring::after{
-            content:'';position:absolute;inset:-16px;
-            border-radius:50%;
-            border:2px solid rgba(255,216,77,.18);
-            animation:otrSearchRing 2.2s ease-in-out infinite;
+        .otr-chevron-btn:active { background:var(--otr-row-bg); }
+        /* Когда лист развёрнут — стрелка смотрит ВНИЗ (чтобы свернуть) */
+        .otr-sheet:not(.otr-collapsed) .otr-chevron-btn {
+            transform: rotate(180deg);
         }
-        .otr-search-ring::after{animation-delay:.9s;}
-        @keyframes otrSearchRing{
-            0%{transform:scale(.7);opacity:.8}
-            100%{transform:scale(1.5);opacity:0}
+        /* Когда свёрнут — стрелка смотрит ВВЕРХ (чтобы развернуть) */
+        .otr-sheet.otr-collapsed .otr-chevron-btn {
+            transform: rotate(0deg);
         }
-        .otr-search-car{font-size:32px;color:#ffd84d;animation:otrSearchCar 1.6s ease-in-out infinite;}
-        @keyframes otrSearchCar{0%,100%{transform:translateX(-4px)}50%{transform:translateX(4px)}}
-        .otr-search-title{font-size:17px;font-weight:700;color:#f0f0f0;margin-bottom:6px;}
-        .otr-search-sub{font-size:13px;color:rgba(255,255,255,.4);text-align:center;line-height:1.5;}
+
+        /* ── РУЧКА ПЕРЕТАСКИВАНИЯ ── */
+        .otr-handle-zone {
+            padding:12px 0 6px;
+            display:flex;align-items:center;justify-content:center;
+            cursor:pointer;user-select:none;
+            position:relative;
+            -webkit-user-select:none;
+            -webkit-tap-highlight-color:transparent;
+        }
+        .otr-sheet-handle {
+            width:40px;height:4px;
+            background:var(--otr-handle);border-radius:2px;
+            transition:width .2s, opacity .2s;
+        }
+
+
+        /* ── КНОПКА EXPAND — убрана, свайп только через ручку ── */
+        .otr-expand-btn {display:none;}
+
+        /* ── СТАТУС (заголовок) ── */
+        .otr-status-row {
+            display:flex;align-items:center;
+            padding:6px 20px 14px;
+            border-bottom:1px solid var(--otr-sep);
+            cursor:pointer;
+            -webkit-tap-highlight-color:transparent;
+            user-select:none;
+        }
+        .otr-status-left  {flex:1;min-width:0;}
+        .otr-status-label {display:none;}
+        .otr-status-main  {
+            font-size:22px;font-weight:700;color:var(--otr-text);
+            line-height:1.25;letter-spacing:-.3px;
+        }
+        .otr-status-sub {
+            font-size:13px;color:var(--otr-text-muted);margin-top:2px;
+        }
+        .otr-eta-right {display:none;}
 
         /* ── РАЗДЕЛИТЕЛЬ ── */
-        .otr-sep{height:1px;background:rgba(255,255,255,.07);margin:14px 20px 0;}
+        .otr-sep {height:1px;background:var(--otr-sep);margin:14px 0 0;}
 
-        /* ── КАРТОЧКА ВОДИТЕЛЯ ── */
-        .otr-driver-section{padding:14px 20px 0;}
-        .otr-driver-row{display:flex;align-items:center;gap:14px;}
-        .otr-driver-avatar{
-            width:54px;height:54px;border-radius:50%;flex-shrink:0;
-            background:linear-gradient(135deg,#2c3e2c,#1e2a1e);
-            border:2px solid rgba(52,199,89,.3);
+        /* ── ВОДИТЕЛЬ ── */
+        .otr-driver-section {padding:14px 20px 0;}
+        .otr-driver-row {display:flex;align-items:center;gap:12px;}
+        .otr-driver-avatar {
+            width:52px;height:52px;border-radius:50%;flex-shrink:0;
+            background:var(--otr-row-bg);
             display:flex;align-items:center;justify-content:center;
-            font-size:22px;font-weight:700;color:#34c759;
-            overflow:hidden;
+            font-size:22px;font-weight:700;color:var(--otr-text-muted);overflow:hidden;
         }
-        .otr-driver-info{flex:1;min-width:0;}
-        .otr-driver-name{
-            font-size:17px;font-weight:700;color:#f0f0f0;
-            white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+        .otr-driver-info   {flex:1;min-width:0;}
+        .otr-driver-name   {font-size:17px;font-weight:700;color:var(--otr-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .otr-driver-stars  {display:flex;align-items:center;gap:2px;margin-top:2px;}
+        .otr-star-full     {color:#ffd84d;font-size:13px;}
+        .otr-star-empty    {color:var(--otr-chevron);font-size:13px;}
+        .otr-rating-num    {font-size:13px;font-weight:700;color:var(--otr-text);margin-left:4px;}
+        .otr-driver-car-photo-wrap {display:flex;align-items:flex-end;flex-shrink:0;}
+        .otr-driver-photo  {
+            width:44px;height:44px;border-radius:50%;
+            background:var(--otr-row-bg);border:3px solid var(--otr-sheet-bg);
+            overflow:hidden;display:flex;align-items:center;justify-content:center;
+            font-size:18px;font-weight:700;color:var(--otr-text-muted);
         }
-        .otr-driver-stars{
-            display:flex;align-items:center;gap:3px;margin-top:3px;
+
+        /* ── НОМЕР АВТО ── */
+        .otr-plate-big {
+            display:inline-flex;align-items:center;
+            font-size:22px;font-weight:800;letter-spacing:.06em;
+            color:var(--otr-text);
+            background:var(--otr-plate-bg);border:2px solid var(--otr-plate-border);
+            border-radius:10px;padding:6px 16px;margin-top:12px;
+            font-family:-apple-system,BlinkMacSystemFont,monospace;
         }
-        .otr-star-full{color:#ffd84d;font-size:12px;}
-        .otr-star-empty{color:rgba(255,255,255,.2);font-size:12px;}
-        .otr-rating-num{
-            font-size:12px;color:rgba(255,255,255,.45);margin-left:5px;
+
+        /* ── 3 КНОПКИ ДЕЙСТВИЙ ── */
+        .otr-action-row {display:flex;gap:10px;margin-top:14px;}
+        .otr-action-btn {
+            flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+            gap:5px;padding:13px 8px;border-radius:14px;
+            font-size:12px;font-weight:600;color:var(--otr-text);
+            background:var(--otr-btn-bg);border:none;cursor:pointer;
+            transition:opacity .15s,transform .1s;text-decoration:none;
         }
-        .otr-driver-call{
-            width:48px;height:48px;border-radius:50%;
-            background:rgba(52,199,89,.12);
-            border:1.5px solid rgba(52,199,89,.25);
-            display:flex;align-items:center;justify-content:center;
-            font-size:18px;color:#34c759;
-            text-decoration:none;transition:background .2s;flex-shrink:0;
-        }
-        .otr-driver-call:active{background:rgba(52,199,89,.25);}
+        .otr-action-btn:active {transform:scale(.95);opacity:.7;}
+        .otr-action-btn i   {font-size:20px;}
+        .otr-btn-call   i   {color:#34c759;}
+        .otr-btn-safety i   {color:var(--otr-text);}
+        .otr-btn-share  i   {color:#007aff;}
 
         /* ── АВТО ── */
-        .otr-car-row{
-            display:flex;align-items:center;gap:10px;
-            padding:10px 20px 0;
-        }
-        .otr-car-color-dot{
-            width:14px;height:14px;border-radius:50%;
-            flex-shrink:0;
-            border:2px solid rgba(255,255,255,.15);
-        }
-        .otr-car-model{
-            font-size:14px;color:rgba(255,255,255,.75);font-weight:500;flex:1;
-        }
-        .otr-car-plate{
-            display:inline-flex;align-items:center;
-            font-size:13px;font-weight:800;letter-spacing:.1em;
-            color:#f0f0f0;
-            background:rgba(255,255,255,.1);
-            border:1.5px solid rgba(255,255,255,.18);
-            border-radius:7px;
-            padding:4px 10px;
-            font-family:monospace;
-        }
+        .otr-car-row       {display:flex;align-items:center;gap:8px;margin-top:3px;padding:0;}
+        .otr-car-color-dot {width:12px;height:12px;border-radius:50%;flex-shrink:0;border:1.5px solid var(--otr-sep);}
+        .otr-car-model     {font-size:14px;color:var(--otr-text-muted);font-weight:500;flex:1;}
+        .otr-car-plate     {display:none;}
 
         /* ── МАРШРУТ ── */
-        .otr-route-section{padding:14px 20px 0;}
-        .otr-route-title{
-            font-size:10px;font-weight:700;letter-spacing:.08em;
-            text-transform:uppercase;color:rgba(255,255,255,.3);
-            margin-bottom:10px;
+        .otr-route-section {padding:0 16px;}
+        .otr-route-title   {display:none;}
+        .otr-route-item {
+            display:flex;gap:14px;align-items:center;
+            padding:13px 0;border-bottom:1px solid var(--otr-sep);cursor:pointer;
         }
-        .otr-route-row{
-            display:flex;gap:14px;align-items:flex-start;
-            padding:6px 0;
+        .otr-route-item:last-child {border-bottom:none;}
+        .otr-route-icon-wrap {
+            width:36px;height:36px;border-radius:50%;flex-shrink:0;
+            display:flex;align-items:center;justify-content:center;font-size:15px;
         }
-        .otr-route-left{display:flex;flex-direction:column;align-items:center;padding-top:4px;}
-        .otr-route-dot{
-            width:10px;height:10px;border-radius:50%;flex-shrink:0;
-        }
-        .otr-route-connector{
-            width:2px;flex:1;min-height:18px;
-            background:linear-gradient(to bottom,rgba(255,255,255,.1),rgba(255,255,255,.1));
-            margin:3px 0;
-        }
-        .otr-route-addr-block{}
-        .otr-route-label{font-size:11px;color:rgba(255,255,255,.3);margin-bottom:2px;}
-        .otr-route-addr{font-size:14px;color:#e0e0e0;line-height:1.4;}
+        .otr-route-icon-from {background:#e5f9ee;color:#34c759;}
+        .otr-route-icon-to   {background:var(--otr-row-bg);color:var(--otr-text-muted);}
+        .otr-route-text-wrap {flex:1;min-width:0;}
+        .otr-route-label {font-size:11px;color:var(--otr-text-muted);font-weight:500;margin-bottom:2px;}
+        .otr-route-addr  {font-size:15px;font-weight:500;color:var(--otr-text);line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .otr-route-chevron {color:var(--otr-chevron);font-size:11px;flex-shrink:0;opacity:.6;}
 
-        /* ── ЦЕНА ── */
-        .otr-price-section{
-            display:flex;align-items:center;justify-content:space-between;
-            padding:12px 20px 0;
+        /* ── ДОБАВИТЬ ОСТАНОВКУ ── */
+        .otr-add-stop {
+            display:flex;gap:14px;align-items:center;
+            padding:13px 16px;border-top:1px solid var(--otr-sep);cursor:pointer;
         }
-        .otr-price-label{font-size:13px;color:rgba(255,255,255,.4);}
-        .otr-price-val{
-            font-size:24px;font-weight:800;color:#ffd84d;letter-spacing:-.5px;
+        .otr-add-stop-icon {
+            width:36px;height:36px;border-radius:50%;
+            background:var(--otr-btn-bg);
+            display:flex;align-items:center;justify-content:center;
+            font-size:15px;color:var(--otr-text-muted);
+            flex-shrink:0;
         }
-        .otr-pay-chip{
-            font-size:12px;color:rgba(255,255,255,.4);
-            background:rgba(255,255,255,.07);
-            border-radius:8px;padding:4px 10px;margin-left:8px;
-            font-weight:500;
+        .otr-add-stop-text    {font-size:15px;font-weight:500;color:var(--otr-text);flex:1;}
+        .otr-add-stop-chevron {color:var(--otr-chevron);font-size:11px;opacity:.6;}
+
+        /* ── НУЖНА ПОМОЩЬ ── */
+        .otr-help-row {
+            display:flex;align-items:center;gap:14px;
+            padding:13px 16px;border-top:1px solid var(--otr-sep);cursor:pointer;
+        }
+        .otr-help-icon   {width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--otr-text);flex-shrink:0;}
+        .otr-help-text   {font-size:15px;font-weight:500;color:var(--otr-text);flex:1;}
+        .otr-help-chevron{color:var(--otr-chevron);font-size:11px;opacity:.6;}
+
+        /* ── ОПЛАТА ── */
+        .otr-payment-row {
+            display:flex;align-items:center;gap:14px;
+            padding:13px 16px;border-top:1px solid var(--otr-sep);
+        }
+        .otr-payment-logo   {width:36px;height:36px;background:var(--otr-btn-bg);border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+        .otr-payment-text   {flex:1;min-width:0;}
+        .otr-payment-main   {font-size:15px;font-weight:500;color:var(--otr-text);}
+        .otr-payment-sub    {font-size:12px;color:var(--otr-text-muted);margin-top:1px;}
+        .otr-payment-change {
+            font-size:14px;font-weight:600;color:var(--otr-text);
+            background:var(--otr-btn-bg);border:none;border-radius:10px;
+            padding:7px 14px;cursor:pointer;flex-shrink:0;
         }
 
-        /* ── КНОПКИ ── */
-        .otr-footer{
-            padding:14px 20px 36px;
+        /* ── ПОКАЗАТЬ ВОДИТЕЛЮ ГДЕ Я ── */
+        .otr-share-loc-row {
+            display:flex;align-items:center;gap:14px;
+            padding:13px 16px;border-top:1px solid var(--otr-sep);
         }
-        .otr-actions{display:flex;gap:10px;margin-bottom:10px;}
-        .otr-action-btn{
-            flex:1;
-            display:flex;align-items:center;justify-content:center;gap:8px;
-            padding:14px;
-            border-radius:14px;
-            font-size:15px;font-weight:600;
-            cursor:pointer;transition:opacity .2s,transform .1s;
-            text-decoration:none;
+        .otr-share-loc-icon {width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--otr-text);flex-shrink:0;}
+        .otr-share-loc-text {font-size:15px;font-weight:500;color:var(--otr-text);flex:1;}
+        .otr-toggle {
+            width:51px;height:31px;background:var(--otr-toggle-off);
+            border-radius:16px;border:none;cursor:pointer;
+            position:relative;transition:background .25s;flex-shrink:0;
+            -webkit-appearance:none;appearance:none;
         }
-        .otr-action-btn:active{transform:scale(.97);}
-        .otr-btn-call{
-            background:rgba(52,199,89,.12);
-            border:1.5px solid rgba(52,199,89,.2);
-            color:#34c759;
+        .otr-toggle.on {background:#34c759;}
+        .otr-toggle::after {
+            content:'';position:absolute;top:2px;left:2px;
+            width:27px;height:27px;border-radius:50%;
+            background:#fff;box-shadow:0 2px 6px rgba(0,0,0,.25);
+            transition:transform .25s cubic-bezier(.26,1,.5,1);
         }
-        .otr-btn-msg{
-            background:rgba(255,255,255,.07);
-            border:1.5px solid rgba(255,255,255,.12);
-            color:#f0f0f0;
+        .otr-toggle.on::after {transform:translateX(20px);}
+
+        /* ── ПЕРЕВОЗЧИК ── */
+        .otr-carrier-row {
+            display:flex;align-items:center;gap:14px;
+            padding:13px 16px;border-top:1px solid var(--otr-sep);cursor:pointer;
         }
-        .otr-cancel-btn{
-            width:100%;padding:14px;
-            background:transparent;
-            border:1.5px solid rgba(255,68,68,.25);
-            border-radius:14px;
-            color:rgba(255,100,100,.9);
-            font-size:14px;font-weight:500;
-            cursor:pointer;transition:background .2s;
+        .otr-carrier-icon    {width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--otr-text-muted);flex-shrink:0;}
+        .otr-carrier-wrap    {flex:1;min-width:0;}
+        .otr-carrier-label   {font-size:11px;color:var(--otr-text-muted);}
+        .otr-carrier-name    {font-size:15px;font-weight:500;color:var(--otr-text);}
+        .otr-carrier-chevron {color:var(--otr-chevron);font-size:11px;opacity:.6;flex-shrink:0;}
+
+        /* ── ПОИСК ВОДИТЕЛЯ ── */
+        .otr-search-wrap {
+            display:flex;flex-direction:column;align-items:center;padding:18px 24px 8px;
         }
-        .otr-cancel-btn:active{background:rgba(255,68,68,.08);}
-        .otr-done-btn{
-            width:100%;padding:15px;
-            background:#ffd84d;border:none;border-radius:14px;
-            color:#141414;font-size:15px;font-weight:700;cursor:pointer;
+        .otr-search-ring {
+            width:76px;height:76px;border-radius:50%;
+            background:var(--otr-search-bg);
+            display:flex;align-items:center;justify-content:center;
+            position:relative;margin-bottom:14px;
+        }
+        .otr-search-ring::before,.otr-search-ring::after {
+            content:'';position:absolute;inset:-16px;border-radius:50%;
+            border:2px solid var(--otr-search-ring);
+            animation:otrSearchRing 2.2s ease-in-out infinite;
+        }
+        .otr-search-ring::after {animation-delay:.9s;}
+        @keyframes otrSearchRing{0%{transform:scale(.7);opacity:.8}100%{transform:scale(1.5);opacity:0}}
+        .otr-search-car   {font-size:28px;color:#ffd84d;animation:otrSearchCar 1.6s ease-in-out infinite;display:inline-block;}
+        @keyframes otrSearchCar{0%,100%{transform:translateX(-4px)}50%{transform:translateX(4px)}}
+        .otr-search-title {font-size:17px;font-weight:700;color:var(--otr-text);margin-bottom:6px;}
+        .otr-search-sub   {font-size:13px;color:var(--otr-text-muted);text-align:center;line-height:1.5;}
+
+        /* ── FOOTER / ОТМЕНА ── */
+        .otr-footer {padding:8px 16px 44px;}
+        .otr-cancel-btn {
+            width:100%;padding:14px 0;background:transparent;border:none;
+            border-top:1px solid var(--otr-sep);
+            color:var(--otr-cancel-color);
+            font-size:16px;font-weight:500;cursor:pointer;
+            display:block;text-align:center;
+            transition:opacity .15s;
+            letter-spacing:-.1px;
+            margin-top:4px;
+        }
+        .otr-cancel-btn:active {opacity:.5;}
+        .otr-done-btn {
+            width:100%;padding:16px;background:#ffd84d;border:none;border-radius:14px;
+            color:#141414;font-size:16px;font-weight:700;cursor:pointer;margin-top:4px;
         }
 
         /* ── РЕЙТИНГ ── */
-        .otr-rating-card{
-            background:#1c1c1e;border-radius:18px;
-            padding:20px;margin:10px 20px 0;
-            border:1px solid rgba(255,255,255,.07);
-            text-align:center;
+        .otr-rating-card {
+            background:var(--otr-row-bg);border-radius:18px;
+            padding:20px;margin:10px 20px 0;text-align:center;
         }
-        .otr-rating-title{font-size:16px;font-weight:700;color:#f0f0f0;margin-bottom:16px;}
-        .otr-stars-input{display:flex;gap:8px;justify-content:center;margin-bottom:18px;}
-        .otr-star-btn{
-            font-size:38px;cursor:pointer;
-            color:rgba(255,255,255,.15);
+        .otr-rating-title {font-size:16px;font-weight:700;color:var(--otr-text);margin-bottom:16px;}
+        .otr-stars-input  {display:flex;gap:8px;justify-content:center;margin-bottom:18px;}
+        .otr-star-btn {
+            font-size:38px;cursor:pointer;color:var(--otr-chevron);
             transition:all .15s;background:none;border:none;padding:0;
         }
-        .otr-star-btn.lit{color:#ffd84d;transform:scale(1.12);}
-        .otr-rate-btn{
-            padding:13px 48px;
-            background:#ffd84d;border:none;border-radius:14px;
-            color:#141414;font-size:15px;font-weight:700;cursor:pointer;
+        .otr-star-btn.lit {color:#ffd84d;transform:scale(1.12);}
+        .otr-rate-btn {
+            padding:13px 48px;background:var(--otr-text);border:none;border-radius:14px;
+            color:var(--otr-sheet-bg);font-size:15px;font-weight:700;cursor:pointer;
         }
 
-        /* ── FLASH УВЕДОМЛЕНИЯ ── */
-        .otr-flash-overlay{
+        /* ── FLASH ── */
+        .otr-flash-overlay {
             position:fixed;inset:0;z-index:9100;
             display:flex;align-items:center;justify-content:center;
-            background:rgba(0,0,0,.55);
-            backdrop-filter:blur(5px);
+            background:rgba(0,0,0,.45);backdrop-filter:blur(8px);
             animation:otrFlashBg .25s ease;
         }
         @keyframes otrFlashBg{from{opacity:0}to{opacity:1}}
-        .otr-flash-card{
-            background:#1c1c1e;border-radius:26px;
-            padding:36px 28px;text-align:center;
-            max-width:310px;width:88%;
+        .otr-flash-card {
+            background:var(--otr-sheet-bg);border-radius:26px;
+            padding:36px 28px;text-align:center;max-width:310px;width:88%;
             animation:otrFlashCard .35s cubic-bezier(.34,1.56,.64,1);
         }
         @keyframes otrFlashCard{from{transform:scale(.65) translateY(30px);opacity:0}to{transform:none;opacity:1}}
-        .otr-flash-ico{
-            width:72px;height:72px;border-radius:50%;
-            display:flex;align-items:center;justify-content:center;
-            margin:0 auto 18px;font-size:30px;
-        }
-        .otr-flash-title{font-size:21px;font-weight:800;color:#f0f0f0;margin-bottom:8px;}
-        .otr-flash-sub{font-size:14px;color:rgba(255,255,255,.45);line-height:1.5;}
+        .otr-flash-ico   {width:72px;height:72px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 18px;font-size:30px;}
+        .otr-flash-title {font-size:21px;font-weight:800;color:var(--otr-text);margin-bottom:8px;}
+        .otr-flash-sub   {font-size:14px;color:var(--otr-text-muted);line-height:1.5;}
 
         /* ── ARRIVING PULSE ── */
-        @keyframes otrArrivingPulse{
-            0%,100%{box-shadow:0 0 0 0 rgba(255,216,77,.5)}
-            60%{box-shadow:0 0 0 20px rgba(255,216,77,0)}
-        }
+        @keyframes otrArrivingPulse{0%,100%{box-shadow:0 0 0 0 rgba(255,216,77,.6)}60%{box-shadow:0 0 0 20px rgba(255,216,77,0)}}
         .otr-arriving-pulse{animation:otrArrivingPulse 1.6s ease-in-out infinite;}
 
-        /* ── МИНИ-КАРТОЧКА (Яндекс Go floating card) ── */
-        #activeOrderCard{
+        /* ── МИНИ-КАРТОЧКА ── */
+        #activeOrderCard {
             position:fixed;left:0;right:0;bottom:0;z-index:8900;
             padding:0 12px 16px;pointer-events:none;
             transform:translateY(130%);
             transition:transform .4s cubic-bezier(.34,1.26,.64,1);
         }
-        #activeOrderCard.aoc-visible{transform:translateY(0);pointer-events:auto;}
-        .aoc-inner{
-            background:#1c1c1e;border-radius:20px;overflow:hidden;
-            box-shadow:0 -2px 30px rgba(0,0,0,.5);
-            border:1px solid rgba(255,255,255,.08);
+        #activeOrderCard.aoc-visible {transform:translateY(0);pointer-events:auto;}
+        .aoc-inner {
+            background:var(--otr-sheet-bg, #fff);border-radius:20px;overflow:hidden;
+            box-shadow:0 4px 30px rgba(0,0,0,.18);
         }
-        .aoc-status-bar{height:3px;background:#ffd84d;transition:background .4s;}
-        .aoc-body{display:flex;align-items:center;gap:14px;padding:14px 16px;}
-        .aoc-icon{
-            width:46px;height:46px;border-radius:50%;
-            display:flex;align-items:center;justify-content:center;
-            font-size:18px;flex-shrink:0;transition:background .4s;
-        }
-        .aoc-info{flex:1;min-width:0;}
-        .aoc-status{font-size:14px;font-weight:700;color:#f0f0f0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-        .aoc-sub{font-size:12px;color:rgba(255,255,255,.4);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-        .aoc-right{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;}
-        .aoc-eta{font-size:14px;font-weight:700;color:#ffd84d;}
-        .aoc-chevron{color:rgba(255,255,255,.2);font-size:14px;}
-        .aoc-pulse{animation:aocPulse 1.8s ease-in-out infinite;}
+        .aoc-status-bar {height:3px;background:#ffd84d;transition:background .4s;}
+        .aoc-body   {display:flex;align-items:center;gap:14px;padding:14px 16px;}
+        .aoc-icon   {width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;transition:background .4s;}
+        .aoc-info   {flex:1;min-width:0;}
+        .aoc-status {font-size:14px;font-weight:700;color:var(--otr-text, #1c1c1e);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .aoc-sub    {font-size:12px;color:var(--otr-text-muted, rgba(60,60,67,.55));margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+        .aoc-right  {display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0;}
+        .aoc-eta    {font-size:14px;font-weight:700;color:var(--otr-text, #1c1c1e);}
+        .aoc-chevron{color:var(--otr-chevron, #c7c7cc);opacity:.6;}
+        .aoc-pulse  {animation:aocPulse 1.8s ease-in-out infinite;}
         @keyframes aocPulse{0%,100%{opacity:1}50%{opacity:.45}}
 
-        /* ── ИНДИКАТОР ОШИБКИ СЕТИ ── */
-        .otr-net-error{
+        /* ── ОШИБКА СЕТИ ── */
+        .otr-net-error {
             position:fixed;bottom:130px;left:50%;transform:translateX(-50%);
-            background:rgba(255,68,68,.92);color:#fff;
-            padding:10px 20px;border-radius:22px;
-            font-size:13px;font-weight:600;z-index:9999;
-            backdrop-filter:blur(8px);
-            display:none;white-space:nowrap;
+            background:rgba(255,59,48,.92);color:#fff;padding:10px 20px;
+            border-radius:22px;font-size:13px;font-weight:600;z-index:9999;
+            backdrop-filter:blur(8px);display:none;white-space:nowrap;
         }
-        </style>`;
+
+        </style>`; 
 
         // ── Определяем цвет машины из строки ─────────────────────────────────
         function carColorFromString(str) {
@@ -2557,81 +2658,209 @@ document.addEventListener('DOMContentLoaded', function() {
             return s;
         }
 
-        // ── Начальный HTML оверлея ─────────────────────────────────────────────
+        // ── Начальный HTML оверлея (Яндекс Go точная копия) ──────────────────
         function buildOverlayHtml(orderId, info) {
+            const payLabel = (info.payment === 'cash') ? 'наличными' : (info.payment ? 'картой' : 'наличными');
+            const price = info.price ? info.price + ' ₸' : '—';
             return `
             <div id="otrMapWrap">
                 <div id="otrMapEl"></div>
                 <div class="otr-map-topbar">
-                    <button class="otr-back" onclick="minimizeOrderTracking()"><i class="fas fa-arrow-left"></i></button>
-                    <div class="otr-map-order-num">Заказ №${orderId}</div>
+                    <button class="otr-back" onclick="collapseOrderSheet()"><i class="fas fa-chevron-left"></i></button>
                 </div>
                 <div class="otr-eta-badge" id="otrEtaBadge">
                     <span class="otr-eta-car">🚗</span><span id="otrEtaText"></span>
                 </div>
             </div>
             <div class="otr-sheet" id="otrSheet">
-                <div class="otr-sheet-handle"></div>
-                <div id="otrStatusRow" class="otr-status-row">
+                <!-- РУЧКА ПЕРЕТАСКИВАНИЯ -->
+                <div class="otr-handle-zone" id="otrHandleZone" >
+                    <div class="otr-sheet-handle"></div>
+                </div>
+                <!-- СТАТУС ЗАКАЗА -->
+                <div id="otrStatusRow" class="otr-status-row" >
                     <div class="otr-status-left">
                         <div class="otr-status-label">Статус заказа</div>
-                        <div class="otr-status-main" id="otrStatusMain">Создаём заказ…</div>
+                        <div class="otr-status-main" id="otrStatusMain">Ищем водителя…</div>
                         <div class="otr-status-sub" id="otrStatusSub"></div>
                     </div>
-                    <div class="otr-eta-right" id="otrEtaRight" style="display:none">
+                    <div class="otr-eta-right" id="otrEtaRight">
                         <div class="otr-eta-mins" id="otrEtaMins">—</div>
                         <div class="otr-eta-unit">мин</div>
                     </div>
+
                 </div>
-                <div id="otrSheetBody">
-                    <!-- Поиск водителя -->
-                    <div class="otr-search-wrap">
-                        <div class="otr-search-ring">
-                            <i class="fas fa-car otr-search-car"></i>
+                <!-- СКРОЛЛИРУЕМОЕ ТЕЛО -->
+                <div id="otrSheetScroll">
+                    <div id="otrSheetBody">
+                        <div class="otr-search-wrap">
+                            <div class="otr-search-ring"><i class="fas fa-taxi otr-search-car"></i></div>
+                            <div class="otr-search-title">Ищем водителя…</div>
+                            <div class="otr-search-sub">Обычно это занимает меньше минуты</div>
                         </div>
-                        <div class="otr-search-title">Ищем водителя…</div>
-                        <div class="otr-search-sub">Обычно это занимает меньше минуты</div>
-                    </div>
-                    <div class="otr-sep"></div>
-                    <!-- Маршрут -->
-                    <div class="otr-route-section">
-                        <div class="otr-route-title">Маршрут</div>
-                        <div class="otr-route-row">
-                            <div class="otr-route-left">
-                                <div class="otr-route-dot" style="background:#34c759"></div>
-                                <div class="otr-route-connector"></div>
+                        <div class="otr-sep"></div>
+                        <div class="otr-route-section">
+                            <div class="otr-route-item">
+                                <div class="otr-route-icon-wrap otr-route-icon-from"><i class="fas fa-person-walking"></i></div>
+                                <div class="otr-route-text-wrap">
+                                    <div class="otr-route-label">Подача в ~—</div>
+                                    <div class="otr-route-addr">${info.from || '—'}</div>
+                                </div>
+                                <div class="otr-route-chevron"><svg width="8" height="13" viewBox="0 0 8 13" fill="none"><path d="M1 1l6 5.5L1 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
                             </div>
-                            <div class="otr-route-addr-block">
-                                <div class="otr-route-label">Откуда</div>
-                                <div class="otr-route-addr">${info.from || '—'}</div>
-                            </div>
-                        </div>
-                        <div class="otr-route-row">
-                            <div class="otr-route-left">
-                                <div class="otr-route-dot" style="background:#ffd84d"></div>
-                            </div>
-                            <div class="otr-route-addr-block">
-                                <div class="otr-route-label">Куда</div>
-                                <div class="otr-route-addr">${info.to || '—'}</div>
+                            <div class="otr-route-item">
+                                <div class="otr-route-icon-wrap otr-route-icon-to"><i class="fas fa-flag"></i></div>
+                                <div class="otr-route-text-wrap">
+                                    <div class="otr-route-label">Прибытие</div>
+                                    <div class="otr-route-addr">${info.to || '—'}</div>
+                                </div>
+                                <div class="otr-route-chevron"><svg width="8" height="13" viewBox="0 0 8 13" fill="none"><path d="M1 1l6 5.5L1 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
                             </div>
                         </div>
-                    </div>
-                    <div class="otr-sep"></div>
-                    <!-- Цена -->
-                    <div class="otr-price-section">
-                        <div class="otr-price-label">Стоимость</div>
-                        <div style="display:flex;align-items:baseline;gap:0">
-                            <div class="otr-price-val">${info.price || '—'} ₸</div>
+                        <div class="otr-add-stop">
+                            <div class="otr-add-stop-icon"><i class="fas fa-plus"></i></div>
+                            <div class="otr-add-stop-text">Добавить остановку</div>
+                            <div class="otr-add-stop-chevron"><svg width="8" height="13" viewBox="0 0 8 13" fill="none"><path d="M1 1l6 5.5L1 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                        </div>
+                        <div class="otr-help-row">
+                            <div class="otr-help-icon"><i class="fas fa-headset"></i></div>
+                            <div class="otr-help-text">Нужна помощь</div>
+                            <div class="otr-help-chevron"><svg width="8" height="13" viewBox="0 0 8 13" fill="none"><path d="M1 1l6 5.5L1 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+                        </div>
+                        <div class="otr-payment-row">
+                            <div class="otr-payment-logo">
+                                ${(info.payment === 'cash' || !info.payment) ? '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="1" y="4" width="18" height="12" rx="2" stroke="#34c759" stroke-width="1.5"/><path d="M1 8h18" stroke="#34c759" stroke-width="1.5"/><rect x="3" y="11" width="5" height="2" rx="1" fill="#34c759"/></svg>' : '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="1" y="4" width="18" height="12" rx="2" stroke="#007aff" stroke-width="1.5"/><path d="M1 7h18" stroke="#007aff" stroke-width="2"/></svg>'}
+                            </div>
+                            <div class="otr-payment-text">
+                                <div class="otr-payment-main" id="otrPayMain">Оплата ${payLabel}: ${price}</div>
+                                <div class="otr-payment-sub" id="otrPaySub"></div>
+                            </div>
+                            <button class="otr-payment-change">Изменить</button>
+                        </div>
+                        <div class="otr-share-loc-row">
+                            <div class="otr-share-loc-icon"><i class="fas fa-location-crosshairs"></i></div>
+                            <div class="otr-share-loc-text">Показать водителю, где я</div>
+                            <button class="otr-toggle" id="otrShareToggle" onclick="this.classList.toggle('on')"></button>
+                        </div>
+                        <div class="otr-carrier-row">
+                            <div class="otr-carrier-icon"><i class="fas fa-circle-info"></i></div>
+                            <div class="otr-carrier-wrap">
+                                <div class="otr-carrier-label">Перевозчик и детали</div>
+                                <div class="otr-carrier-name">Timofeyev Transfer</div>
+                            </div>
+                            <div class="otr-carrier-chevron"><svg width="8" height="13" viewBox="0 0 8 13" fill="none"><path d="M1 1l6 5.5L1 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
                         </div>
                     </div>
                 </div>
+                <!-- FOOTER: отмена -->
                 <div class="otr-footer" id="otrFooter">
-                    <button class="otr-cancel-btn" onclick="cancelActiveOrder(${orderId})">Отменить заказ</button>
+                    <button class="otr-cancel-btn" onclick="cancelActiveOrder(${orderId})">Отменить поездку</button>
                 </div>
             </div>`;
         }
 
-        function openOrderTracking(orderId, info) {
+        // ── DRAGGABLE SHEET ───────────────────────────────────────────────────
+        window._sheetExpanded = true;
+
+        window.expandOrderSheet = function() {
+            if (window._expandOrderSheet) { window._expandOrderSheet(); return; }
+            const sheet = document.getElementById('otrSheet');
+            if (!sheet) return;
+            window._sheetExpanded = true;
+            sheet.classList.remove('otr-collapsed');
+            sheet.style.height = '';
+            const backBtn = document.querySelector('.otr-back');
+            if (backBtn) backBtn.style.display = '';
+            setTimeout(() => { if (typeof _trackingMap !== 'undefined' && _trackingMap) _trackingMap.container.fitToViewport(); }, 350);
+        };
+
+        window.toggleSheetExpand = function() {
+            const sheet = document.getElementById('otrSheet');
+            if (!sheet) return;
+            if (sheet.classList.contains('otr-collapsed')) window.expandOrderSheet();
+            else window.collapseOrderSheet();
+        };
+
+        window.collapseOrderSheet = function() {
+            if (window._collapseOrderSheet) { window._collapseOrderSheet(); return; }
+            const sheet = document.getElementById('otrSheet');
+            if (!sheet) return;
+            window._sheetExpanded = false;
+            sheet.classList.add('otr-collapsed');
+            sheet.style.height = '';
+            const backBtn = document.querySelector('.otr-back');
+            if (backBtn) backBtn.style.display = 'none';
+            setTimeout(() => { if (typeof _trackingMap !== 'undefined' && _trackingMap) _trackingMap.container.fitToViewport(); }, 350);
+        };
+
+        function initSheetDrag(sheet) {
+            // Простой toggle как в Яндекс Go — без drag, только кнопки
+            if (!sheet) return;
+
+            function expandSheet() {
+                window._sheetExpanded = true;
+                sheet.classList.remove('otr-collapsed');
+                sheet.style.height = '';
+                sheet.style.transition = '';
+                const backBtn = document.querySelector('.otr-back');
+                if (backBtn) backBtn.style.display = '';
+                const chevron = document.getElementById('otrStatusChevron');
+                if (chevron) chevron.setAttribute('data-open','1');
+                setTimeout(() => {
+                    if (typeof _trackingMap !== 'undefined' && _trackingMap) _trackingMap.container.fitToViewport();
+                }, 350);
+            }
+
+            function collapseSheet() {
+                window._sheetExpanded = false;
+                sheet.classList.add('otr-collapsed');
+                sheet.style.height = '';
+                sheet.style.transition = '';
+                const backBtn = document.querySelector('.otr-back');
+                if (backBtn) backBtn.style.display = 'none';
+                const chevron = document.getElementById('otrStatusChevron');
+                if (chevron) chevron.removeAttribute('data-open');
+                setTimeout(() => {
+                    if (typeof _trackingMap !== 'undefined' && _trackingMap) _trackingMap.container.fitToViewport();
+                }, 350);
+            }
+
+            // Кнопка chevron (^) — сворачивает
+            const chevron = document.getElementById('otrStatusChevron');
+            if (chevron) {
+                chevron.style.cursor = 'pointer';
+                chevron.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    if (sheet.classList.contains('otr-collapsed')) expandSheet();
+                    else collapseSheet();
+                });
+            }
+
+            // Ручка + статус-строка — тогглят
+            const handleZone = sheet.querySelector('.otr-handle-zone');
+            const statusRow  = sheet.querySelector('.otr-status-row');
+
+            [handleZone, statusRow].forEach(el => {
+                if (!el) return;
+                el.style.cursor = 'pointer';
+                el.addEventListener('click', function(e) {
+                    if (sheet.classList.contains('otr-collapsed')) expandSheet();
+                    else collapseSheet();
+                });
+            });
+
+            // Тап по свёрнутому листу (любое место) — разворачивает
+            sheet.addEventListener('click', function(e) {
+                if (!sheet.classList.contains('otr-collapsed')) return;
+                expandSheet();
+            });
+
+            // Экспортируем для внешнего использования
+            window._expandOrderSheet  = expandSheet;
+            window._collapseOrderSheet = collapseSheet;
+        }
+
+                function openOrderTracking(orderId, info) {
             _trackingOrderId   = orderId;
             _lastTrackedStatus = null;
 
@@ -2645,9 +2874,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.head.insertAdjacentHTML('beforeend', OTR_STYLES);
             }
 
-            overlay.style.display = 'flex';
-            overlay.style.flexDirection = 'column';
+            overlay.style.display = 'block';
+            overlay.style.flexDirection = '';
             overlay.innerHTML = buildOverlayHtml(orderId, info);
+            window._sheetExpanded = true;
+            setTimeout(() => initSheetDrag(document.getElementById('otrSheet')), 50);
+            // fitToViewport после того как карта инициализируется
+            setTimeout(() => { if (_trackingMap) _trackingMap.container.fitToViewport(); }, 600);
 
             if (_trackingInterval) clearInterval(_trackingInterval);
             _pollFailCount = 0;
@@ -2678,13 +2911,23 @@ document.addEventListener('DOMContentLoaded', function() {
                         clearInterval(_trackingInterval); _trackingInterval = null;
                     }
                 } else if (!order) {
+                    // Активного заказа нет — значит завершён или отменён
+                    clearInterval(_trackingInterval); _trackingInterval = null;
                     try {
                         const full = await TF.orders.get(String(orderId));
                         if (_lastTrackedStatus !== full.status) onStatusChanged(full);
                         _lastTrackedStatus = full.status;
                         renderTrackingInfo(orderId, full);
-                        clearInterval(_trackingInterval);
-                    } catch {}
+                        if (['cancelled','completed'].includes(full.status)) {
+                            resetOrderButton();
+                            hideActiveOrderCard();
+                        }
+                    } catch {
+                        // Заказ вообще не найден — просто разблокируем кнопку
+                        resetOrderButton();
+                        hideActiveOrderCard();
+                        setTimeout(() => window.closeOrderTracking && window.closeOrderTracking(), 500);
+                    }
                 }
             } catch (e) {
                 _pollFailCount++;
@@ -2708,35 +2951,70 @@ document.addEventListener('DOMContentLoaded', function() {
             if (el) el.style.display = 'none';
         }
 
+        // Сбрасывает кнопку "Заказать" в исходное состояние
+        function resetOrderButton() {
+            const btn = document.getElementById('orderButton');
+            if (btn) {
+                btn.disabled = false;
+                const txt = document.getElementById('orderButtonText');
+                if (txt) txt.textContent = 'Заказать трансфер';
+            }
+        }
+
         function onStatusChanged(order) {
             const overlay = document.getElementById('orderTrackingOverlay');
-            const overlayHidden = !overlay || overlay.style.display === 'none';
             if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
 
             if (order.status === 'accepted') {
                 showDriverFoundFlash(order);
-                if (overlayHidden) setTimeout(window.reopenOrderTracking, 700);
+                setTimeout(() => {
+                    const sh = document.getElementById('otrSheet');
+                    if (sh) {
+                        sh.classList.remove('otr-state-mini','otr-collapsed');
+                        if (!sh.classList.contains('otr-state-mid') && !sh.classList.contains('otr-state-full')) {
+                            sh.classList.add('otr-state-mid');
+                            window._sheetState = 'mid';
+                        }
+                    }
+                    if (overlay && overlay.style.display === 'none') window.reopenOrderTracking();
+                }, 700);
             }
             if (order.status === 'arriving') {
                 showArrivingFlash();
-                if (overlayHidden) setTimeout(window.reopenOrderTracking, 700);
+                setTimeout(() => {
+                    if (overlay && overlay.style.display === 'none') window.reopenOrderTracking();
+                }, 700);
             }
             if (order.status === 'in_progress') {
                 showInProgressFlash();
             }
             if (order.status === 'completed') {
                 showCompletedFlash();
+                resetOrderButton();
+            }
+            if (order.status === 'cancelled') {
+                // Заказ отменён (водителем или пассажиром) — закрываем трекинг и разблокируем кнопку
+                clearInterval(_trackingInterval); _trackingInterval = null;
+                _trackingOrderId = null;
+                _lastTrackedStatus = null;
+                hideActiveOrderCard();
+                resetOrderButton();
+                setTimeout(() => window.closeOrderTracking(), 1500);
             }
         }
 
         function _showFlash(iconHtml, title, sub, borderColor) {
+            const isLight = document.body.classList.contains('light-theme');
+            const bgColor   = isLight ? '#ffffff'              : '#1e1e1e';
+            const textColor = isLight ? '#1c1c1e'              : '#f0f0f0';
+            const subColor  = isLight ? 'rgba(60,60,67,.55)'   : 'rgba(255,255,255,.5)';
             const flash = document.createElement('div');
             flash.className = 'otr-flash-overlay';
             flash.innerHTML = `
-            <div class="otr-flash-card" style="border:1px solid ${borderColor}">
+            <div class="otr-flash-card" style="background:${bgColor};border:1px solid ${borderColor};box-shadow:0 8px 40px rgba(0,0,0,0.55)">
                 <div class="otr-flash-ico">${iconHtml}</div>
-                <div class="otr-flash-title">${title}</div>
-                <div class="otr-flash-sub">${sub}</div>
+                <div class="otr-flash-title" style="color:${textColor}">${title}</div>
+                <div class="otr-flash-sub"   style="color:${subColor}">${sub}</div>
             </div>`;
             document.body.appendChild(flash);
             flash.addEventListener('click', () => flash.remove());
@@ -2748,8 +3026,8 @@ document.addEventListener('DOMContentLoaded', function() {
             _showFlash(
                 `<i class="fas fa-check" style="color:#34c759;font-size:32px"></i>`,
                 'Водитель найден!',
-                `${order.driver_name || 'Водитель'} едет к вам${carStr ? '<br><span style="font-size:13px">' + carStr + '</span>' : ''}`,
-                'rgba(52,199,89,.25)'
+                `${order.driver_name || 'Водитель'} едет к вам${carStr ? '<br><span style="font-size:13px;color:rgba(60,60,67,.6)">' + carStr + '</span>' : ''}`,
+                'rgba(52,199,89,.2)'
             );
         }
 
@@ -2758,7 +3036,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 `<i class="fas fa-map-marker-alt" style="color:#ffd84d;font-size:32px"></i>`,
                 'Водитель на месте!',
                 'Выходите — водитель ждёт вас',
-                'rgba(255,216,77,.25)'
+                'rgba(255,216,77,.2)'
             );
         }
 
@@ -2767,7 +3045,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 `<i class="fas fa-route" style="color:#007aff;font-size:32px"></i>`,
                 'Поездка началась!',
                 'Хорошей дороги 🚗',
-                'rgba(0,122,255,.25)'
+                'rgba(0,122,255,.2)'
             );
         }
 
@@ -2776,7 +3054,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 `<i class="fas fa-flag-checkered" style="color:#34c759;font-size:32px"></i>`,
                 'Поездка завершена!',
                 'Надеемся, вам понравилось путешествие',
-                'rgba(52,199,89,.25)'
+                'rgba(52,199,89,.2)'
             );
         }
 
@@ -2791,18 +3069,21 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!body) return;
 
             const cfg = ORDER_STATUS_CFG[order.status] || { text: order.status, sub: '', icon:'fa-circle', color:'#ffd84d' };
-            if (statusMain) statusMain.textContent = cfg.text;
+            // Яндекс Go: в заголовке показываем "Через ~X мин приедет"
+            let statusText = cfg.text;
+            if (order.status === 'accepted' && _etaMinutes) {
+                statusText = _etaMinutes <= 1 ? 'Водитель рядом!' : `Через ~${_etaMinutes} мин приедет`;
+            }
+            if (statusMain) statusMain.textContent = statusText;
             if (statusSub)  statusSub.textContent  = order.status === 'cancelled'
                 ? (order.cancel_reason || 'Заказ был отменён') : cfg.sub;
 
-            // ETA справа — показываем только когда водитель едет
+            // ETA справа — скрываем (Яндекс Go встраивает ETA в заголовок)
             if (etaRight) {
-                const showEta = ['accepted','arriving'].includes(order.status) && _etaMinutes;
-                etaRight.style.display = showEta ? 'block' : 'none';
-                if (showEta && etaMins) etaMins.textContent = _etaMinutes;
+                etaRight.style.display = 'none';
             }
 
-            // Показываем ETA badge на карте
+            // ETA badge на карте
             const etaBadge = document.getElementById('otrEtaBadge');
             const etaText  = document.getElementById('otrEtaText');
             if (etaBadge && etaText) {
@@ -2831,96 +3112,136 @@ document.addEventListener('DOMContentLoaded', function() {
             body.dataset.lastStatus = order.status;
 
             const price    = order.price ? Number(order.price).toLocaleString('ru-RU') + ' ₸' : '—';
-            const payLabel = order.payment_method === 'cash' ? 'Наличными' : 'Картой';
+            const payLabel = order.payment_method === 'cash' ? 'наличными' : 'картой';
 
-            // Блок водителя
+            // ── Блок водителя (Яндекс Go стиль) ──
             let driverBlock = '';
             if (order.driver_name || order.car_make) {
                 const r      = parseFloat(order.driver_rating) || 0;
                 const carStr = [order.car_make, order.car_model].filter(Boolean).join(' ');
                 const carColor = carColorFromString(order.car_color);
                 const initial = (order.driver_name || 'В').charAt(0).toUpperCase();
+                const starsFull = Math.round(r);
+
+                let starsHtml = '';
+                for (let i=1;i<=5;i++) {
+                    starsHtml += `<i class="fas fa-star ${i<=starsFull?'otr-star-full':'otr-star-empty'}"></i>`;
+                }
 
                 driverBlock = `
-                <div class="otr-sep"></div>
+                <div class="otr-sep" style="margin-bottom:0"></div>
                 <div class="otr-driver-section">
-                    <div class="otr-route-title">Водитель</div>
                     <div class="otr-driver-row">
                         <div class="otr-driver-avatar">${initial}</div>
                         <div class="otr-driver-info">
-                            <div class="otr-driver-name">${order.driver_name || 'Водитель'}</div>
-                            <div class="otr-driver-stars">
-                                ${renderStars(r)}
-                                ${r ? `<span class="otr-rating-num">${r.toFixed(1)}</span>` : ''}
-                            </div>
+                            <div class="otr-driver-name">${order.driver_name || 'Водитель'} ${r ? '<span class="otr-rating-num">★' + r.toFixed(2) + '</span>' : ''}</div>
+                            ${(carStr || order.car_color) ? `<div class="otr-car-row" style="margin-top:3px;padding:0;">
+                                <div class="otr-car-color-dot" style="background:${carColor}"></div>
+                                <div class="otr-car-model">${carStr}${order.car_color ? ', ' + order.car_color : ''}</div>
+                            </div>` : ''}
                         </div>
-                        ${order.driver_phone ? `<a href="tel:${order.driver_phone}" class="otr-driver-call"><i class="fas fa-phone"></i></a>` : ''}
+                        <div class="otr-driver-car-photo-wrap">
+                            <div class="otr-driver-photo">${initial}</div>
+                        </div>
                     </div>
-                    ${(carStr || order.car_number || order.car_color) ? `
-                    <div class="otr-car-row">
-                        <div class="otr-car-color-dot" style="background:${carColor}"></div>
-                        <div class="otr-car-model">${carStr}${order.car_color ? ', ' + order.car_color : ''}</div>
-                        ${order.car_number ? `<div class="otr-car-plate">${order.car_number}</div>` : ''}
-                    </div>` : ''}
-                    ${order.driver_phone ? `
-                    <div class="otr-actions" style="margin-top:14px">
-                        <a href="tel:${order.driver_phone}" class="otr-action-btn otr-btn-call"><i class="fas fa-phone"></i> Позвонить</a>
-                        <button class="otr-action-btn otr-btn-msg"><i class="fas fa-comment"></i> Написать</button>
-                    </div>` : ''}
+                    ${order.car_number ? `<div class="otr-plate-big">${order.car_number}</div>` : ''}
+                    <!-- 3 КНОПКИ: Связаться, Безопасность, Поделиться -->
+                    <div class="otr-action-row">
+                        ${order.driver_phone ? `<a href="tel:${order.driver_phone}" class="otr-action-btn otr-btn-call"><i class="fas fa-phone"></i><span>Связаться</span></a>` : `<button class="otr-action-btn otr-btn-call" style="opacity:.4" disabled><i class="fas fa-phone"></i><span>Связаться</span></button>`}
+                        <button class="otr-action-btn otr-btn-safety"><i class="fas fa-shield-halved"></i><span>Безопасность</span></button>
+                        <button class="otr-action-btn otr-btn-share" onclick="if(navigator.share)navigator.share({title:'Timofeyev Transfer',text:'Слежу за поездкой №${orderId}'})"><i class="fas fa-share-nodes"></i><span>Поделиться</span></button>
+                    </div>
                 </div>`;
             }
 
-            // Поиск (только pending)
+            // ── Поиск (только pending) ──
             const searchBlock = order.status === 'pending' ? `
                 <div class="otr-search-wrap">
-                    <div class="otr-search-ring"><i class="fas fa-car otr-search-car"></i></div>
+                    <div class="otr-search-ring"><i class="fas fa-taxi otr-search-car"></i></div>
                     <div class="otr-search-title">Ищем водителя…</div>
                     <div class="otr-search-sub">Обычно это занимает меньше минуты</div>
                 </div>` : '';
 
-            // Рейтинг (completed)
+            // ── Рейтинг (completed) ──
             const ratingBlock = order.status === 'completed' ? `
-                <div class="otr-sep" style="margin-top:14px"></div>
+                <div class="otr-sep" style="margin-bottom:0"></div>
                 <div class="otr-rating-card">
                     <div class="otr-rating-title">Как прошла поездка?</div>
                     <div class="otr-stars-input" id="otrStarsInput">
                         ${[1,2,3,4,5].map(i=>`<button class="otr-star-btn" onclick="selectRatingStar(${i})">★</button>`).join('')}
                     </div>
-                    <button class="otr-rate-btn" onclick="submitOrderRating(${orderId})">Оценить</button>
+                    <button class="otr-rate-btn" onclick="submitOrderRating(${orderId})">Оценить поездку</button>
                 </div>` : '';
+
+            // ── ETA label ──
+            const etaLabel = _etaMinutes && ['accepted','arriving'].includes(order.status)
+                ? `Подача в ~${_etaMinutes} мин`
+                : 'Подача';
 
             body.innerHTML = `
             ${searchBlock}
             ${driverBlock}
-            <div class="otr-sep"></div>
+            <div class="otr-sep" style="margin-bottom:0"></div>
+            <!-- МАРШРУТ -->
             <div class="otr-route-section">
-                <div class="otr-route-title">Маршрут</div>
-                <div class="otr-route-row">
-                    <div class="otr-route-left">
-                        <div class="otr-route-dot" style="background:#34c759"></div>
-                        <div class="otr-route-connector"></div>
+                <div class="otr-route-item">
+                    <div class="otr-route-icon-wrap otr-route-icon-from">
+                        <i class="fas fa-person-walking"></i>
                     </div>
-                    <div class="otr-route-addr-block">
-                        <div class="otr-route-label">Откуда</div>
+                    <div class="otr-route-text-wrap">
+                        <div class="otr-route-label">${etaLabel}</div>
                         <div class="otr-route-addr">${order.from_address || '—'}</div>
                     </div>
+                    <div class="otr-route-chevron"><svg width="8" height="13" viewBox="0 0 8 13" fill="none"><path d="M1 1l6 5.5L1 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
                 </div>
-                <div class="otr-route-row">
-                    <div class="otr-route-left">
-                        <div class="otr-route-dot" style="background:#ffd84d"></div>
+                <div class="otr-route-item">
+                    <div class="otr-route-icon-wrap otr-route-icon-to">
+                        <i class="fas fa-flag"></i>
                     </div>
-                    <div class="otr-route-addr-block">
-                        <div class="otr-route-label">Куда</div>
+                    <div class="otr-route-text-wrap">
+                        <div class="otr-route-label">Прибытие</div>
                         <div class="otr-route-addr">${order.to_address || '—'}</div>
                     </div>
+                    <div class="otr-route-chevron"><svg width="8" height="13" viewBox="0 0 8 13" fill="none"><path d="M1 1l6 5.5L1 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
                 </div>
             </div>
-            <div class="otr-price-section">
-                <div class="otr-price-label">Стоимость</div>
-                <div style="display:flex;align-items:baseline">
-                    <div class="otr-price-val">${price}</div>
-                    <div class="otr-pay-chip">${payLabel}</div>
+            <!-- ДОБАВИТЬ ОСТАНОВКУ -->
+            <div class="otr-add-stop">
+                <div class="otr-add-stop-icon"><i class="fas fa-plus"></i></div>
+                <div class="otr-add-stop-text">Добавить остановку</div>
+                <div class="otr-add-stop-chevron"><svg width="8" height="13" viewBox="0 0 8 13" fill="none"><path d="M1 1l6 5.5L1 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            </div>
+            <!-- НУЖНА ПОМОЩЬ -->
+            <div class="otr-help-row">
+                <div class="otr-help-icon"><i class="fas fa-headset"></i></div>
+                <div class="otr-help-text">Нужна помощь</div>
+                <div class="otr-help-chevron"><svg width="8" height="13" viewBox="0 0 8 13" fill="none"><path d="M1 1l6 5.5L1 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            </div>
+            <!-- ОПЛАТА -->
+            <div class="otr-payment-row">
+                <div class="otr-payment-logo">
+                    ${order.payment_method === 'cash' ? '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="1" y="4" width="18" height="12" rx="2" stroke="#34c759" stroke-width="1.5"/><path d="M1 8h18" stroke="#34c759" stroke-width="1.5"/><rect x="3" y="11" width="5" height="2" rx="1" fill="#34c759"/></svg>' : '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="1" y="4" width="18" height="12" rx="2" stroke="#007aff" stroke-width="1.5"/><path d="M1 7h18" stroke="#007aff" stroke-width="2"/></svg>'}
                 </div>
+                <div class="otr-payment-text">
+                    <div class="otr-payment-main">Оплата ${payLabel}: ${price}</div>
+                    <div class="otr-payment-sub"></div>
+                </div>
+                <button class="otr-payment-change">Изменить</button>
+            </div>
+            <!-- ПОКАЗАТЬ ВОДИТЕЛЮ ГДЕ Я -->
+            <div class="otr-share-loc-row">
+                <div class="otr-share-loc-icon"><i class="fas fa-location-crosshairs"></i></div>
+                <div class="otr-share-loc-text">Показать водителю, где я</div>
+                <button class="otr-toggle" id="otrShareToggle" onclick="this.classList.toggle('on')"></button>
+            </div>
+            <!-- ПЕРЕВОЗЧИК -->
+            <div class="otr-carrier-row">
+                <div class="otr-carrier-icon"><i class="fas fa-circle-info"></i></div>
+                <div class="otr-carrier-wrap">
+                    <div class="otr-carrier-label">Перевозчик и детали</div>
+                    <div class="otr-carrier-name">Timofeyev Transfer</div>
+                </div>
+                <div class="otr-carrier-chevron"><svg width="8" height="13" viewBox="0 0 8 13" fill="none"><path d="M1 1l6 5.5L1 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
             </div>
             ${ratingBlock}`;
 
@@ -2930,7 +3251,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     footer.innerHTML = `<button class="otr-done-btn" onclick="closeOrderTracking()">Закрыть</button>`;
                     hideActiveOrderCard();
                 } else if (['pending','accepted'].includes(order.status)) {
-                    footer.innerHTML = `<button class="otr-cancel-btn" onclick="cancelActiveOrder(${orderId})">Отменить заказ</button>`;
+                    footer.innerHTML = `<button class="otr-cancel-btn" onclick="cancelActiveOrder(${orderId})">Отменить поездку</button>`;
                 } else {
                     footer.innerHTML = '';
                 }
@@ -2951,6 +3272,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     center: [lat, lng], zoom: 15, controls: []
                 }, { suppressMapOpenBlock: true, openBalloonOnClick: false });
                 _trackingMap.behaviors.disable('scrollZoom');
+                // Принудительно пересчитываем размер карты
+                setTimeout(() => { try { _trackingMap.container.fitToViewport(); } catch(e){} }, 100);
 
                 // Маркер точки подачи (зелёный)
                 if (order.from_lat) {
@@ -3113,21 +3436,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
-        // ── Свернуть в мини-карточку ──────────────────────────────────────────
+        // ── Свернуть: лист уменьшается до мини-полоски, карта остаётся видна ──
         window.minimizeOrderTracking = function() {
-            const overlay = document.getElementById('orderTrackingOverlay');
-            if (overlay) {
-                overlay.style.transition = 'opacity .25s,transform .25s';
-                overlay.style.opacity    = '0';
-                overlay.style.transform  = 'translateY(60px)';
-                setTimeout(() => {
-                    overlay.style.display    = 'none';
-                    overlay.style.opacity    = '';
-                    overlay.style.transform  = '';
-                    overlay.style.transition = '';
-                }, 260);
-            }
-            showActiveOrderCard();
+            window.collapseOrderSheet();
         };
 
         // ── Закрыть полностью (заказ завершён) ────────────────────────────────
@@ -3142,18 +3453,24 @@ document.addEventListener('DOMContentLoaded', function() {
             _pollFailCount     = 0;
             hidePollError();
             hideActiveOrderCard();
+            resetOrderButton();
             const overlay = document.getElementById('orderTrackingOverlay');
             if (overlay) overlay.style.display = 'none';
         };
 
-        // ── Открыть из мини-карточки ──────────────────────────────────────────
+        // ── Развернуть из свёрнутого состояния ───────────────────────────────
         window.reopenOrderTracking = function() {
             if (!_trackingOrderId) return;
-            hideActiveOrderCard();
             const overlay = document.getElementById('orderTrackingOverlay');
             if (overlay) {
-                overlay.style.display = 'flex';
-                overlay.style.flexDirection = 'column';
+                overlay.style.display = 'block';
+                overlay.style.flexDirection = '';
+                window._sheetExpanded = true;
+                const sh = overlay.querySelector('#otrSheet');
+                if (sh) { sh.classList.remove('otr-collapsed'); sh.style.height = ''; }
+                const backBtn = overlay.querySelector('.otr-back');
+                if (backBtn) backBtn.style.display = '';
+                setTimeout(() => initSheetDrag(document.getElementById('otrSheet')), 50);
                 if (!_trackingInterval) {
                     const _oid = String(_trackingOrderId);
                     _pollFailCount = 0;
@@ -3163,8 +3480,12 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         };
 
-        // ── Мини-карточка (Яндекс GO стиль — всегда снизу) ───────────────────
+        // ── Мини-карточка (показывается поверх ДРУГИХ экранов, не трекинга) ──
+        // Теперь показывается только если пользователь ушёл из трекинг-экрана
         function showActiveOrderCard() {
+            // Если оверлей трекинга открыт — не показываем отдельную карточку
+            const overlay = document.getElementById('orderTrackingOverlay');
+            if (overlay && overlay.style.display !== 'none') return;
             let card = document.getElementById('activeOrderCard');
             if (!card) {
                 card = document.createElement('div');
@@ -3180,7 +3501,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             '</div>' +
                             '<div class="aoc-right">' +
                                 '<div class="aoc-eta" id="aocEta"></div>' +
-                                '<div class="aoc-chevron"><i class="fas fa-chevron-up"></i></div>' +
+                                '<div class="aoc-chevron"><svg width="10" height="6" viewBox="0 0 10 6" fill="none"><path d="M1 5l4-4 4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>' +
                             '</div>' +
                         '</div>' +
                     '</div>';
@@ -3252,7 +3573,11 @@ document.addEventListener('DOMContentLoaded', function() {
             try {
                 await TF.orders.cancel(orderId, 'Отменён клиентом');
                 if (_trackingInterval) { clearInterval(_trackingInterval); _trackingInterval = null; }
-                pollOrderStatus(orderId);
+                _trackingOrderId = null;
+                _lastTrackedStatus = null;
+                resetOrderButton();
+                hideActiveOrderCard();
+                setTimeout(() => window.closeOrderTracking && window.closeOrderTracking(), 1000);
             } catch(e) { alert(e.message || 'Не удалось отменить заказ'); }
         };
 
@@ -3273,6 +3598,22 @@ document.addEventListener('DOMContentLoaded', function() {
         let currentAnimatedPrice = 0;
         let animationFrame = null;
         let _finalCalculatedPrice = 0; // Итоговая цена (не анимированная) — используется при создании заказа
+        let _priceIsCalculating = false; // true пока идёт пересчёт маршрута или анимация цены
+
+        // Блокирует/разблокирует кнопку заказа в зависимости от состояния пересчёта
+        function updateOrderButtonState() {
+            const btn = document.getElementById('orderButton');
+            if (!btn) return;
+            if (_priceIsCalculating || animationFrame !== null) {
+                btn.disabled = true;
+                btn.style.opacity = '0.6';
+                btn.title = 'Подождите, цена пересчитывается…';
+            } else {
+                btn.disabled = false;
+                btn.style.opacity = '';
+                btn.title = '';
+            }
+        }
 
         // Per-tariff animation state
         const tariffAnimStates = {};
@@ -3321,13 +3662,16 @@ document.addEventListener('DOMContentLoaded', function() {
             state.frameId = requestAnimationFrame(tick);
         }
 
-        function animateCounter(element, targetValue, duration = 800) {
+        function animateCounter(element, targetValue, duration = 800, onComplete = null) {
             if (animationFrame) {
                 cancelAnimationFrame(animationFrame);
             }
 
             const startValue = currentAnimatedPrice;
             const startTime = performance.now();
+
+            // Кнопка заблокирована пока идёт анимация
+            updateOrderButtonState();
 
             function easeOutQuart(x) {
                 return 1 - Math.pow(1 - x, 4);
@@ -3348,6 +3692,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else {
                     animationFrame = null;
                     currentAnimatedPrice = targetValue;
+                    updateOrderButtonState(); // анимация завершена — разблокируем кнопку
+                    if (onComplete) onComplete();
                 }
             }
 
@@ -3661,6 +4007,13 @@ document.addEventListener('DOMContentLoaded', function() {
     window.openCalculator = function() {
         if (!hs) return;
         if (_calcHideTimer) { clearTimeout(_calcHideTimer); _calcHideTimer = null; }
+        // postMessage → Тильда меняет URL на /order/map
+        try {
+            if (window.self !== window.top) {
+                window.parent.postMessage({ tfNavigate: 'order/map' }, '*');
+                console.log('[TF] postMessage → order/map');
+            }
+        } catch(e) { console.warn('[TF] postMessage error', e); }
         hs.classList.add('hs-hidden');
         // Показываем кнопку меню в калькуляторе (плавно)
         if (topbar) {
@@ -3682,6 +4035,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // Кнопка "назад" для возврата на главный экран
     window.returnToHomeScreen = function() {
         if (!hs) return;
+
+        // postMessage → Тильда меняет URL на /order
+        try {
+            if (window.self !== window.top) {
+                window.parent.postMessage({ tfNavigate: 'order' }, '*');
+                console.log('[TF] postMessage → order');
+            }
+        } catch(e) { console.warn('[TF] postMessage error', e); }
 
         // Отменяем таймер скрытия из openCalculator (если ещё не сработал)
         if (_calcHideTimer) { clearTimeout(_calcHideTimer); _calcHideTimer = null; }
@@ -3747,6 +4108,27 @@ document.addEventListener('DOMContentLoaded', function() {
             var chk = document.getElementById('hsThemeToggleCheck');
             if (chk) chk.checked = document.body.classList.contains('light-theme');
             updateDrawerThemeLabel();
+            // Обновляем видимость кнопок меню при каждом открытии
+            if (typeof TF !== 'undefined' && TF.auth.isLoggedIn()) {
+                TF.auth.me().then(function(me) {
+                    if (me) {
+                        localStorage.setItem('tf_user', JSON.stringify(me));
+                        if (typeof updateDrawerModeBlock === 'function') updateDrawerModeBlock(me);
+                    }
+                }).catch(function() {
+                    // Если API недоступен — используем закешированные данные
+                    var cached = TF.auth.getUser();
+                    if (cached && typeof updateDrawerModeBlock === 'function') {
+                        updateDrawerModeBlock(cached);
+                    }
+                });
+            } else {
+                // Не авторизован — показываем только "Работа водителем"
+                var sg = document.getElementById('hsModeSwitcherGroup');
+                var wg = document.getElementById('hsDriverWorkGroup');
+                if (sg) sg.style.display = 'none';
+                if (wg) wg.style.display = '';
+            }
         }
     };
 
@@ -3819,10 +4201,16 @@ window.openDriverApplication = async function() {
 
     var user = TF.auth.getUser();
 
-    // 2. Если уже водитель — открываем приложение водителя
+    // 2. Если уже одобренный водитель — переключаем режим (не редиректим автоматически)
     if (user.role === 'driver') {
-        window.location.href = 'driver.html';
-        return;
+        try {
+            var me = await TF.auth.me();
+            if (me.driver && me.driver.status === 'approved') {
+                closeDriverScreen();
+                if (typeof switchAppMode === 'function') switchAppMode('driver');
+                return;
+            }
+        } catch(e) {}
     }
 
     // 3. Блокируем кнопку
@@ -3876,15 +4264,16 @@ window.openDriverScreen = function() {
         var screen = document.getElementById('driverScreen');
         if (screen) screen.classList.add('is-open');
 
-        // Если пользователь уже водитель — сразу редиректим
         if (TF.auth.isLoggedIn()) {
             var user = TF.auth.getUser();
             if (user.role === 'driver') {
                 try {
-                    // Актуализируем данные с сервера
                     var me = await TF.auth.me();
                     if (me.driver && me.driver.status === 'approved') {
-                        window.location.href = 'driver.html';
+                        // ★ Вместо редиректа — закрываем экран и открываем переключатель в меню
+                        if (screen) screen.classList.remove('is-open');
+                        if (typeof updateDrawerModeBlock === 'function') updateDrawerModeBlock(me);
+                        toggleHsMenu();
                         return;
                     }
                     // Статус заявки — обновляем кнопку
@@ -3892,7 +4281,7 @@ window.openDriverScreen = function() {
                     if (btn && me.driver) {
                         var statusMap = {
                             pending:  { main: 'Заявка на рассмотрении', sub: 'Мы вам перезвоним' },
-                            approved: { main: 'Открыть приложение водителя', sub: '' },
+                            approved: { main: 'Переключиться в режим водителя', sub: '' },
                             rejected: { main: 'Подать заявку повторно', sub: 'Обратитесь в поддержку' }
                         };
                         var s = statusMap[me.driver.status];
@@ -3969,3 +4358,105 @@ window.clearPhone = function() {
     if (clearBtn) clearBtn.style.display = 'none';
 };
 window.toggleCountryPicker = function() {};
+/* ================================================================
+   ПЕРЕКЛЮЧАТЕЛЬ РЕЖИМОВ: Пассажир ↔ Водитель
+   ================================================================ */
+
+window.updateDrawerModeBlock = function(me) {
+    var switcherGroup  = document.getElementById('hsModeSwitcherGroup');
+    var workGroup      = document.getElementById('hsDriverWorkGroup');
+
+    // Одобренный водитель — показываем переключатель, скрываем "Работа водителем"
+    var hasApprovedDriver = me && me.driver && me.driver.status === 'approved';
+
+    if (switcherGroup) switcherGroup.style.display = hasApprovedDriver ? '' : 'none';
+    if (workGroup)     workGroup.style.display      = hasApprovedDriver ? 'none' : '';
+
+    if (!hasApprovedDriver) return;
+
+    var tabClient = document.getElementById('hsModeTabClient');
+    var tabDriver = document.getElementById('hsModeTabDriver');
+
+    // Активный таб соответствует текущей роли в БД
+    if (me && me.role === 'driver') {
+        if (tabDriver) tabDriver.classList.add('active');
+        if (tabClient) tabClient.classList.remove('active');
+    } else {
+        // Водитель временно в режиме пассажира
+        if (tabClient) tabClient.classList.add('active');
+        if (tabDriver) tabDriver.classList.remove('active');
+    }
+};
+
+window.switchAppMode = async function(mode) {
+    var tabDriver = document.getElementById('hsModeTabDriver');
+    var tabClient = document.getElementById('hsModeTabClient');
+
+    // Сразу обновляем UI (оптимистично)
+    if (mode === 'driver') {
+        if (tabDriver) tabDriver.classList.add('active');
+        if (tabClient) tabClient.classList.remove('active');
+    } else {
+        if (tabClient) tabClient.classList.add('active');
+        if (tabDriver) tabDriver.classList.remove('active');
+    }
+
+    try {
+        // Переключаем роль на сервере → получаем новый JWT
+        await TF.auth.switchRole(mode);
+        if (mode === 'driver') {
+            try {
+                if (window.self !== window.top) {
+                    // Внутри iframe Тильды — сообщаем родителю перейти на /driver
+                    window.parent.postMessage({ tfNavigate: 'driver' }, '*');
+                    console.log('[TF] postMessage → driver');
+                } else {
+                    window.location.href = 'driver.html';
+                }
+            } catch(e) {
+                window.location.href = 'driver.html';
+            }
+        } else {
+            if (window.closeHsMenu) window.closeHsMenu();
+        }
+    } catch (e) {
+        // Откатываем UI при ошибке
+        if (mode === 'driver') {
+            if (tabClient) tabClient.classList.add('active');
+            if (tabDriver) tabDriver.classList.remove('active');
+        } else {
+            if (tabDriver) tabDriver.classList.add('active');
+            if (tabClient) tabClient.classList.remove('active');
+        }
+        alert(e.message || 'Не удалось переключить режим. Попробуйте ещё раз.');
+    }
+};
+// ============================================================
+// TILDA BRIDGE v3 — ?screen= автооткрытие
+// ============================================================
+window.addEventListener('load', function () {
+    var inIframe = (window.self !== window.top);
+    console.log('[TF Bridge] loaded. inIframe=' + inIframe);
+
+    var params = new URLSearchParams(window.location.search);
+    var screen = params.get('screen');
+    if (!screen) return;
+
+    console.log('[TF Bridge] ?screen=' + screen);
+
+    setTimeout(function () {
+        if (screen === 'map') {
+            console.log('[TF Bridge] calling openCalculator()');
+            if (typeof window.openCalculator === 'function') {
+                window.openCalculator();
+            } else {
+                console.warn('[TF Bridge] openCalculator not found!');
+            }
+        } else if (screen === 'account') {
+            console.log('[TF Bridge] calling toggleHsMenu()');
+            if (typeof window.toggleHsMenu === 'function') {
+                window.toggleHsMenu();
+            }
+        }
+    }, 500);
+});

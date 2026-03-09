@@ -223,7 +223,7 @@ if ($method === 'PATCH' && $id) {
         'pending'     => ['accepted', 'cancelled'],
         'accepted'    => ['arriving', 'cancelled'],
         'arriving'    => ['in_progress', 'cancelled'],
-        'in_progress' => ['completed'],
+        'in_progress' => ['completed', 'cancelled'],
         'completed'   => [],
         'cancelled'   => [],
     ];
