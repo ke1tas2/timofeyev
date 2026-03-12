@@ -327,18 +327,25 @@ const TF = (function () {
     };
 
     function finishAuth(user) {
-        if (user && user.role === 'admin') {
-            window.location.href = 'admin.html';
-            return;
-        }
-        // ★ Водитель остаётся на index.html, переключатель появляется в боковом меню
+        // ★ Все роли остаются на index.html — переключение через боковое меню
+        // ★ Никакого авторедиректа в admin.html или driver.html — пользователь
+        //   сам выбирает режим через кнопки в боковом меню (drawer).
         window.closeAuthScreen && window.closeAuthScreen();
         TF.updateHeaderAuth(user);
-        if (user && user.role === 'driver') {
+
+        // Всегда запрашиваем полный профиль (me) после входа:
+        // — verifyOtp возвращает краткий user без is_admin/driver
+        // — только me() отдаёт is_admin=true, что нужно для кнопки «Панель администратора»
+        if (user) {
             TF.auth.me().then(function(me) {
+                localStorage.setItem('tf_user', JSON.stringify(me));
                 if (window.updateDrawerModeBlock) window.updateDrawerModeBlock(me);
-            }).catch(function(){});
+            }).catch(function() {
+                // Если API временно недоступен — используем кешированный объект для любой роли
+                if (window.updateDrawerModeBlock) window.updateDrawerModeBlock(user);
+            });
         }
+
         showState(STATE.PHONE);
         const pi = document.getElementById('authPhoneInput');
         if (pi) pi.value = '';

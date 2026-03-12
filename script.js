@@ -12,21 +12,28 @@ window.closeAuthScreen = function() {
     if (screen) screen.classList.remove('is-open');
 };
 
-// Version: 3.1.0 - New point B selection mode: drag map, confirm location
-// ── Редирект по роли при загрузке страницы ───────────────────
+// Version: 3.2.0 - Admin mode via drawer only, no auto-redirect
+// ── Восстановление сессии при загрузке страницы ──────────────
+// ★ НИКАКОГО авторедиректа для администраторов или водителей!
+//   Все переключения режимов выполняются вручную через боковое меню.
 (function() {
     document.addEventListener('DOMContentLoaded', async function() {
+        // ★ Защита: admin_token ВСЕГДА очищаем при загрузке index.html.
+        //   Он устанавливается только прямо перед редиректом в admin.html через кнопку
+        //   в боковом меню, поэтому не должен «живать» дольше одного перехода.
+        //   Это исключает авто-вход в admin.html если пользователь закрыл браузер
+        //   находясь в панели администратора без явного выхода.
+        localStorage.removeItem('admin_token');
+        localStorage.removeItem('tf_left_admin');
+
         if (typeof TF === 'undefined' || !TF.auth.isLoggedIn()) return;
         try {
             var me = await TF.auth.me();
             if (!me) return;
+            // ★★ КРИТИЧНО: role='admin' или is_admin=true — только показываем кнопку в drawer.
+            //    НИКАКОГО авторедиректа на admin.html при загрузке страницы. Никогда.
             localStorage.setItem('tf_user', JSON.stringify(me));
-            if (me.role === 'admin') {
-                window.location.href = 'admin.html';
-                return;
-            }
-            // ★ Водитель остаётся на index.html — режим переключается вручную в боковом меню
-            // Показываем переключатель режимов если водитель одобрен
+            // Обновляем drawer: показываем нужные кнопки (клиент/водитель/админ)
             if (typeof updateDrawerModeBlock === 'function') updateDrawerModeBlock(me);
             // Проверяем наличие активного заказа при перезагрузке страницы
             if (me.role === 'client' || me.role === 'driver' || !me.role) {
@@ -53,6 +60,8 @@ window.closeAuthScreen = function() {
             if (e && (e.status === 401 || e.status === 403)) {
                 localStorage.removeItem('tf_token');
                 localStorage.removeItem('tf_user');
+                localStorage.removeItem('tf_is_admin');
+                localStorage.removeItem('tf_is_driver');
             }
         }
     });
@@ -4362,72 +4371,102 @@ window.toggleCountryPicker = function() {};
    ПЕРЕКЛЮЧАТЕЛЬ РЕЖИМОВ: Пассажир ↔ Водитель
    ================================================================ */
 
+// ============================================================
+// ПЕРЕКЛЮЧАТЕЛЬ РЕЖИМОВ: Пассажир ↔ Водитель + кнопка Админ
+// ============================================================
+
+window._tfPersistCapabilities = function(me) {
+    if (!me) return;
+    // tf_is_admin хранится ТОЛЬКО для внутреннего использования в switchAppMode('admin').
+    // Для видимости кнопки «Панель администратора» используется me.is_admin из API.
+    if (me.is_admin) localStorage.setItem('tf_is_admin', '1');
+    else localStorage.removeItem('tf_is_admin'); // чистим при входе не-администратора
+    if (me.driver && me.driver.status === 'approved') localStorage.setItem('tf_is_driver', '1');
+};
+
 window.updateDrawerModeBlock = function(me) {
-    var switcherGroup  = document.getElementById('hsModeSwitcherGroup');
-    var workGroup      = document.getElementById('hsDriverWorkGroup');
+    if (!me) return;
+    window._tfPersistCapabilities(me);
 
-    // Одобренный водитель — показываем переключатель, скрываем "Работа водителем"
-    var hasApprovedDriver = me && me.driver && me.driver.status === 'approved';
+    var switcherGroup = document.getElementById('hsModeSwitcherGroup');
+    var workGroup     = document.getElementById('hsDriverWorkGroup');
+    var adminGroup    = document.getElementById('hsAdminGroup');
+    var tabClient     = document.getElementById('hsModeTabClient');
+    var tabDriver     = document.getElementById('hsModeTabDriver');
 
-    if (switcherGroup) switcherGroup.style.display = hasApprovedDriver ? '' : 'none';
-    if (workGroup)     workGroup.style.display      = hasApprovedDriver ? 'none' : '';
+    var hasDriver = !!(me.driver && me.driver.status === 'approved')
+                    || localStorage.getItem('tf_is_driver') === '1';
+    // ★ hasAdmin проверяется ТОЛЬКО по полю is_admin из API-ответа.
+    //   localStorage.tf_is_admin НЕ используется для показа кнопки —
+    //   это исключает показ кнопки «Панель администратора» не-администраторам.
+    var hasAdmin  = !!(me.is_admin);
 
-    if (!hasApprovedDriver) return;
+    // Переключатель Пассажир/Водитель — только для одобренных водителей
+    if (switcherGroup) switcherGroup.style.display = hasDriver ? '' : 'none';
+    // Жёлтая кнопка "Работа водителем" — только если НЕ одобренный водитель И НЕ администратор
+    if (workGroup) workGroup.style.display = (!hasDriver && !hasAdmin) ? '' : 'none';
+    // Кнопка "Панель администратора" — только для админов
+    if (adminGroup) adminGroup.style.display = hasAdmin ? '' : 'none';
 
-    var tabClient = document.getElementById('hsModeTabClient');
-    var tabDriver = document.getElementById('hsModeTabDriver');
-
-    // Активный таб соответствует текущей роли в БД
-    if (me && me.role === 'driver') {
-        if (tabDriver) tabDriver.classList.add('active');
-        if (tabClient) tabClient.classList.remove('active');
-    } else {
-        // Водитель временно в режиме пассажира
-        if (tabClient) tabClient.classList.add('active');
-        if (tabDriver) tabDriver.classList.remove('active');
+    // Активный таб переключателя водитель/пассажир
+    if (hasDriver && tabClient && tabDriver) {
+        var isDriver = me.role === 'driver';
+        tabDriver.style.background = isDriver ? '#fc3f1e' : 'transparent';
+        tabDriver.style.color      = isDriver ? '#fff'    : '#8e8e93';
+        tabClient.style.background = isDriver ? 'transparent' : '#fc3f1e';
+        tabClient.style.color      = isDriver ? '#8e8e93' : '#fff';
     }
 };
 
 window.switchAppMode = async function(mode) {
-    var tabDriver = document.getElementById('hsModeTabDriver');
     var tabClient = document.getElementById('hsModeTabClient');
+    var tabDriver = document.getElementById('hsModeTabDriver');
 
-    // Сразу обновляем UI (оптимистично)
-    if (mode === 'driver') {
-        if (tabDriver) tabDriver.classList.add('active');
-        if (tabClient) tabClient.classList.remove('active');
-    } else {
-        if (tabClient) tabClient.classList.add('active');
-        if (tabDriver) tabDriver.classList.remove('active');
+    // Переход в админку — копируем tf_token в admin_token и идём на admin.html.
+    // admin.html/boot() проверяет ТОЛЬКО admin_token, поэтому без этого шага авто-вход невозможен.
+    // ВАЖНО: admin_token устанавливается прямо перед window.location.replace() — это атомарная
+    // операция. Если переход не произойдёт (ошибка), index.html при следующей загрузке
+    // автоматически очистит admin_token (см. DOMContentLoaded в начале файла).
+    if (mode === 'admin') {
+        var token = localStorage.getItem('tf_token');
+        if (!token) { alert('Войдите в аккаунт'); return; }
+        localStorage.setItem('tf_is_admin', '1');
+        closeHsMenu && closeHsMenu();
+        try {
+            // Устанавливаем admin_token и сразу же редиректим — не даём ему «зависнуть»
+            localStorage.setItem('admin_token', token);
+            if (window.self !== window.top) { window.parent.postMessage({ tfNavigate: 'admin' }, '*'); }
+            else { window.location.replace('admin.html'); } // replace() — прямой переход без записи в истории
+        } catch(e) {
+            localStorage.setItem('admin_token', token);
+            window.location.replace('admin.html');
+        }
+        return;
     }
 
+    // Оптимистичное обновление табов (только для driver/client)
+    if (tabClient) { tabClient.style.background = mode === 'client' ? '#fc3f1e' : 'transparent'; tabClient.style.color = mode === 'client' ? '#fff' : '#8e8e93'; }
+    if (tabDriver) { tabDriver.style.background = mode === 'driver' ? '#fc3f1e' : 'transparent'; tabDriver.style.color = mode === 'driver' ? '#fff' : '#8e8e93'; }
+
     try {
-        // Переключаем роль на сервере → получаем новый JWT
         await TF.auth.switchRole(mode);
+
         if (mode === 'driver') {
             try {
-                if (window.self !== window.top) {
-                    // Внутри iframe Тильды — сообщаем родителю перейти на /driver
-                    window.parent.postMessage({ tfNavigate: 'driver' }, '*');
-                    console.log('[TF] postMessage → driver');
-                } else {
-                    window.location.href = 'driver.html';
-                }
-            } catch(e) {
-                window.location.href = 'driver.html';
-            }
+                if (window.self !== window.top) { window.parent.postMessage({ tfNavigate: 'driver' }, '*'); }
+                else { window.location.replace('driver.html'); }
+            } catch(e) { window.location.replace('driver.html'); }
         } else {
+            // client — остаёмся, закрываем меню
             if (window.closeHsMenu) window.closeHsMenu();
         }
     } catch (e) {
-        // Откатываем UI при ошибке
-        if (mode === 'driver') {
-            if (tabClient) tabClient.classList.add('active');
-            if (tabDriver) tabDriver.classList.remove('active');
-        } else {
-            if (tabDriver) tabDriver.classList.add('active');
-            if (tabClient) tabClient.classList.remove('active');
-        }
+        // Откатываем табы при ошибке
+        var stored = null;
+        try { stored = JSON.parse(localStorage.getItem('tf_user') || '{}'); } catch(ex) {}
+        var prevRole = stored && stored.role ? stored.role : 'client';
+        if (tabClient) { tabClient.style.background = prevRole === 'client' ? '#fc3f1e' : 'transparent'; tabClient.style.color = prevRole === 'client' ? '#fff' : '#8e8e93'; }
+        if (tabDriver) { tabDriver.style.background = prevRole === 'driver' ? '#fc3f1e' : 'transparent'; tabDriver.style.color = prevRole === 'driver' ? '#fff' : '#8e8e93'; }
         alert(e.message || 'Не удалось переключить режим. Попробуйте ещё раз.');
     }
 };
@@ -4460,3 +4499,268 @@ window.addEventListener('load', function () {
         }
     }, 500);
 });
+/* ================================================================
+   ПЕРЕКЛЮЧАТЕЛЬ РЕЖИМОВ: Пассажир ↔ Администратор
+   ================================================================ */
+
+// ── Обратная совместимость: updateDrawerAdminBlock → updateDrawerModeBlock ──
+window.updateDrawerAdminBlock = function(me) {
+    window.updateDrawerModeBlock(me);
+};
+
+// ── switchToAdmin: функция для совместимости — требует явного подтверждения ──
+// (переименована чтобы предотвратить случайный вызов из старого Tilda-кода)
+window._switchToAdmin_legacy = function() {
+    window.switchAppMode('admin');
+};
+// window.switchToAdmin НЕ экспортируется глобально, чтобы старый Tilda-код не вызвал редирект
+
+// ── Патч TF.auth.logout: очищаем флаги ролей при выходе ──
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof TF === 'undefined') return;
+    var _origLogout = TF.auth.logout.bind(TF.auth);
+    TF.auth.logout = async function() {
+        await _origLogout();
+        localStorage.removeItem('tf_is_admin');
+        localStorage.removeItem('tf_is_driver');
+        localStorage.removeItem('admin_token');
+        // Сбрасываем переключатель режимов
+        var switcherGroup = document.getElementById('hsModeSwitcherGroup');
+        var workGroup     = document.getElementById('hsDriverWorkGroup');
+        if (switcherGroup) switcherGroup.style.display = 'none';
+        if (workGroup)     workGroup.style.display = '';
+    };
+}); 
+
+/* ================================================================
+   SOCIAL AUTH — Вход через Google, VK, Apple, Mail.ru
+   Добавить в конец script.js
+   ================================================================ */
+ 
+(function() {
+    'use strict';
+ 
+    // ── Настройка кнопок при загрузке ────────────────────────
+    document.addEventListener('DOMContentLoaded', function() {
+        bindSocialButtons();
+    });
+ 
+    function bindSocialButtons() {
+        // Apple
+        var appleBtn = document.querySelector('.auth-social-btn[title="Apple"]');
+        if (appleBtn) appleBtn.onclick = function() { socialLogin('apple'); };
+ 
+        // VK
+        var vkBtn = document.querySelector('.auth-social-vk');
+        if (vkBtn) vkBtn.onclick = function() { socialLogin('vk'); };
+ 
+        // Google
+        var googleBtn = document.querySelector('.auth-social-google');
+        if (googleBtn) googleBtn.onclick = function() { socialLogin('google'); };
+ 
+        // Mail.ru
+        var mailBtn = document.querySelector('.auth-social-mail');
+        if (mailBtn) mailBtn.onclick = function() { socialLogin('mailru'); };
+    }
+ 
+    // ── Основная функция входа через соцсеть ─────────────────
+    window.socialLogin = async function(provider) {
+        var authError = document.getElementById('authErrorMsg');
+ 
+        // Показываем лоадер
+        setSocialBtnLoading(provider, true);
+        if (authError) authError.style.display = 'none';
+ 
+        try {
+            // Получаем OAuth URL с сервера
+            var res = await fetch('/api/auth/social/' + provider + '/url', {
+                headers: { 'Content-Type': 'application/json' }
+            });
+            var json = await res.json();
+ 
+            if (!json.success || !json.data.url) {
+                showSocialError(provider, json.message || 'Провайдер недоступен');
+                return;
+            }
+ 
+            // Открываем popup
+            openSocialPopup(json.data.url, provider);
+ 
+        } catch (e) {
+            showSocialError(provider, 'Ошибка соединения. Попробуйте позже.');
+        } finally {
+            setSocialBtnLoading(provider, false);
+        }
+    };
+ 
+    // ── Открыть popup и ждать результат ──────────────────────
+    function openSocialPopup(url, provider) {
+        var w = 520, h = 620;
+        var left = Math.round(screen.width / 2 - w / 2);
+        var top  = Math.round(screen.height / 2 - h / 2);
+        var features = 'width=' + w + ',height=' + h + ',left=' + left + ',top=' + top +
+                       ',menubar=no,toolbar=no,location=no,status=no';
+ 
+        var popup = window.open(url, 'social_auth_' + provider, features);
+ 
+        if (!popup) {
+            // Блокировщик попапов — редирект в том же окне
+            window.location.href = url;
+            return;
+        }
+ 
+        // Слушаем postMessage от callback-страницы
+        var handler = function(event) {
+            // Принимаем только от нашего домена
+            if (event.origin && event.origin !== window.location.origin) return;
+            if (!event.data || event.data.type !== 'SOCIAL_AUTH') return;
+ 
+            window.removeEventListener('message', handler);
+            clearInterval(checkClosed);
+            if (!popup.closed) popup.close();
+ 
+            handleSocialResult(event.data);
+        };
+ 
+        window.addEventListener('message', handler);
+ 
+        // Если пользователь закрыл popup вручную
+        var checkClosed = setInterval(function() {
+            if (popup.closed) {
+                clearInterval(checkClosed);
+                window.removeEventListener('message', handler);
+            }
+        }, 500);
+    }
+ 
+    // ── Обработать результат OAuth ────────────────────────────
+    async function handleSocialResult(data) {
+        if (data.error || !data.data) {
+            showAuthError(data.error || 'Вход не выполнен');
+            return;
+        }
+ 
+        var result = data.data;
+ 
+        // Сохраняем токен
+        localStorage.setItem('tf_token', result.token);
+        if (result.user) localStorage.setItem('tf_user', JSON.stringify(result.user));
+ 
+        // Если новый пользователь — просим ввести имя
+        if (result.is_new) {
+            showAuthNameBlock(result);
+            return;
+        }
+ 
+        // Успешный вход
+        await onAuthSuccess(result.user);
+    }
+ 
+    // ── Показать блок ввода имени для нового пользователя ────
+    function showAuthNameBlock(result) {
+        var phoneBlock = document.getElementById('authPhoneBlock');
+        var otpBlock   = document.getElementById('authOtpBlock');
+        var nameBlock  = document.getElementById('authNameBlock');
+        var title      = document.querySelector('.auth-title');
+ 
+        if (phoneBlock) phoneBlock.style.display = 'none';
+        if (otpBlock)   otpBlock.style.display   = 'none';
+        if (nameBlock)  nameBlock.style.display   = '';
+        if (title)      title.innerHTML = 'Как вас зовут?';
+ 
+        // Переопределяем submitName чтобы учесть социальный вход
+        window._socialAuthPending = result;
+    }
+ 
+    // ── Обработка onAuthSuccess (вызывается после соцвхода) ──
+    async function onAuthSuccess(user) {
+        try {
+            // Перезагружаем данные пользователя с сервера
+            if (typeof TF !== 'undefined' && TF.auth) {
+                var me = await TF.auth.me().catch(() => user);
+                localStorage.setItem('tf_user', JSON.stringify(me));
+                if (typeof updateDrawerModeBlock === 'function') updateDrawerModeBlock(me);
+            }
+        } catch(e) {}
+ 
+        // Закрываем экран авторизации
+        if (typeof window.closeAuthScreen === 'function') window.closeAuthScreen();
+ 
+        // Показываем уведомление
+        showSocialToast('Добро пожаловать! Вы вошли через соцсеть.');
+ 
+        // Перезагружаем страницу чтобы применить авторизацию
+        setTimeout(function() { window.location.reload(); }, 800);
+    }
+ 
+    // ── Патч submitName для социального входа ────────────────
+    var _origSubmitName = window.submitName;
+    window.submitName = async function() {
+        if (window._socialAuthPending) {
+            var nameInput = document.getElementById('authNameInput');
+            var name = nameInput ? nameInput.value.trim() : '';
+            var result = window._socialAuthPending;
+            window._socialAuthPending = null;
+ 
+            // Сохраняем имя через API
+            if (name && typeof TF !== 'undefined') {
+                try {
+                    await fetch('/api/auth/me', {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + result.token
+                        },
+                        body: JSON.stringify({ name: name })
+                    });
+                    if (result.user) result.user.name = name;
+                } catch(e) {}
+            }
+ 
+            await onAuthSuccess(result.user);
+            return;
+        }
+ 
+        // Оригинальная логика для OTP-входа
+        if (_origSubmitName) _origSubmitName();
+    };
+ 
+    // ── UI хелперы ───────────────────────────────────────────
+    var PROVIDER_SELECTORS = {
+        apple:  '[title="Apple"]',
+        vk:     '.auth-social-vk',
+        google: '.auth-social-google',
+        mailru: '.auth-social-mail',
+    };
+ 
+    function setSocialBtnLoading(provider, loading) {
+        var btn = document.querySelector('.auth-social-btn' + (PROVIDER_SELECTORS[provider] || ''));
+        if (!btn) return;
+        btn.disabled = loading;
+        btn.style.opacity = loading ? '0.5' : '1';
+    }
+ 
+    function showSocialError(provider, msg) {
+        setSocialBtnLoading(provider, false);
+        showAuthError(msg);
+    }
+ 
+    function showAuthError(msg) {
+        var el = document.getElementById('authErrorMsg');
+        if (el) {
+            el.textContent = msg;
+            el.style.display = 'block';
+        }
+    }
+ 
+    function showSocialToast(msg) {
+        // Используем существующий toast если есть, иначе alert
+        if (typeof window.showToast === 'function') {
+            window.showToast(msg, 'success');
+        } else if (typeof window._tfToast === 'function') {
+            window._tfToast(msg);
+        }
+        // Тихо — не alert
+    }
+ 
+})();

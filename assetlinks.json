@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "kz.timofeev",
+        "sha256_cert_fingerprints": ["B0:41:14:2B:40:C2:90:FF:26:C7:39:20:81:7C:E6:BA:70:28:82:1B:5D:E9:97:8A:B6:44:35:79:40:E4:82:BE"]
+      }
+    }]

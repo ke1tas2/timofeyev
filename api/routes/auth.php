@@ -38,13 +38,14 @@ if ($method === 'GET' && $action === 'me') {
     $driverData = Database::row('SELECT * FROM drivers WHERE user_id = ?', [$user['id']]);
 
     Response::ok([
-        'id'     => $user['id'],
-        'phone'  => $user['phone'],
-        'name'   => $user['name'],
-        'email'  => $user['email'] ?? null,
-        'avatar' => $user['avatar'] ?? null,
-        'role'   => $user['role'],
-        'driver' => $driverData,
+        'id'       => $user['id'],
+        'phone'    => $user['phone'],
+        'name'     => $user['name'],
+        'email'    => $user['email'] ?? null,
+        'avatar'   => $user['avatar'] ?? null,
+        'role'     => $user['role'],
+        'is_admin' => !empty($user['is_admin']),
+        'driver'   => $driverData,
     ]);
 }
 
@@ -214,26 +215,47 @@ if ($method === 'POST' && $action === 'logout') {
     Response::ok(null, 'Выход выполнен');
 }
 
-// POST /api/auth/switch-role — переключение режима пассажир ↔ водитель
+// POST /api/auth/switch-role — переключение режима: client / driver / admin
 if ($method === 'POST' && $action === 'switch-role') {
     $user = Auth::require();
 
-    if ($user['role'] === 'driver') {
-        // Водитель → режим пассажира
-        $newRole = 'client';
-    } elseif ($user['role'] === 'client') {
-        // Пассажир → режим водителя (только если есть одобренная заявка)
-        $driver = Database::row(
-            "SELECT id FROM drivers WHERE user_id = ? AND status = 'approved'",
-            [$user['id']]
-        );
-        if (!$driver) {
-            Response::error('У вас нет одобренной заявки водителя', 403);
+    $targetRole = $body['target_role'] ?? null;
+
+    // Загружаем полную запись пользователя из БД (там есть is_admin, role и т.д.)
+    $dbUser = Database::row('SELECT * FROM users WHERE id = ?', [$user['id']]);
+    if (!$dbUser) Response::error('Пользователь не найден', 404);
+
+    // Определяем доступные роли для этого пользователя
+    $availableRoles = ['client'];
+
+    // Одобренный водитель
+    $driver = Database::row(
+        "SELECT id FROM drivers WHERE user_id = ? AND status = 'approved'",
+        [$user['id']]
+    );
+    if ($driver) $availableRoles[] = 'driver';
+
+    // Права администратора: is_admin колонка (после миграции) ИЛИ role='admin' (fallback)
+    $hasAdminRight = !empty($dbUser['is_admin']) || $dbUser['role'] === 'admin';
+    if ($hasAdminRight) $availableRoles[] = 'admin';
+
+    // Если target_role не указан — старая логика toggle driver/client
+    if (!$targetRole) {
+        if ($user['role'] === 'driver') {
+            $targetRole = 'client';
+        } elseif ($user['role'] === 'client' && $driver) {
+            $targetRole = 'driver';
+        } else {
+            Response::error('Укажите target_role', 400);
         }
-        $newRole = 'driver';
-    } else {
-        Response::error('Переключение недоступно для роли ' . $user['role'], 403);
     }
+
+    // Проверяем что переключение разрешено
+    if (!in_array($targetRole, $availableRoles)) {
+        Response::error("Переключение в режим '$targetRole' недоступно", 403);
+    }
+
+    $newRole = $targetRole;
 
     // Меняем роль в БД
     Database::exec('UPDATE users SET role = ? WHERE id = ?', [$newRole, $user['id']]);

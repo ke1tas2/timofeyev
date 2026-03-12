@@ -1106,6 +1106,7 @@ input  { font-family: inherit; outline: none; border: none; background: none; }
 <div id="toast"><i class="fas fa-check" id="toastIcon"></i><span id="toastMsg"></span></div>
 
 <script src="https://api-maps.yandex.ru/2.1/?apikey=69c18fe9-15b1-4391-b4e7-2a005a4fb22d&lang=ru_RU"></script>
+<script src="push.js?v=1.0.0"></script>
 <script>
 /* ═══════════════════════════════════════════════════════════
    CONFIG
@@ -1171,10 +1172,10 @@ ymaps.ready(function() {
     // Если открыл напрямую старым способом — используем driver_token.
     var tok = localStorage.getItem('driver_token') || localStorage.getItem('tf_token');
     if (!tok) return;
-    // Гарантируем синхронизацию обоих ключей
-    if (tok) {
+    // Устанавливаем driver_token если его не было (вошли через switcher из index.html)
+    // НЕ трогаем tf_token — это токен главного приложения
+    if (!localStorage.getItem('driver_token')) {
       localStorage.setItem('driver_token', tok);
-      localStorage.setItem('tf_token', tok);
     }
     try {
       const me = await GET('auth/me');
@@ -2143,10 +2144,10 @@ function clearAllAndGoHome() {
     if (window.self !== window.top) {
       window.parent.postMessage({ tfNavigate: 'order' }, '*');
     } else {
-      window.location.href = 'index.html';
+      window.location.replace('index.html');
     }
   } catch(e) {
-    window.location.href = 'index.html';
+    window.location.replace('index.html');
   }
 }
 
@@ -2186,10 +2187,10 @@ function switchDriverMode(mode) {
           if (window.self !== window.top) {
             window.parent.postMessage({ tfNavigate: 'order' }, '*');
           } else {
-            window.location.href = 'index.html?mode=client';
+            window.location.replace('index.html');
           }
         } catch(e) {
-          window.location.href = 'index.html?mode=client';
+          window.location.replace('index.html');
         }
       }, 180);
     }).catch(function(e) {

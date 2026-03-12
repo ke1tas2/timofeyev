@@ -815,6 +815,9 @@ a { color: inherit; text-decoration: none; }
 ══════════════════════════════════════════════ -->
 <div id="loginScreen">
   <div class="login-box">
+    <button class="login-back" onclick="goToMainApp()" style="margin-bottom:16px;">
+      <i class="fas fa-arrow-left"></i> На главную
+    </button>
     <div class="login-brand">Timofeyev <span>Admin</span></div>
     <div class="login-subtitle">Панель управления сервисом</div>
 
@@ -918,6 +921,24 @@ a { color: inherit; text-decoration: none; }
           <div class="sidebar-user-role">admin</div>
         </div>
       </div>
+
+      <!-- Переключатель режимов -->
+      <div id="adminModeSwitcher" style="margin-bottom:8px;display:none">
+        <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;font-weight:600;margin-bottom:6px">
+          Переключить режим
+        </div>
+        <div style="display:flex;gap:6px">
+          <button onclick="switchAdminToMode('client')" id="adminModeTabClient"
+            style="flex:1;padding:8px 4px;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.2s;background:rgba(255,255,255,0.08);color:#8e8e93">
+            <i class="fas fa-user" style="margin-right:4px"></i>Пассажир
+          </button>
+          <button onclick="switchAdminToMode('driver')" id="adminModeTabDriver"
+            style="flex:1;padding:8px 4px;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all 0.2s;background:rgba(255,255,255,0.08);color:#8e8e93;display:none">
+            <i class="fas fa-car" style="margin-right:4px"></i>Водитель
+          </button>
+        </div>
+      </div>
+
       <button class="logout-btn" onclick="adminLogout()">
         <i class="fas fa-sign-out-alt"></i> Выйти
       </button>
@@ -1025,7 +1046,7 @@ a { color: inherit; text-decoration: none; }
 
 <!-- Toast -->
 <div id="toast"><i class="fas fa-check" id="toastIcon"></i> <span id="toastMsg"></span></div>
-
+<script src="push.js?v=1.0.0"></script>
 <script>
 /* ═══════════════════════════════════════════════════════════
    CONFIG
@@ -1063,17 +1084,26 @@ let loginPhone  = '';
    BOOT — проверяем сохранённый токен
 ═══════════════════════════════════════════════════════════ */
 (async function boot() {
+  // ★ ТОЛЬКО admin_token — не используем tf_token как запасной вариант.
+  // admin_token устанавливается строго при явном нажатии «Панель администратора»
+  // в главном приложении. Это исключает авто-вход при возврате через «Назад» или по URL.
   const token = localStorage.getItem('admin_token');
   if (!token) return;
+
   try {
     const me = await GET('auth/me');
-    if (me.role !== 'admin') {
+
+    const hasAdminRights = !!(me.is_admin) || me.role === 'admin';
+    if (!hasAdminRights) {
       localStorage.removeItem('admin_token');
       return;
     }
+
     adminUser = me;
+    localStorage.setItem('tf_is_admin', '1');
     showMain();
   } catch(e) {
+    // Токен просрочен или недействителен
     localStorage.removeItem('admin_token');
   }
 })();
@@ -1144,12 +1174,15 @@ async function loginVerifyOtp() {
 
   try {
     const data = await POST('auth/verify-otp', { phone: loginPhone, code });
-    if (data.user.role !== 'admin') {
+    if (!data.user.is_admin && data.user.role !== 'admin') {
       // Не администратор — сразу выходим
       await POST('auth/logout');
       throw { message: 'Доступ только для администраторов' };
     }
     localStorage.setItem('admin_token', data.token);
+    // ★ НЕ перезаписываем tf_token — у главного приложения свой токен.
+    // admin_token используется только для запросов к /api/admin/* из этой панели.
+    localStorage.setItem('tf_is_admin', '1');
     adminUser = data.user;
     showMain();
   } catch(e) {
@@ -1222,16 +1255,103 @@ function showMain() {
   document.getElementById('sidebarName').textContent = name;
   document.getElementById('sidebarAvatar').textContent = (name[0] || 'A').toUpperCase();
 
+  // Показываем переключатель режимов если есть другие роли
+  const switcher    = document.getElementById('adminModeSwitcher');
+  const driverTab   = document.getElementById('adminModeTabDriver');
+  const isDriver    = adminUser.driver && adminUser.driver.status === 'approved';
+
+  if (switcher) {
+    // Показываем переключатель всегда (есть хотя бы режим пассажира)
+    switcher.style.display = '';
+    if (driverTab) driverTab.style.display = isDriver ? 'flex' : 'none';
+  }
+
   loadDashboard();
+}
+
+async function switchAdminToMode(targetMode) {
+  const tabClient = document.getElementById('adminModeTabClient');
+  const tabDriver = document.getElementById('adminModeTabDriver');
+
+  // Оптимистичное обновление
+  if (tabClient) { tabClient.style.background = targetMode === 'client' ? '#fc3f1e' : 'rgba(255,255,255,0.08)'; tabClient.style.color = targetMode === 'client' ? '#fff' : '#8e8e93'; }
+  if (tabDriver) { tabDriver.style.background = targetMode === 'driver' ? '#fc3f1e' : 'rgba(255,255,255,0.08)'; tabDriver.style.color = targetMode === 'driver' ? '#fff' : '#8e8e93'; }
+
+  try {
+    // Переносим admin_token обратно в tf_token (роль меняем только для водителя)
+    const adminToken = localStorage.getItem('admin_token');
+
+    if (targetMode === 'driver') {
+      // Для режима водителя — нужен switchRole чтобы JWT имел role=driver
+      const res = await fetch(`${API}/auth/switch-role`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${adminToken}` },
+        body: JSON.stringify({ target_role: 'driver' }),
+      });
+      const json = await res.json();
+      if (!json.success) throw new Error(json.message || 'Ошибка переключения');
+      localStorage.setItem('tf_token', json.data.token);
+      localStorage.setItem('tf_user', JSON.stringify(json.data.user));
+    } else {
+      // Режим пассажира: восстанавливаем tf_token главного приложения.
+      // Если admin_token == tf_token (вошли через drawer), tf_token уже в порядке.
+      // is_admin=1 остаётся — чтобы кнопка «Панель администратора» снова появилась в drawer.
+      if (adminToken) {
+        localStorage.setItem('tf_token', adminToken);
+      }
+      localStorage.setItem('tf_user', JSON.stringify({
+        id: adminUser.id, phone: adminUser.phone, name: adminUser.name,
+        role: adminUser.role, is_admin: adminUser.is_admin
+      }));
+    }
+
+    // ★ Удаляем admin_token — теперь boot() не зайдёт автоматически при возврате
+    localStorage.removeItem('admin_token');
+    // Ставим флаг: «только что вышел из админки» → index.html не будет его редиректить
+    localStorage.setItem('tf_left_admin', '1');
+
+    if (targetMode === 'driver') {
+      // Используем replace() — admin.html исчезает из истории браузера
+      try {
+        if (window.self !== window.top) { window.parent.postMessage({ tfNavigate: 'driver' }, '*'); }
+        else { window.location.replace('driver.html'); }
+      } catch(e) { window.location.replace('driver.html'); }
+    } else {
+      try {
+        if (window.self !== window.top) { window.parent.postMessage({ tfNavigate: 'order' }, '*'); }
+        else { window.location.replace('index.html'); }
+      } catch(e) { window.location.replace('index.html'); }
+    }
+  } catch(e) {
+    if (tabClient) { tabClient.style.background = 'rgba(255,255,255,0.08)'; tabClient.style.color = '#8e8e93'; }
+    if (tabDriver) { tabDriver.style.background = 'rgba(255,255,255,0.08)'; tabDriver.style.color = '#8e8e93'; }
+    alert(e.message || 'Не удалось переключить режим');
+  }
 }
 
 async function adminLogout() {
   try { await POST('auth/logout'); } catch(e) {}
-  localStorage.removeItem('admin_token');
   localStorage.removeItem('tf_token');
   localStorage.removeItem('tf_user');
-  adminUser = null;
-  window.location.href = 'index.html';
+  localStorage.removeItem('admin_token');
+  localStorage.removeItem('tf_is_admin');
+  localStorage.removeItem('tf_is_driver');
+  goToMainApp();
+}
+
+function goToMainApp() {
+  // Убеждаемся что admin_token точно очищен перед возвратом на главную
+  localStorage.removeItem('admin_token');
+  localStorage.setItem('tf_left_admin', '1');
+  try {
+    if (window.self !== window.top) {
+      window.parent.postMessage({ tfNavigate: 'order' }, '*');
+    } else {
+      window.location.replace('index.html'); // replace() = нет записи в истории → нет свайпа назад в админку
+    }
+  } catch(e) {
+    window.location.replace('index.html');
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════

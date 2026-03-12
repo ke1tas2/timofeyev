@@ -4,13 +4,229 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="format-detection" content="telephone=no">
-    <title>Заказ трансфера</title>
+    <title>Timofeyev Transfer</title>
+
+    <!-- ═══ PWA ═══ -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#fc3f1e">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Timofeyev">
+
+    <!-- SEO -->
+    <meta name="description" content="Заказ трансфера и такси в Казахстане">
+
+    <!-- Иконки для iOS (Apple Touch Icons) -->
+    <link rel="apple-touch-icon" sizes="152x152" href="/assets/icons/icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="/assets/icons/icon-192x192.png">
+
+    <!-- Splash screen iOS -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
 <base target="_blank">
-    <link rel="stylesheet" href="styles.css?v=3.1.0">
+    <link rel="stylesheet" href="styles.css?v=3.2.0">
+
+    <!-- ═══ SPLASH SCREEN STYLES — до любых других стилей ═══ -->
+    <style>
+      html, body { background: #000 !important; }
+
+      #splashScreen {
+        position: fixed !important;
+        top: 0 !important; left: 0 !important;
+        width: 100% !important; height: 100% !important;
+        z-index: 999999 !important;
+        background: #000 !important;
+        overflow: hidden !important;
+        opacity: 1 !important;
+        isolation: isolate !important;
+        transition: opacity 0.65s ease, visibility 0.65s ease;
+        margin: 0 !important; padding: 0 !important;
+      }
+      #splashScreen.sp-hide {
+        opacity: 0 !important;
+        visibility: hidden !important;
+        pointer-events: none !important;
+      }
+      .sp-glow {
+        position: absolute !important;
+        top: 50% !important; left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        width: 340px; height: 340px; border-radius: 50%;
+        background: radial-gradient(circle, rgba(201,162,39,.18) 0%, rgba(201,162,39,.04) 45%, transparent 70%);
+        animation: spPulse 2.2s ease-in-out infinite;
+      }
+      @keyframes spPulse {
+        0%,100% { transform: translate(-50%,-50%) scale(1);    opacity: .7; }
+        50%      { transform: translate(-50%,-50%) scale(1.15); opacity: 1;  }
+      }
+      .sp-orbit {
+        position: absolute !important;
+        top: 50% !important; left: 50% !important;
+        transform: translate(-50%,-50%) !important;
+        width: 270px; height: 270px; border-radius: 50%;
+        animation: spOrbit 3.6s linear infinite;
+      }
+      @keyframes spOrbit { to { transform: translate(-50%,-50%) rotate(360deg); } }
+      .sp-dot {
+        position: absolute;
+        width: 9px; height: 9px;
+        background: #c9a227; border-radius: 50%;
+        top: 50%; left: 50%;
+        margin: -4.5px 0 0 -4.5px;
+        box-shadow: 0 0 10px 3px rgba(201,162,39,.85);
+      }
+      .sp-dot:nth-child(1) { transform: translateY(-135px); }
+      .sp-dot:nth-child(2) { transform: rotate(120deg) translateY(-135px); }
+      .sp-dot:nth-child(3) { transform: rotate(240deg) translateY(-135px); }
+      .sp-ring {
+        position: absolute !important;
+        top: 50% !important; left: 50% !important;
+        border-radius: 50%;
+        border: 1.5px solid transparent;
+      }
+      .sp-ring-a {
+        width: 224px; height: 224px;
+        margin: -112px 0 0 -112px !important;
+        border-top-color:    rgba(201,162,39,.95);
+        border-right-color:  rgba(201,162,39,.35);
+        border-bottom-color: rgba(201,162,39,.05);
+        border-left-color:   rgba(201,162,39,.35);
+        animation: spRing 2.2s linear infinite;
+      }
+      .sp-ring-b {
+        width: 178px; height: 178px;
+        margin: -89px 0 0 -89px !important;
+        border-top-color:    rgba(255,210,80,.08);
+        border-right-color:  rgba(255,210,80,.65);
+        border-bottom-color: rgba(255,210,80,.08);
+        border-left-color:   rgba(255,210,80,.08);
+        animation: spRing 1.5s linear infinite reverse;
+      }
+      @keyframes spRing { to { transform: rotate(360deg); } }
+      .sp-center {
+        position: absolute !important;
+        top: 50% !important; left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        z-index: 10 !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        margin: 0 !important; padding: 0 !important;
+      }
+      .sp-logo {
+        display: block !important;
+        width: 150px !important; height: 150px !important;
+        object-fit: contain !important;
+        mix-blend-mode: screen !important;
+        animation: spLogoIn .9s cubic-bezier(.34,1.56,.64,1) both,
+                   spLogoGlow 2.2s 1s ease-in-out infinite;
+      }
+      @keyframes spLogoIn {
+        from { opacity: 0; transform: scale(.45); }
+        to   { opacity: 1; transform: scale(1);   }
+      }
+      @keyframes spLogoGlow {
+        0%,100% { filter: drop-shadow(0 0 14px rgba(201,162,39,.55)) drop-shadow(0 0 36px rgba(201,162,39,.18)); }
+        50%     { filter: drop-shadow(0 0 26px rgba(201,162,39,.95)) drop-shadow(0 0 60px rgba(201,162,39,.38)); }
+      }
+      .sp-name {
+        display: block !important;
+        margin-top: 26px !important;
+        font-family: Georgia,'Times New Roman',serif !important;
+        font-size: 21px !important; font-weight: 400 !important;
+        letter-spacing: .3em !important;
+        color: #c9a227 !important;
+        text-transform: uppercase !important;
+        white-space: nowrap !important;
+        animation: spTextIn .9s .25s ease both;
+      }
+      .sp-name-t { font-size: 25px !important; font-weight: 700 !important; }
+      .sp-sub {
+        display: block !important;
+        margin-top: 5px !important;
+        font-family: Georgia,'Times New Roman',serif !important;
+        font-size: 10px !important;
+        letter-spacing: .55em !important;
+        color: rgba(201,162,39,.45) !important;
+        text-transform: uppercase !important;
+        white-space: nowrap !important;
+        animation: spTextIn .9s .45s ease both;
+      }
+      @keyframes spTextIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to   { opacity: 1; transform: translateY(0);    }
+      }
+      .sp-bar {
+        position: absolute !important;
+        bottom: 52px !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+        width: 90px; height: 2px;
+        background: rgba(201,162,39,.15);
+        border-radius: 2px; overflow: hidden;
+      }
+      .sp-bar-fill {
+        height: 100%; width: 0%;
+        background: linear-gradient(90deg, transparent, #c9a227, transparent);
+        animation: spBarFill 2.2s ease-in-out forwards;
+      }
+      @keyframes spBarFill { 0%{width:0%} 80%{width:90%} 100%{width:100%} }
+    </style>
 </head>
 <body>
+
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <!--  SPLASH SCREEN                                         -->
+  <!-- ═══════════════════════════════════════════════════════ -->
+  <div id="splashScreen" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:999999;background:#000;overflow:hidden;">
+
+    <!-- Свечение -->
+    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:340px;height:340px;border-radius:50%;background:radial-gradient(circle,rgba(201,162,39,.18) 0%,rgba(201,162,39,.04) 45%,transparent 70%);animation:spPulse 2.2s ease-in-out infinite;"></div>
+
+    <!-- Орбита -->
+    <div style="position:absolute;top:50%;left:50%;width:270px;height:270px;border-radius:50%;margin:-135px 0 0 -135px;animation:spOrbit 3.6s linear infinite;">
+      <span style="position:absolute;top:50%;left:50%;width:9px;height:9px;background:#c9a227;border-radius:50%;margin:-4.5px 0 0 -4.5px;box-shadow:0 0 10px 3px rgba(201,162,39,.85);transform:translateY(-135px);"></span>
+      <span style="position:absolute;top:50%;left:50%;width:9px;height:9px;background:#c9a227;border-radius:50%;margin:-4.5px 0 0 -4.5px;box-shadow:0 0 10px 3px rgba(201,162,39,.85);transform:rotate(120deg) translateY(-135px);"></span>
+      <span style="position:absolute;top:50%;left:50%;width:9px;height:9px;background:#c9a227;border-radius:50%;margin:-4.5px 0 0 -4.5px;box-shadow:0 0 10px 3px rgba(201,162,39,.85);transform:rotate(240deg) translateY(-135px);"></span>
+    </div>
+
+    <!-- Кольцо внешнее -->
+    <div style="position:absolute;top:50%;left:50%;width:224px;height:224px;margin:-112px 0 0 -112px;border-radius:50%;border:1.5px solid transparent;border-top-color:rgba(201,162,39,.95);border-right-color:rgba(201,162,39,.35);border-bottom-color:rgba(201,162,39,.05);border-left-color:rgba(201,162,39,.35);animation:spRing 2.2s linear infinite;"></div>
+
+    <!-- Кольцо внутреннее -->
+    <div style="position:absolute;top:50%;left:50%;width:178px;height:178px;margin:-89px 0 0 -89px;border-radius:50%;border:1.5px solid transparent;border-top-color:rgba(255,210,80,.08);border-right-color:rgba(255,210,80,.65);border-bottom-color:rgba(255,210,80,.08);border-left-color:rgba(255,210,80,.08);animation:spRing 1.5s linear infinite reverse;"></div>
+
+    <!-- ЛОГОТИП — точно в центре колец -->
+    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:10;">
+      <img src="./assets/icons/licon-512.png" alt="Timofeyev" style="display:block;width:150px;height:150px;object-fit:contain;mix-blend-mode:screen;animation:spLogoIn .9s cubic-bezier(.34,1.56,.64,1) both,spLogoGlow 2.2s 1s ease-in-out infinite;"mix />
+    </div>
+
+    <!-- ТЕКСТ — ниже колец (центр колец + половина кольца 112px + отступ) -->
+    <div style="position:absolute;top:calc(50% + 125px);left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;z-index:10;">
+      <div style="font-family:Georgia,'Times New Roman',serif;font-size:21px;font-weight:400;letter-spacing:.3em;color:#c9a227;text-transform:uppercase;white-space:nowrap;animation:spTextIn .9s .25s ease both;"><span style="font-size:25px;font-weight:700;">T</span>IMOFEYEV</div>
+      <div style="margin-top:5px;font-family:Georgia,'Times New Roman',serif;font-size:10px;letter-spacing:.55em;color:rgba(201,162,39,.45);text-transform:uppercase;white-space:nowrap;animation:spTextIn .9s .45s ease both;">TRANSFER</div>
+    </div>
+
+    <!-- Прогресс-бар -->
+    <div style="position:absolute;bottom:52px;left:50%;transform:translateX(-50%);width:90px;height:2px;background:rgba(201,162,39,.15);border-radius:2px;overflow:hidden;">
+      <div style="height:100%;background:linear-gradient(90deg,transparent,#c9a227,transparent);animation:spBarFill 2.2s ease-in-out forwards;"></div>
+    </div>
+
+    <style>
+      @keyframes spPulse{0%,100%{transform:translate(-50%,-50%) scale(1);opacity:.7}50%{transform:translate(-50%,-50%) scale(1.15);opacity:1}}
+      @keyframes spOrbit{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+      @keyframes spRing{to{transform:rotate(360deg)}}
+      @keyframes spLogoIn{from{opacity:0;transform:scale(.45)}to{opacity:1;transform:scale(1)}}
+      @keyframes spLogoGlow{0%,100%{filter:drop-shadow(0 0 14px rgba(201,162,39,.55)) drop-shadow(0 0 36px rgba(201,162,39,.18))}50%{filter:drop-shadow(0 0 26px rgba(201,162,39,.95)) drop-shadow(0 0 60px rgba(201,162,39,.38))}}
+      @keyframes spTextIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+      @keyframes spBarFill{0%{width:0%}80%{width:90%}100%{width:100%}}
+      #splashScreen.sp-hide{opacity:0!important;visibility:hidden!important;transition:opacity .65s ease,visibility .65s ease;}
+    </style>
+  </div>
+
     <!-- Обертка для работы в Tilda -->
     <div id="tilda-calculator-wrapper">
 
@@ -253,19 +469,17 @@
         <div class="hs-drawer-body">
 
             <!-- Группа 1: Уведомления (отдельная) -->
-            <div class="hs-drawer-group">
-                <div class="hs-drawer-item" onclick="closeHsMenu()">
-                    <div class="hs-drawer-item-icon hs-di-bell">
-                        <i class="fas fa-bell"></i>
-                        <span class="hs-di-badge"></span>
-                    </div>
-                    <div class="hs-drawer-item-text">
-                        <span class="hs-di-title">Включите уведомления</span>
-                    </div>
-                    <i class="fas fa-chevron-right hs-drawer-chevron"></i>
+            <div class="hs-drawer-item" id="btn-enable-notif" onclick="closeHsMenu(); TFPush.promptPermission();">
+                <div class="hs-drawer-item-icon hs-di-bell" id="notif-btn-icon">
+                    <i class="fas fa-bell" id="notif-btn-bell-icon"></i>
+                    <span class="hs-di-badge" id="menuNotifBadge"></span>
                 </div>
+                <div class="hs-drawer-item-text">
+                    <span class="hs-di-title" id="notif-btn-title">Включите уведомления</span>
+                    <span class="hs-di-subtitle" id="notif-btn-subtitle" style="display:none;">Нажмите чтобы включить</span>
+                </div>
+                <i class="fas fa-chevron-right hs-drawer-chevron" id="notif-btn-chevron"></i>
             </div>
-
             <!-- Группа 2: Скидки + Способы оплаты (вместе) -->
             <div class="hs-drawer-group">
                 <div class="hs-drawer-item" onclick="closeHsMenu()">
@@ -304,6 +518,7 @@
             </div>
 
             <!-- ★ Переключатель режима Пассажир/Водитель (только для одобренных водителей) -->
+            <!-- Переключатель Пассажир ↔ Водитель (только для одобренных водителей) -->
             <div class="hs-drawer-group" id="hsModeSwitcherGroup" style="display:none">
                 <div style="padding:14px 16px 12px">
                     <div style="font-size:11px;color:#8e8e93;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;margin-bottom:10px">
@@ -322,7 +537,7 @@
                 </div>
             </div>
 
-            <!-- Группа 4: Работа водителем (жёлтая — отдельная) -->
+            <!-- Работа водителем (жёлтая — для пользователей без одобренной заявки водителя) -->
             <div class="hs-drawer-group hs-drawer-group--yellow" id="hsDriverWorkGroup">
                 <div class="hs-drawer-item" onclick="openDriverScreen()">
                     <div class="hs-drawer-item-icon hs-di-work">
@@ -332,6 +547,19 @@
                         <span class="hs-di-title hs-di-title--dark">Работа водителем</span>
                     </div>
                     <i class="fas fa-chevron-right hs-drawer-chevron hs-drawer-chevron--dark"></i>
+                </div>
+            </div>
+
+            <!-- Войти в админ панель (только для администраторов) -->
+            <div class="hs-drawer-group hs-drawer-group--admin" id="hsAdminGroup" style="display:none">
+                <div class="hs-drawer-item" onclick="switchAppMode('admin')">
+                    <div class="hs-drawer-item-icon hs-di-admin">
+                        <i class="fas fa-shield-halved"></i>
+                    </div>
+                    <div class="hs-drawer-item-text">
+                        <span class="hs-di-title hs-di-title--admin">Панель администратора</span>
+                    </div>
+                    <i class="fas fa-chevron-right hs-drawer-chevron" style="color:#fff;opacity:0.6"></i>
                 </div>
             </div>
 
@@ -1060,7 +1288,73 @@
     <script src="https://api-maps.yandex.ru/2.1/?apikey=69c18fe9-15b1-4391-b4e7-2a005a4fb22d&lang=ru_RU"></script>
     
     </div>
-    <script src="api.js?v=2.0.0"></script>
-    <script src="script.js?v=6.0.0"></script>
+    <script src="api.js?v=2.0.1"></script>
+    <script src="script.js?v=6.0.1"></script>
+    <script src="push.js?v=1.0.0"></script>
+
+    <!-- ═══ Service Worker (PWA) ═══ -->
+    <script>
+      // ── Splash Screen: скрываем после загрузки ──────────
+      (function () {
+        var MIN_MS = 2400; // минимум сколько показываем (мс)
+        var start  = Date.now();
+
+        function hideSplash() {
+          var el = document.getElementById('splashScreen');
+          if (!el) return;
+          var wait = Math.max(0, MIN_MS - (Date.now() - start));
+          setTimeout(function () {
+            el.classList.add('sp-hide');
+            setTimeout(function () { el && el.remove(); }, 700);
+          }, wait);
+        }
+
+        // Вешаем на window.load — весь контент готов
+        if (document.readyState === 'complete') {
+          hideSplash();
+        } else {
+          window.addEventListener('load', hideSplash);
+        }
+        // Страховка — скрыть через 5 сек в любом случае
+        setTimeout(function () {
+          var el = document.getElementById('splashScreen');
+          if (el) { el.classList.add('sp-hide'); setTimeout(function(){el.remove();},700); }
+        }, 5000);
+      })();
+
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/service-worker.js')
+            .then(reg => console.log('[PWA] Service Worker зарегистрирован:', reg.scope))
+            .catch(err => console.error('[PWA] Ошибка регистрации SW:', err));
+        });
+      }
+
+      // Показываем кнопку "Установить приложение"
+      let deferredPrompt;
+      window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+
+        // Показываем свою кнопку установки (опционально)
+        const installBtn = document.getElementById('pwaInstallBtn');
+        if (installBtn) installBtn.style.display = 'flex';
+      });
+
+      function installPWA() {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then((result) => {
+          console.log('[PWA] Пользователь:', result.outcome);
+          deferredPrompt = null;
+          const installBtn = document.getElementById('pwaInstallBtn');
+          if (installBtn) installBtn.style.display = 'none';
+        });
+      }
+
+      window.addEventListener('appinstalled', () => {
+        console.log('[PWA] Приложение установлено!');
+      });
+    </script>
 </body>
 </html>

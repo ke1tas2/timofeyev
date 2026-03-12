@@ -56,15 +56,30 @@ class Auth {
 
         // Проверяем что токен не отозван
         $tokenHash = JWT::hash($token);
-        $record = Database::row(
-            'SELECT t.is_valid, t.expires_at, u.id, u.phone, u.name, u.role, u.status
-             FROM auth_tokens t
-             JOIN users u ON u.id = t.user_id
-             WHERE t.token_hash = ? AND t.user_id = ?',
-            [$tokenHash, $payload['user_id']]
-        );
+        // Сначала пробуем с is_admin (после миграции), при ошибке — без него (fallback)
+        try {
+            $record = Database::row(
+                'SELECT t.is_valid, t.expires_at, u.id, u.phone, u.name, u.role, u.status, u.is_admin
+                 FROM auth_tokens t
+                 JOIN users u ON u.id = t.user_id
+                 WHERE t.token_hash = ? AND t.user_id = ?',
+                [$tokenHash, $payload['user_id']]
+            );
+        } catch (PDOException $e) {
+            // Колонка is_admin ещё не существует — запрос без неё
+            $record = Database::row(
+                'SELECT t.is_valid, t.expires_at, u.id, u.phone, u.name, u.role, u.status
+                 FROM auth_tokens t
+                 JOIN users u ON u.id = t.user_id
+                 WHERE t.token_hash = ? AND t.user_id = ?',
+                [$tokenHash, $payload['user_id']]
+            );
+            if ($record) $record['is_admin'] = ($record['role'] === 'admin') ? 1 : 0;
+        }
 
-        if (!$record || !$record['is_valid'] || $record['status'] !== 'active') return null;
+        if (!$record || !$record['is_valid']) return null;
+        // Заблокированный пользователь — не пускаем
+        if ($record['status'] !== 'active') return null;
 
         self::$currentUser = $record;
         return $record;
@@ -77,11 +92,14 @@ class Auth {
         return $user;
     }
 
-    // Проверка роли
+    // Проверка роли — для admin проверяем флаг is_admin, чтобы переключение режимов не ломало доступ
     public static function requireRole(string ...$roles): array {
         $user = self::require();
-        if (!in_array($user['role'], $roles)) Response::forbidden();
-        return $user;
+        foreach ($roles as $role) {
+            if ($role === 'admin' && !empty($user['is_admin'])) return $user;
+            if ($user['role'] === $role) return $user;
+        }
+        Response::forbidden();
     }
 
     private static function extractToken(): ?string {
