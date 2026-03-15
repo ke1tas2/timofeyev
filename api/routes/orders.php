@@ -105,8 +105,8 @@ if ($method === 'POST' && !$id) {
             'INSERT INTO orders
              (client_id, tariff_id, transport_class, from_address, from_lat, from_lng,
               to_address, to_lat, to_lng, distance_km, duration_min, price,
-              payment_method, options, comment, status)
-             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+              payment_method, options, comment, preferred_driver_id, status)
+             VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
             [
                 $user['id'], (int)$body['tariff_id'],
                 $body['transport_class'] ?? 'comfort',
@@ -118,6 +118,7 @@ if ($method === 'POST' && !$id) {
                 $body['payment_method'] ?? 'cash',
                 isset($body['options']) ? json_encode($body['options']) : null,
                 $body['comment'] ?? null,
+                isset($body['preferred_driver_id']) ? (int)$body['preferred_driver_id'] : null,
                 'pending',
             ]
         );

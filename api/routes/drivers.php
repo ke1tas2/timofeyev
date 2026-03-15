@@ -6,6 +6,43 @@
 $user   = Auth::require();
 $action = is_numeric($segments[1] ?? '') ? '' : ($segments[1] ?? '');
 
+// ── GET /api/drivers/available — публичный список авто по тарифу ──
+// Не требует авторизации водителя, доступен всем клиентам
+if ($method === 'GET' && $action === 'available') {
+    $tariffType = $_GET['tariff_type'] ?? '';
+    $allowed = ['sedan','suv','sport','limousine','bus','minibus','helicopter','jet','trailer'];
+    if (!in_array($tariffType, $allowed)) Response::error('Неверный тип тарифа');
+
+    $drivers = Database::query(
+        "SELECT d.id, d.car_make, d.car_model, d.car_year, d.car_color,
+                d.car_number, d.car_display_name, d.rating, d.is_online,
+                u.name AS driver_name
+         FROM drivers d
+         JOIN users u ON u.id = d.user_id
+         WHERE d.car_tariff_type = ?
+           AND d.status = 'approved'
+         ORDER BY d.is_online DESC, d.rating DESC",
+        [$tariffType]
+    );
+
+    // Форматируем для клиента
+    $result = array_map(function($d) {
+        $carName = $d['car_display_name']
+            ?: trim(($d['car_make'] ?? '') . ' ' . ($d['car_model'] ?? '') . ($d['car_year'] ? ' ' . $d['car_year'] : ''));
+        return [
+            'driver_id'   => (int)$d['id'],
+            'name'        => $carName ?: 'Автомобиль',
+            'driver_name' => $d['driver_name'] ?? '',
+            'rating'      => $d['rating'] ? round((float)$d['rating'], 1) : null,
+            'color'       => $d['car_color'] ?? null,
+            'number'      => $d['car_number'] ?? null,
+            'is_online'   => (bool)$d['is_online'],
+        ];
+    }, $drivers);
+
+    Response::ok($result);
+}
+
 // ── POST /api/drivers/apply ──────────────────────────────────
 if ($method === 'POST' && $action === 'apply') {
     $existing = Database::row('SELECT id, status FROM drivers WHERE user_id=?', [$user['id']]);
@@ -14,11 +51,23 @@ if ($method === 'POST' && $action === 'apply') {
         Response::error('Ваша заявка уже ' . ($map[$existing['status']] ?? $existing['status']));
     }
 
-    Database::transaction(function() use ($user, $body) {
+    // Валидируем тип тарифа
+    $allowed = ['sedan','suv','sport','limousine','bus','minibus','helicopter','jet','trailer'];
+    $tariffType = $body['car_tariff_type'] ?? 'sedan';
+    if (!in_array($tariffType, $allowed)) $tariffType = 'sedan';
+
+    // Формируем отображаемое название авто
+    $displayName = $body['car_display_name'] ?? null;
+    if (!$displayName) {
+        $displayName = trim(($body['car_make'] ?? '') . ' ' . ($body['car_model'] ?? ''));
+    }
+
+    Database::transaction(function() use ($user, $body, $tariffType, $displayName) {
         Database::insert(
             'INSERT INTO drivers
-             (user_id, car_make, car_model, car_year, car_color, car_number, car_class, license_number, status)
-             VALUES (?,?,?,?,?,?,?,?,?)',
+             (user_id, car_make, car_model, car_year, car_color, car_number,
+              car_class, car_tariff_type, car_display_name, license_number, status)
+             VALUES (?,?,?,?,?,?,?,?,?,?,?)',
             [
                 $user['id'],
                 $body['car_make']       ?? null,
@@ -27,6 +76,8 @@ if ($method === 'POST' && $action === 'apply') {
                 $body['car_color']      ?? null,
                 $body['car_number']     ?? null,
                 $body['car_class']      ?? 'comfort',
+                $tariffType,
+                $displayName            ?: null,
                 $body['license_number'] ?? null,
                 'pending',
             ]
@@ -64,7 +115,8 @@ if ($method === 'GET' && $action === 'me') {
 
 // ── PUT /api/drivers/me ──────────────────────────────────────
 if ($method === 'PUT' && $action === 'me') {
-    $fields = ['car_make','car_model','car_year','car_color','car_number','car_class','license_number'];
+    $fields = ['car_make','car_model','car_year','car_color','car_number',
+               'car_class','car_tariff_type','car_display_name','license_number'];
     $sets = []; $params = [];
     foreach ($fields as $f) {
         if (array_key_exists($f, $body)) { $sets[] = "$f = ?"; $params[] = $body[$f]; }

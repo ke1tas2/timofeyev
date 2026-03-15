@@ -25,7 +25,7 @@ return [
     // ── SMS-провайдер ────────────────────────────────────────
     // !! Смените 'mock' на 'mobizon' когда вставите ключ !!
     'sms' => [
-        'provider' => 'mobizon',   // 'mock' | 'mobizon' | 'smsc'
+        'provider' => 'mock',      // 'mock' | 'mobizon' | 'smsc'
         'smsc' => [
             'login'    => 'YOUR_SMSC_LOGIN',
             'password' => 'YOUR_SMSC_PASSWORD',
@@ -33,7 +33,7 @@ return [
         ],
         'mobizon' => [
             // !! Скопируйте ключ из Mobizon → Профиль → API-ключ !!
-            'api_key'  => 'kz1e2f4cb8f4a3d4849379da52d584faf41ccfca24c6b36a208e65255dd64b00032014',
+            'api_key'  => 'YOUR_MOBIZON_API_KEY',
             'sender'   => 'Timofeyev',  // Должен быть одобрен в Mobizon как «Отправитель SMS»
         ],
     ],
@@ -75,8 +75,8 @@ return [
         //   2. Тип: Web application
         //   3. Redirect URI: https://timofeyev.kz/api/auth/social/google/callback
         'google' => [
-            'client_id'     => '672763786631-o5gepfrh6mmim84g14o5a3v5hr8n3ul0.apps.googleusercontent.com ',
-            'client_secret' => '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',
+            'client_id'     => 'YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com',
+            'client_secret' => 'YOUR_GOOGLE_CLIENT_SECRET',
         ],
 
         // VK ID — https://id.vk.com/business/go

@@ -94,7 +94,9 @@ document.addEventListener('DOMContentLoaded', function() {
         let fromMarker, toMarker;
         let fromCoords = null;
         let toCoords = null;
-        let selectedTariff = 'sedan';
+        let selectedTariff    = 'sedan';
+        let selectedCar       = null;
+        let _selectedDriverId = null;
         let selectingPoint = null;
         let currentPayment = 'cash';
         let mapClickHandler = null;
@@ -104,88 +106,40 @@ document.addEventListener('DOMContentLoaded', function() {
         const MAX_STOPS = 3;
 
         const tariffs = [
-            {
-                id: 'sedan',
-                name: 'Седан',
-                price: 10000,
-                perKm: 200,
-                image: './assets/sedan.png'
-            },
-
-            {
-                id: 'suv',
-                name: 'Внедорожник',
-                price: 15000,
-                perKm: 260,
-                image: './assets/suv.png'
-            },
-
-            {
-                id: 'sport',
-                name: 'Спорткар',
-                price: 30000,
-                perKm: 400,
-                image: './assets/sportcar.png'
-            },
-            {
-                id: 'limousine',
-                name: 'Лимузин',
-                price: 50000,
-                perKm: 350,
-                image: './assets/limousine-black.png'
-            },
-            {
-                id: 'bus',
-                name: 'Автобус',
-                price: 40000,
-                perKm: 350,
-                image: './assets/bus.png'
-            },
-            {
-                id: 'minibus',
-                name: 'Микроавтобус',
-                price: 30000,
-                perKm: 300,
-                image: './assets/microbus.png'
-            },
-            {
-                id: 'helicopter',
-                name: 'Вертолёт',
-                price: 2160000,
-                perKm: 500000,
-                image: './assets/helicopter-black.png'
-            },
-            {
-                id: 'jet',
-                name: 'Бизнес джет',
-                price: 10000000,
-                perKm: 1500000,
-                image: './assets/plane.png'
-            },
-            {
-                id: 'trailer',
-                name: 'Перегон авто',
-                price: 20000,
-                perKm: 200,
-                image: './assets/car-keys.png'
-            }
+            { id: 'sedan',      get name() { return window.t ? window.t('sedan')      : 'Sedan';        }, price: 10000,    perKm: 200,     image: './assets/sedan.png',
+              cars: [ { id: 'camry', name: 'Toyota Camry', seats: 3 }, { id: 'e_class', name: 'Mercedes E-Class', seats: 3 }, { id: 'bmw5', name: 'BMW 5 Series', seats: 3 }, { id: 'a6', name: 'Audi A6', seats: 3 }, { id: 'genesis', name: 'Genesis G80', seats: 3 } ] },
+            { id: 'suv',        get name() { return window.t ? window.t('suv')        : 'SUV';          }, price: 15000,    perKm: 260,     image: './assets/suv.png',
+              cars: [ { id: 'lc200', name: 'Toyota Land Cruiser 200', seats: 6 }, { id: 'lc300', name: 'Toyota Land Cruiser 300', seats: 6 }, { id: 'gclass', name: 'Mercedes G-Class', seats: 4 }, { id: 'x7', name: 'BMW X7', seats: 6 }, { id: 'lx570', name: 'Lexus LX570', seats: 6 }, { id: 'escalade', name: 'Cadillac Escalade', seats: 6 }, { id: 'prado', name: 'Toyota Prado', seats: 6 }, { id: 'patrol', name: 'Nissan Patrol', seats: 6 } ] },
+            { id: 'sport',      get name() { return window.t ? window.t('sport')      : 'Sportscar';    }, price: 30000,    perKm: 400,     image: './assets/sportcar.png',
+              cars: [ { id: 'porsche', name: 'Porsche 911', seats: 2 }, { id: 'amg_gt', name: 'Mercedes-AMG GT', seats: 2 }, { id: 'bmw_m8', name: 'BMW M8', seats: 2 }, { id: 'audi_r8', name: 'Audi R8', seats: 2 } ] },
+            { id: 'limousine',  get name() { return window.t ? window.t('limousine')  : 'Limousine';    }, price: 50000,    perKm: 350,     image: './assets/limousine-black.png',
+              cars: [ { id: 'rr_phantom', name: 'Rolls-Royce Phantom', seats: 4 }, { id: 'bentley', name: 'Bentley Flying Spur', seats: 4 }, { id: 'limo_merc', name: 'Mercedes S-Class Limo', seats: 6 }, { id: 'limo_linc', name: 'Lincoln Town Car', seats: 8 } ] },
+            { id: 'bus',        get name() { return window.t ? window.t('bus')        : 'Bus';          }, price: 40000,    perKm: 350,     image: './assets/bus.png',
+              cars: [ { id: 'sprinter_xl', name: 'Mercedes Sprinter 20', seats: 20 }, { id: 'hyundai_bus', name: 'Hyundai County', seats: 30 }, { id: 'man_bus', name: "MAN Lion's Coach", seats: 50 } ] },
+            { id: 'minibus',    get name() { return window.t ? window.t('minibus')    : 'Minibus';      }, price: 30000,    perKm: 300,     image: './assets/microbus.png',
+              cars: [ { id: 'vito', name: 'Mercedes Vito', seats: 7 }, { id: 'vclass', name: 'Mercedes V-Class', seats: 7 }, { id: 'caravelle', name: 'VW Caravelle', seats: 8 }, { id: 'sprinter_m', name: 'Mercedes Sprinter 8', seats: 8 } ] },
+            { id: 'helicopter', get name() { return window.t ? window.t('helicopter') : 'Helicopter';   }, price: 2160000,  perKm: 500000,  image: './assets/helicopter-black.png',
+              cars: [ { id: 'bell_407', name: 'Bell 407', seats: 6 }, { id: 'aw109', name: 'AgustaWestland AW109', seats: 7 }, { id: 'ec135', name: 'Airbus EC135', seats: 7 } ] },
+            { id: 'jet',        get name() { return window.t ? window.t('jet')        : 'Private jet';  }, price: 10000000, perKm: 1500000, image: './assets/plane.png',
+              cars: [ { id: 'citation', name: 'Cessna Citation XLS', seats: 8 }, { id: 'global6000', name: 'Bombardier Global 6000', seats: 12 }, { id: 'gulfstream', name: 'Gulfstream G650', seats: 14 } ] },
+            { id: 'trailer',    get name() { return window.t ? window.t('trailer')    : 'Car delivery'; }, price: 20000,    perKm: 200,     image: './assets/car-keys.png', cars: [] },
         ];
 
         let paymentMethods = [
-            { id: 'cash', name: 'Наличными', icon: 'money-bill-wave', type: 'cash' }
+            { id: 'cash', get name() { return window.t ? window.t('cash') : 'Cash'; }, icon: 'money-bill-wave', type: 'cash' }
         ];
 
         let savedCards = JSON.parse(localStorage.getItem('taxi_saved_cards')) || [];
 
         function updatePaymentMethods() {
             paymentMethods = [
-                { id: 'cash', name: 'Наличными', icon: 'money-bill-wave', type: 'cash' }
+                { id: 'cash', get name() { return window.t ? window.t('cash') : 'Cash'; }, icon: 'money-bill-wave', type: 'cash' }
             ];
 
             savedCards.forEach((card, index) => {
                 paymentMethods.push({
                     id: 'card_' + index,
-                    name: 'Карта •••• ' + card.number.slice(-4),
+                    name: (window.t ? window.t('card') : 'Card') + ' •••• ' + card.number.slice(-4),
                     icon: 'credit-card',
                     type: 'card',
                     cardIndex: index,
@@ -273,13 +227,41 @@ document.addEventListener('DOMContentLoaded', function() {
                 navigator.geolocation.getCurrentPosition(
                     function(position) {
                         const coords = [position.coords.latitude, position.coords.longitude];
-                        // При ручном нажатии на кнопку геопозиции:
-                        // только обновляем адрес и центрируем карту, маркер А не ставим
+
+                        // Смещаем center карты так, чтобы GPS оказался ровно под кончиком маркера.
+                        // dy = расстояние от кончика маркера до геометрического центра #map (в пикселях).
+                        // Маркер обычно выше центра (dy < 0), значит центр карты должен быть
+                        // южнее GPS на |dy| пикселей, чтобы GPS визуально встал под маркер.
+                        try {
+                            const markerEl = document.getElementById('mapMarker');
+                            const mapEl    = document.getElementById('map');
+                            let dy = 0;
+                            if (markerEl && mapEl) {
+                                const mr = markerEl.getBoundingClientRect();
+                                const mp = mapEl.getBoundingClientRect();
+                                dy = mr.bottom - (mp.top + mp.height / 2);
+                            }
+                            const zoom           = 15;
+                            const projection     = map.options.get('projection');
+                            const gpsGlobalPx    = projection.toGlobalPixels(coords, zoom);
+                            // Сдвигаем центр на -dy по Y: если маркер выше (dy<0), центр едет вверх
+                            const shiftedGlobalPx = [gpsGlobalPx[0], gpsGlobalPx[1] - dy];
+                            const shiftedCoords   = projection.fromGlobalPixels(shiftedGlobalPx, zoom);
+                            map.setCenter(shiftedCoords, zoom, { duration: 300 });
+                        } catch (e) {
+                            map.setCenter(coords, 15, { duration: 300 });
+                        }
+
+                        // Отменяем boundschange-таймер: адрес ставим сами по точным GPS coords
+                        if (centerGeocodeTimer) clearTimeout(centerGeocodeTimer);
                         geocodeCoords('from', coords, false);
-                        map.setCenter(coords, 15, { duration: 300 });
+                        // Страховка на время анимации (300мс + запас)
+                        setTimeout(function() {
+                            if (centerGeocodeTimer) clearTimeout(centerGeocodeTimer);
+                        }, 500);
                     },
                     function() {
-                        alert('Не удалось определить местоположение. Разрешите доступ к геолокации.');
+                        alert(window.t ? window.t('loc_error') : 'Could not detect location. Please allow location access.');
                     },
                     { enableHighAccuracy: true, timeout: 10000 }
                 );
@@ -325,43 +307,29 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         function initInterface() {
-            const tariffGrid = document.getElementById('tariffGrid');
-            tariffs.forEach(tariff => {
-                const card = document.createElement('div');
-                card.className = 'tariff-card';
-                // Добавляем модификатор по ID тарифа, чтобы можно было тонко настраивать стили
-                card.classList.add(`tariff-card-${tariff.id}`);
-                if (tariff.id === selectedTariff) card.classList.add('active');
+            // ── Инициализация анимации цен (нужна для calculatePrice) ──
+            tariffs.forEach(t => initTariffAnimState(t.id, t.price));
 
-                const imageUrl = tariff.image || '';
-
-                card.innerHTML = `
-                    ${tariff.id === 'suv' ? '<div class="tariff-badge">Популярный</div>' : ''}
-                    <div class="tariff-image-box">
-                        ${imageUrl ? `<img src="${imageUrl}" alt="${tariff.name}" class="tariff-image">` : ''}
-                    </div>
-                    <div class="tariff-name">${tariff.name}</div>
-                    <div class="tariff-price" id="tariff-price-${tariff.id}">${formatPrice(tariff.price)} ₸</div>
-                `;
-
-                card.addEventListener('click', () => selectTariff(tariff.id));
-                tariffGrid.appendChild(card);
-                // init animation state with base price
-                initTariffAnimState(tariff.id, tariff.price);
-            });
-
-            document.querySelectorAll('.transport-class-option').forEach(option => {
-                option.addEventListener('click', () => {
-                    const cls = option.getAttribute('data-class');
-                    if (!cls) return;
-                    selectedTransportClass = cls;
-
-                    // Синхронизируем активное состояние для всех одинаковых классов
-                    document.querySelectorAll('.transport-class-option').forEach(o => {
-                        o.classList.toggle('active', o.getAttribute('data-class') === cls);
-                    });
+            // ── Строим табы категорий ──
+            const tabsEl = document.getElementById('tariffTabs');
+            if (tabsEl) {
+                tariffs.forEach(tariff => {
+                    const tab = document.createElement('button');
+                    tab.className = 'tariff-tab' + (tariff.id === selectedTariff ? ' active' : '');
+                    tab.dataset.id = tariff.id;
+                    tab.textContent = (window.t ? window.t(tariff.id) : null) || tariff.name;
+                    tab.addEventListener('click', () => selectTariff(tariff.id));
+                    tabsEl.appendChild(tab);
                 });
-            });
+            }
+
+            // ── Рендерим карточки машин для первого тарифа ──
+            renderTariffCars(selectedTariff);
+
+            // Применяем текущий язык к сгенерированным табам
+            if (typeof window.setLanguage === 'function') {
+                window.setLanguage(localStorage.getItem('tf_lang') || 'ru');
+            }
 
             setupInputFields();
 
@@ -471,12 +439,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
             var labelAEl = document.getElementById('srchLabelA');
             if (labelAEl) {
+                const _tf = window.t || (k=>k);
                 if (pointType === 'to') {
-                    labelAEl.textContent = document.getElementById('fromInput').value || 'Откуда';
+                    labelAEl.textContent = document.getElementById('fromInput').value || _tf('from_label');
                 } else if (pointType === 'from') {
-                    labelAEl.textContent = document.getElementById('toInput').value || 'Куда';
+                    labelAEl.textContent = document.getElementById('toInput').value || _tf('to_label');
                 } else if (pointType && pointType.startsWith('stop_')) {
-                    labelAEl.textContent = document.getElementById('fromInput').value || 'Откуда';
+                    labelAEl.textContent = document.getElementById('fromInput').value || _tf('from_label');
                 }
             }
 
@@ -491,9 +460,10 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             var input = document.getElementById('srchInput');
-            input.placeholder = (pointType === 'to') ? 'Куда поедете?'
-                : (pointType === 'from') ? 'Откуда поедете?'
-                : 'Адрес остановки?';
+            const _srchT = window.t || (k=>k);
+            input.placeholder = (pointType === 'to') ? _srchT('search_placeholder')
+                : (pointType === 'from') ? _srchT('from_placeholder')
+                : _srchT('stop_placeholder').replace('{n}', '');
             input.value = cur || '';
             _srchQuery = input.value;
 
@@ -647,7 +617,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 renderSuggestions(topItems.filter(function(i) { return i.value; }), query);
             }).catch(function(e) {
                 console.warn('geocode error:', e);
-                document.getElementById('srchResults').innerHTML = '<div class="srch-empty">Ничего не найдено</div>';
+                document.getElementById('srchResults').innerHTML = '<div class="srch-empty">' + (window.t ? window.t('search_empty') : 'Ничего не найдено') + '</div>';
             });
         }
         
@@ -672,17 +642,15 @@ document.addEventListener('DOMContentLoaded', function() {
             if (!meters && meters !== 0) return '';
             
             if (meters < 1000) {
-                // Менее 1 км - показываем метры
-                return Math.round(meters) + ' м';
+                // Less than 1 km - show metres
+                return Math.round(meters) + ' ' + (window.t ? window.t('dist_m') : 'm');
             } else {
-                // 1 км и более - показываем километры
+                // 1 km and more - show km
                 var km = meters / 1000;
                 if (km < 10) {
-                    // До 10 км - показываем 1 знак после запятой
-                    return km.toFixed(1) + ' км';
+                    return km.toFixed(1) + ' ' + (window.t ? window.t('dist_km') : 'km');
                 } else {
-                    // 10 км и более - округляем до целых
-                    return Math.round(km) + ' км';
+                    return Math.round(km) + ' ' + (window.t ? window.t('dist_km') : 'km');
                 }
             }
         }
@@ -692,7 +660,7 @@ document.addEventListener('DOMContentLoaded', function() {
             list.innerHTML = '';
 
             if (!items.length) {
-                list.innerHTML = '<div class="srch-empty">Ничего не найдено</div>';
+                list.innerHTML = '<div class="srch-empty">' + (window.t ? window.t('search_empty') : 'Nothing found') + '</div>';
                 return;
             }
 
@@ -998,11 +966,12 @@ document.addEventListener('DOMContentLoaded', function() {
             // Заголовок панели: Точка отправления / Точка назначения
             var titleEl = document.querySelector('.mpb-panel-title');
             if (titleEl) {
-                if (pointType === 'from') titleEl.textContent = 'Точка отправления';
-                else if (pointType === 'to') titleEl.textContent = 'Точка назначения';
+                const _tt = window.t || (k=>k);
+                if (pointType === 'from') titleEl.textContent = _tt('mpb_from_title');
+                else if (pointType === 'to') titleEl.textContent = _tt('mpb_to_title');
                 else if (pointType && pointType.startsWith('stop_')) {
                     var sIdx = parseInt(pointType.split('_')[1]);
-                    titleEl.textContent = 'Остановка ' + (sIdx + 1);
+                    titleEl.textContent = _tt('mpb_stop_title').replace('{n}', sIdx + 1);
                 }
             }
 
@@ -1022,7 +991,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     addrB.textContent = curAddr;
                     addrB.classList.add('mpb-has-addr');
                 } else {
-                    addrB.textContent = 'Переместите карту...';
+                    addrB.textContent = (window.t ? window.t('mpb_moving') : 'Move the map...');
                     addrB.classList.remove('mpb-has-addr');
                 }
             }
@@ -1075,7 +1044,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     var addr = parts.length > 2 ? parts.slice(-2).join(', ') : full;
 
                     var el = document.getElementById('mpbAddrB');
-                    el.textContent = addr || 'Переместите карту...';
+                    el.textContent = addr || (window.t ? window.t('mpb_moving') : 'Move the map...');
                     el.classList.toggle('mpb-has-addr', !!addr);
                 }).catch(function(){});
             }, 600);
@@ -1191,7 +1160,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
                 if (stop.coords) {
                     var m = new ymaps.Placemark(stop.coords, {
-                        hintContent: 'Остановка ' + (i + 1),
+                        hintContent: (window.t ? window.t('map_stop_hint').replace('{n}', i+1) : 'Stop ' + (i + 1)),
                         balloonContent: stop.address
                     }, {
                         iconLayout: customStopLayout,
@@ -1226,7 +1195,7 @@ document.addEventListener('DOMContentLoaded', function() {
             stops[idx].address = address;
 
             var m = new ymaps.Placemark(coords, {
-                hintContent: 'Остановка ' + (idx + 1),
+                hintContent: (window.t ? window.t('map_stop_hint').replace('{n}', idx+1) : 'Stop ' + (idx + 1)),
                 balloonContent: address
             }, {
                 iconLayout: customStopLayout,
@@ -1278,14 +1247,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     '</div>' +
                     '<div class="address-input-container" onclick="openSearchOverlay(\'stop_' + idx + '\')">' +
                         '<input type="text" class="address-input" id="stopInput_' + idx + '" ' +
-                            'placeholder="Остановка ' + (idx + 1) + '" autocomplete="off" readonly ' +
+                            'placeholder="' + (window.t ? window.t('stop_placeholder').replace('{n}', idx+1) : 'Stop ' + (idx+1)) + '" autocomplete="off" readonly ' +
                             'value="' + (stop.address || '') + '">' +
-                        '<span class="address-hint">Остановка ' + (idx + 1) + '</span>' +
+                        '<span class="address-hint">' + (window.t ? window.t('stop_placeholder').replace('{n}', idx+1) : 'Stop ' + (idx+1)) + '</span>' +
                     '</div>' +
-                    '<button class="clear-button" style="display:flex;" onclick="removeStop(' + idx + ')" title="Удалить остановку">' +
+                    '<button class="clear-button" style="display:flex;" onclick="removeStop(' + idx + ')" title="' + (window.t ? window.t('remove_stop') : 'Remove stop') + '">' +
                         '<i class="fas fa-times"></i>' +
                     '</button>' +
-                    '<button class="map-select-button" onclick="startSelectingPoint(\'stop_' + idx + '\')" title="Выбрать на карте">' +
+                    '<button class="map-select-button" onclick="startSelectingPoint(\'stop_' + idx + '\')" title="' + (window.t ? window.t('map_select') : 'Select on map') + '">' +
                         '<i class="fas fa-map-marker-alt"></i>' +
                     '</button>';
                 container.appendChild(field);
@@ -1301,34 +1270,49 @@ document.addEventListener('DOMContentLoaded', function() {
         // Возвращает гео-координаты кончика пина маркера.
         // Берём getBoundingClientRect() именно .marker-pin (после rotate(-45deg))
         // — его нижняя граница соответствует визуальному острому кончику.
+        // Возвращает высоту панели, перекрывающей карту снизу (pick-bar или основная панель)
+        function getMapBottomOverlap() {
+            const pickBar = document.getElementById('mapPickBar');
+            if (pickBar && pickBar.classList.contains('mpb-open')) {
+                return pickBar.getBoundingClientRect().height;
+            }
+            const panel = document.getElementById('panel');
+            if (panel && panel.style.display !== 'none') {
+                return panel.getBoundingClientRect().height;
+            }
+            return 0;
+        }
+
         function getMarkerGeoCoords() {
+            // syncUI сдвигает marker.style.top в визуальный центр видимой карты.
+            // map.getCenter() — это центр ВСЕГО #map (50% высоты экрана), он НЕ совпадает
+            // с позицией маркера. Читаем реальный экранный пиксель кончика маркера.
             const markerEl = document.getElementById('mapMarker');
-            const mapEl = document.getElementById('map');
+            const mapEl    = document.getElementById('map');
             if (!markerEl || markerEl.classList.contains('hidden') || !mapEl) {
                 return map.getCenter();
             }
             try {
-                const mapRect = mapEl.getBoundingClientRect();
                 const markerRect = markerEl.getBoundingClientRect();
+                const mapRect    = mapEl.getBoundingClientRect();
 
-                // map-marker уже позиционирован с translate(-50%, -100%)
-                // Так что его нижний край и есть кончик маркера
-                const tipX = markerRect.left + markerRect.width / 2;
+                // Кончик маркера = нижний центр элемента (transform: translate(-50%,-100%))
+                const tipX = markerRect.left + markerRect.width  / 2;
                 const tipY = markerRect.bottom;
-                
-                // Смещение от центра div'а карты
-                const mapCenterX = mapRect.left + mapRect.width / 2;
-                const mapCenterY = mapRect.top + mapRect.height / 2;
-                const dx = tipX - mapCenterX;
-                const dy = tipY - mapCenterY;
 
-                // Проекция Яндекс.Карт: пиксели → гео
-                const projection = map.options.get('projection');
-                const zoom = map.getZoom();
-                const center = map.getCenter();
-                const centerGlobalPx = projection.toGlobalPixels(center, zoom);
-                const tipGlobalPx = [centerGlobalPx[0] + dx, centerGlobalPx[1] + dy];
-                return projection.fromGlobalPixels(tipGlobalPx, zoom);
+                // Смещение от геометрического центра #map
+                const mapCenterX = mapRect.left + mapRect.width  / 2;
+                const mapCenterY = mapRect.top  + mapRect.height / 2;
+                const dx = tipX - mapCenterX;
+                const dy = tipY - mapCenterY;   // < 0 когда маркер выше центра экрана
+
+                // Проекция: пиксели → гео
+                const projection     = map.options.get('projection');
+                const zoom           = map.getZoom();
+                const centerGlobalPx = projection.toGlobalPixels(map.getCenter(), zoom);
+                return projection.fromGlobalPixels(
+                    [centerGlobalPx[0] + dx, centerGlobalPx[1] + dy], zoom
+                );
             } catch (e) {
                 console.error('getMarkerGeoCoords error:', e);
                 return map.getCenter();
@@ -1361,7 +1345,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             fromMarker = new ymaps.Placemark(coords, {
-                hintContent: 'Отправление',
+                hintContent: (window.t ? window.t('map_pickup_hint') : 'Departure'),
                 balloonContent: address
             }, {
                 iconLayout: customPointLayout,
@@ -1537,7 +1521,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             toMarker = new ymaps.Placemark(coords, {
-                hintContent: 'Назначение',
+                hintContent: (window.t ? window.t('map_dest_hint') : 'Destination'),
                 balloonContent: address
             }, {
                 iconLayout: customPointLayout,
@@ -1721,70 +1705,153 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         function selectTariff(tariffId) {
-            selectedTariff = tariffId;
+            selectedTariff    = tariffId;
+            selectedCar       = null;
+            _selectedDriverId = null;
 
-            document.querySelectorAll('.tariff-card').forEach(card => {
-                card.classList.remove('active');
+            // Активный таб
+            document.querySelectorAll('.tariff-tab').forEach(tab => {
+                tab.classList.toggle('active', tab.dataset.id === tariffId);
             });
 
-            const tariffIndex = tariffs.findIndex(t => t.id === tariffId);
-            if (tariffIndex !== -1) {
-                const cards = document.querySelectorAll('.tariff-card');
-                if (cards[tariffIndex]) {
-                    cards[tariffIndex].classList.add('active');
-                }
-            }
+            // Рендерим карточки машин
+            renderTariffCars(tariffId);
 
-            // Синхронизируем скрытый priceAmount с ценой выбранного тарифа
-            const priceEl = document.getElementById('tariff-price-' + tariffId);
+            // Цена: берём рассчитанную если есть, иначе ждём маршрута
+            const tariff      = tariffs.find(t => t.id === tariffId);
+            const calcPrice   = _tariffPrices[tariffId];
             const priceAmount = document.getElementById('priceAmount');
-            if (priceEl && priceAmount) {
-                if (priceEl.classList.contains('calculated')) {
-                    const numericText = priceEl.textContent.replace(/[^\d]/g, '');
-                    const numericValue = parseInt(numericText) || 0;
-                    currentAnimatedPrice = numericValue;
-                    priceAmount.textContent = formatPrice(numericValue);
+            _finalCalculatedPrice = calcPrice !== undefined ? calcPrice : 0;
+            if (priceAmount) {
+                if (calcPrice !== undefined) {
+                    animateCounter(priceAmount, calcPrice, 400, updateOrderButtonState);
                 } else {
                     priceAmount.textContent = '—';
                     currentAnimatedPrice = 0;
                 }
             }
-
             updatePrice();
         }
 
+        // ── Рендер карточек машин ──────────────────────────────
+        function renderTariffCars(tariffId) {
+            const carsEl = document.getElementById('tariffCars');
+            if (!carsEl) return;
+
+            const tariff = tariffs.find(t => t.id === tariffId);
+            if (!tariff) return;
+
+            // Скелетон-загрузка пока грузим с API
+            carsEl.innerHTML = [1,2,3].map(() =>
+                '<div class="tariff-car-skeleton"></div>'
+            ).join('');
+
+            // Загружаем реальных водителей из базы
+            TF.drivers.availableByTariff(tariffId)
+                .then(realCars => _buildCarCards(carsEl, tariff, realCars))
+                .catch(() => _buildCarCards(carsEl, tariff, []));
+        }
+
+        function _buildCarCards(carsEl, tariff, realCars) {
+            carsEl.innerHTML = '';
+
+            // Цена: рассчитанная или базовая
+            const price    = _tariffPrices[tariff.id] !== undefined ? _tariffPrices[tariff.id] : tariff.price;
+            const isCalc   = _tariffPrices[tariff.id] !== undefined;
+            const priceStr = formatPrice(price) + ' ₸';
+
+            // Реальные водители из базы — первыми
+            if (realCars && realCars.length > 0) {
+                realCars.forEach(driver => {
+                    const carId = 'driver_' + driver.driver_id;
+                    const card  = document.createElement('div');
+                    card.className = 'tariff-car-card' + (selectedCar === carId ? ' active' : '');
+                    card.dataset.carId    = carId;
+                    card.dataset.driverId = driver.driver_id;
+
+                    card.innerHTML = `
+                        ${driver.is_online ? '<div class="tariff-car-online"></div>' : ''}
+                        <div class="tariff-car-img"><img src="${tariff.image}" alt="${driver.name}"></div>
+                        <div class="tariff-car-eta">— ${window.t ? window.t('min') : 'мин'}</div>
+                        <div class="tariff-car-name">${driver.name}</div>
+                        ${driver.rating ? `<div class="tariff-car-rating"><i class="fas fa-star"></i> ${driver.rating}</div>` : ''}
+                        <div class="tariff-car-price ${isCalc ? 'has-value' : ''}">${priceStr}</div>
+                    `;
+                    card.addEventListener('click', () => _selectCarCard(card, carId, driver.name, driver.driver_id));
+                    carsEl.appendChild(card);
+                });
+            }
+
+            // Хардкод машины тарифа
+            if (tariff.cars && tariff.cars.length > 0) {
+                tariff.cars.forEach(car => {
+                    const card = document.createElement('div');
+                    card.className = 'tariff-car-card' + (selectedCar === car.id ? ' active' : '');
+                    card.dataset.carId = car.id;
+
+                    card.innerHTML = `
+                        <div class="tariff-car-img"><img src="${tariff.image}" alt="${car.name}"></div>
+                        <div class="tariff-car-eta">— ${window.t ? window.t('min') : 'мин'}</div>
+                        <div class="tariff-car-name">${car.name}</div>
+                        <div class="tariff-car-price ${isCalc ? 'has-value' : ''}">${priceStr}</div>
+                    `;
+                    card.addEventListener('click', () => _selectCarCard(card, car.id, car.name, null));
+                    carsEl.appendChild(card);
+                });
+            }
+
+            if (carsEl.children.length === 0) {
+                const msg = window.t ? window.t('no_cars') : 'Нет доступных автомобилей';
+                carsEl.innerHTML = `<div style="padding:16px;color:rgba(255,255,255,0.3);font-size:13px;">${msg}</div>`;
+            }
+        }
+
+        function _selectCarCard(card, carId, carName, driverId) {
+            selectedCar       = carId;
+            _selectedDriverId = driverId || null;
+
+            document.querySelectorAll('.tariff-car-card').forEach(c => c.classList.remove('active'));
+            card.classList.add('active');
+        }
+
+        // ── Обновление цен в карточках машин ──────────────────
+        function updateCarCardPrices(price, isBase) {
+            document.querySelectorAll('.tariff-car-card').forEach(card => {
+                const priceEl = card.querySelector('.tariff-car-price');
+                if (priceEl) {
+                    priceEl.textContent = formatPrice(price) + ' ₸';
+                    if (!isBase) priceEl.classList.add('has-value');
+                    else priceEl.classList.remove('has-value');
+                }
+            });
+        }
+
+        // Хранилище рассчитанных цен по тарифу (заполняется после расчёта маршрута)
+        const _tariffPrices = {};
+
         function calculatePrice(distanceKm = 0) {
             let extras = 0;
-            if (document.getElementById('animalOption').checked) extras += 5000;
-            if (document.getElementById('skiOption').checked) extras += 3000;
-            if (document.getElementById('childSeatOption').checked) extras += 2000;
-            if (document.getElementById('bicycleOption').checked) extras += 3000;
 
             let selectedPrice = 0;
 
             tariffs.forEach(tariff => {
                 let price = tariff.price + (distanceKm * tariff.perKm) + extras;
                 price = Math.round(price / 100) * 100;
+                _tariffPrices[tariff.id] = price;
+                if (tariff.id === selectedTariff) selectedPrice = price;
+            });
 
-                const priceEl = document.getElementById('tariff-price-' + tariff.id);
-                if (priceEl) {
-                    priceEl.classList.add('calculated');
-                    animateTariffPrice(tariff.id, price);
-                }
+            // Обновляем цены на карточках текущего тарифа
+            updateCarCardPrices(selectedPrice);
 
-                if (tariff.id === selectedTariff) {
-                    selectedPrice = price;
-                }            });
-
-            // Обновляем скрытый элемент для orderTaxi()
             const priceElement = document.getElementById('priceAmount');
-            _finalCalculatedPrice = selectedPrice; // сохраняем итоговую цену ДО анимации
-            _priceIsCalculating = false; // маршрут пришёл, финальная цена известна
+            _finalCalculatedPrice = selectedPrice;
+            _priceIsCalculating = false;
             if (priceElement) {
                 if (currentAnimatedPrice === 0 && priceElement.textContent === '—') {
                     currentAnimatedPrice = selectedPrice;
                     priceElement.textContent = formatPrice(selectedPrice);
-                    updateOrderButtonState(); // цена готова, разблокируем
+                    updateOrderButtonState();
                 } else {
                     animateCounter(priceElement, selectedPrice, 800, updateOrderButtonState);
                 }
@@ -1792,22 +1859,15 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         function resetTariffPrices() {
-            tariffs.forEach(tariff => {
-                const priceEl = document.getElementById('tariff-price-' + tariff.id);
-                if (priceEl) {
-                    priceEl.classList.remove('calculated');
-                    animateTariffPrice(tariff.id, tariff.price);
-                }
-            });
+            Object.keys(_tariffPrices).forEach(k => delete _tariffPrices[k]);
+            const tariff = tariffs.find(t => t.id === selectedTariff);
+            if (tariff) updateCarCardPrices(tariff.price, true);
             const priceElement = document.getElementById('priceAmount');
             if (priceElement) priceElement.textContent = '—';
-            currentAnimatedPrice = 0;
+            currentAnimatedPrice  = 0;
             _finalCalculatedPrice = 0;
-            _priceIsCalculating = false;
-            if (animationFrame) {
-                cancelAnimationFrame(animationFrame);
-                animationFrame = null;
-            }
+            _priceIsCalculating   = false;
+            if (animationFrame) { cancelAnimationFrame(animationFrame); animationFrame = null; }
             updateOrderButtonState();
         }
 
@@ -1917,12 +1977,12 @@ document.addEventListener('DOMContentLoaded', function() {
             const cardCvc = document.getElementById('cardCvc').value;
 
             if (cardNumber.length !== 16) {
-                alert('Номер карты должен содержать 16 цифр');
+                alert(window.t ? window.t('card_num_error') : 'Card number must be 16 digits');
                 return;
             }
 
             if (!cardExpiry.match(/^\d{2}\/\d{2}$/)) {
-                alert('Введите срок действия в формате ММ/ГГ');
+                alert(window.t ? window.t('card_exp_error') : 'Enter expiry date in MM/YY format');
                 return;
             }
 
@@ -1951,7 +2011,7 @@ document.addEventListener('DOMContentLoaded', function() {
         function deleteCard(event, cardIndex) {
             event.stopPropagation();
 
-            if (confirm('Удалить карту?')) {
+            if (confirm(window.t ? window.t('card_delete_confirm') : 'Delete card?')) {
                 savedCards.splice(cardIndex, 1);
                 localStorage.setItem('taxi_saved_cards', JSON.stringify(savedCards));
 
@@ -2019,16 +2079,16 @@ document.addEventListener('DOMContentLoaded', function() {
             const rawPrice = document.getElementById('priceAmount').textContent;
 
             if (!from || !to) {
-                showOrderError('Пожалуйста, укажите точки отправления и назначения');
+                showOrderError(window.t ? window.t('order_error_address') : 'Please enter pickup and destination addresses');
                 return;
             }
             if (rawPrice === '—' || _finalCalculatedPrice === 0) {
-                showOrderError('Пожалуйста, дождитесь расчёта стоимости');
+                showOrderError(window.t ? window.t('order_error_price') : 'Please wait for price calculation');
                 return;
             }
             // Защита от нажатия во время пересчёта маршрута или анимации счётчика
             if (_priceIsCalculating || animationFrame !== null) {
-                showOrderError('Пожалуйста, дождитесь окончания расчёта стоимости');
+                showOrderError(window.t ? window.t('order_error_calculating') : 'Please wait for price calculation to finish');
                 return;
             }
 
@@ -2040,7 +2100,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const btn = document.getElementById('orderButton');
             btn.disabled = true;
-            document.getElementById('orderButtonText').textContent = 'Создаём заказ…';
+            document.getElementById('orderButtonText').textContent = window.t ? window.t('order_creating') : 'Creating order…';
 
             const tariff = tariffs.find(t => t.id === selectedTariff);
             const tariffDbId = TARIFF_ID_MAP[selectedTariff] || 1;
@@ -2048,48 +2108,39 @@ document.addEventListener('DOMContentLoaded', function() {
             // Используем итоговую рассчитанную цену, а не анимированное значение
             const priceNum = _finalCalculatedPrice;
 
-            const options = [];
-            ['animalOption','skiOption','wheelchairOption','childSeatOption',
-             'findCarOption','textOnlyOption','dontSpeakOption','bicycleOption'].forEach(id => {
-                const el = document.getElementById(id);
-                const labels = {
-                    animalOption:'Перевозка животного', skiOption:'Лыжи/сноуборд',
-                    wheelchairOption:'Инвалидное кресло', childSeatOption:'Детское кресло',
-                    findCarOption:'Помогите найти машину', textOnlyOption:'Общаюсь только текстом',
-                    dontSpeakOption:'Не говорю, но слышу', bicycleOption:'Велосипед',
-                };
-                if (el && el.checked) options.push(labels[id]);
-            });
+            const comment = (document.getElementById('driverComment')?.value || '').trim();
 
             const orderPayload = {
-                tariff_id:       tariffDbId,
-                transport_class: transportClass,
-                from_address:    from,
-                from_lat:        fromCoords ? fromCoords[0] : 0,
-                from_lng:        fromCoords ? fromCoords[1] : 0,
-                to_address:      to,
-                to_lat:          toCoords ? toCoords[0] : 0,
-                to_lng:          toCoords ? toCoords[1] : 0,
-                distance_km:     window._lastDistanceKm || null,
-                duration_min:    window._lastDurationMin || null,
-                price:           priceNum,
-                payment_method:  currentPayment || 'cash',
-                options:         options,
-                comment:         options.join(', '),
+                tariff_id:            tariffDbId,
+                transport_class:      transportClass,
+                from_address:         from,
+                from_lat:             fromCoords ? fromCoords[0] : 0,
+                from_lng:             fromCoords ? fromCoords[1] : 0,
+                to_address:           to,
+                to_lat:               toCoords ? toCoords[0] : 0,
+                to_lng:               toCoords ? toCoords[1] : 0,
+                distance_km:          window._lastDistanceKm || null,
+                duration_min:         window._lastDurationMin || null,
+                price:                priceNum,
+                payment_method:       currentPayment || 'cash',
+                options:              [],
+                comment:              comment || null,
+                preferred_driver_id:  _selectedDriverId || null,
+                scheduled_at:         window.getScheduledDatetime ? window.getScheduledDatetime() : null,
             };
 
             try {
                 const result = await TF.orders.create(orderPayload);
                 btn.disabled = false;
-                document.getElementById('orderButtonText').textContent = 'Заказать трансфер';
+                document.getElementById('orderButtonText').textContent = window.t ? window.t('order_btn') : 'Book transfer';
                 openOrderTracking(result.order_id, {
-                    from, to, tariff: tariff ? tariff.name : 'Трансфер',
+                    from, to, tariff: tariff ? tariff.name : (window.t ? window.t('order_transfer_label') : 'Transfer'),
                     price: rawPrice, transportClass, payment: currentPayment || 'cash'
                 });
             } catch (err) {
                 btn.disabled = false;
-                document.getElementById('orderButtonText').textContent = 'Заказать трансфер';
-                showOrderError(err.message || 'Не удалось создать заказ. Попробуйте ещё раз.');
+                document.getElementById('orderButtonText').textContent = window.t ? window.t('order_btn') : 'Book transfer';
+                showOrderError(err.message || (window.t ? window.t('order_error_failed') : 'Could not create order. Please try again.'));
             }
         }
 
@@ -2126,12 +2177,12 @@ document.addEventListener('DOMContentLoaded', function() {
         let _routeRedrawTimer  = null;   // таймер перерисовки маршрута
 
         const ORDER_STATUS_CFG = {
-            pending:     { text: 'Ищем водителя…',            sub: 'Ожидайте — назначаем водителя',      icon: 'fa-circle-notch fa-spin', color: '#ffd84d' },
-            accepted:    { text: 'Через ~4 мин приедет',       sub: 'Водитель выехал к точке подачи',     icon: 'fa-car',                  color: '#1c1c1e' },
-            arriving:    { text: 'Водитель на месте!',          sub: 'Выходите — водитель ждёт вас',       icon: 'fa-map-marker-alt',        color: '#ffd84d' },
-            in_progress: { text: 'Поездка началась',            sub: 'Хорошей поездки!',                  icon: 'fa-route',                 color: '#007aff' },
-            completed:   { text: 'Поездка завершена',           sub: 'Надеемся, поездка понравилась',      icon: 'fa-check-circle',          color: '#34c759' },
-            cancelled:   { text: 'Заказ отменён',               sub: '',                                   icon: 'fa-times-circle',          color: '#ff3b30' },
+            pending:     { key: 'status_pending',     subKey: 'status_pending_sub',     icon: 'fa-circle-notch fa-spin', color: '#ffd84d' },
+            accepted:    { key: 'status_accepted',    subKey: 'status_accepted_sub',    icon: 'fa-car',                  color: '#1c1c1e' },
+            arriving:    { key: 'status_arriving',    subKey: 'status_arriving_sub',    icon: 'fa-map-marker-alt',        color: '#ffd84d' },
+            in_progress: { key: 'status_in_progress', subKey: 'status_in_progress_sub', icon: 'fa-route',                 color: '#007aff' },
+            completed:   { key: 'status_completed',   subKey: 'status_completed_sub',   icon: 'fa-check-circle',          color: '#34c759' },
+            cancelled:   { key: 'status_cancelled',   subKey: '',                        icon: 'fa-times-circle',          color: '#ff3b30' },
         };
 
         // ── SVG-иконка машины (точно как в Яндекс Go) ──────────────────────
@@ -2669,7 +2720,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // ── Начальный HTML оверлея (Яндекс Go точная копия) ──────────────────
         function buildOverlayHtml(orderId, info) {
-            const payLabel = (info.payment === 'cash') ? 'наличными' : (info.payment ? 'картой' : 'наличными');
+            const _t = window.t || (k=>k);
+            const payLabel = (info.payment === 'cash') ? _t('cash') : (info.payment ? _t('card') : _t('cash'));
             const price = info.price ? info.price + ' ₸' : '—';
             return `
             <div id="otrMapWrap">
@@ -2689,30 +2741,29 @@ document.addEventListener('DOMContentLoaded', function() {
                 <!-- СТАТУС ЗАКАЗА -->
                 <div id="otrStatusRow" class="otr-status-row" >
                     <div class="otr-status-left">
-                        <div class="otr-status-label">Статус заказа</div>
-                        <div class="otr-status-main" id="otrStatusMain">Ищем водителя…</div>
+                        <div class="otr-status-label">${_t('otr_status_label')}</div>
+                        <div class="otr-status-main" id="otrStatusMain">${_t('otr_searching')}</div>
                         <div class="otr-status-sub" id="otrStatusSub"></div>
                     </div>
                     <div class="otr-eta-right" id="otrEtaRight">
                         <div class="otr-eta-mins" id="otrEtaMins">—</div>
-                        <div class="otr-eta-unit">мин</div>
+                        <div class="otr-eta-unit">${_t('min')}</div>
                     </div>
-
                 </div>
                 <!-- СКРОЛЛИРУЕМОЕ ТЕЛО -->
                 <div id="otrSheetScroll">
                     <div id="otrSheetBody">
                         <div class="otr-search-wrap">
                             <div class="otr-search-ring"><i class="fas fa-taxi otr-search-car"></i></div>
-                            <div class="otr-search-title">Ищем водителя…</div>
-                            <div class="otr-search-sub">Обычно это занимает меньше минуты</div>
+                            <div class="otr-search-title">${_t('otr_searching')}</div>
+                            <div class="otr-search-sub">${_t('otr_searching_sub')}</div>
                         </div>
                         <div class="otr-sep"></div>
                         <div class="otr-route-section">
                             <div class="otr-route-item">
                                 <div class="otr-route-icon-wrap otr-route-icon-from"><i class="fas fa-person-walking"></i></div>
                                 <div class="otr-route-text-wrap">
-                                    <div class="otr-route-label">Подача в ~—</div>
+                                    <div class="otr-route-label">${_t('otr_pickup')}</div>
                                     <div class="otr-route-addr">${info.from || '—'}</div>
                                 </div>
                                 <div class="otr-route-chevron"><svg width="8" height="13" viewBox="0 0 8 13" fill="none"><path d="M1 1l6 5.5L1 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
@@ -2720,7 +2771,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             <div class="otr-route-item">
                                 <div class="otr-route-icon-wrap otr-route-icon-to"><i class="fas fa-flag"></i></div>
                                 <div class="otr-route-text-wrap">
-                                    <div class="otr-route-label">Прибытие</div>
+                                    <div class="otr-route-label">${_t('otr_arrival')}</div>
                                     <div class="otr-route-addr">${info.to || '—'}</div>
                                 </div>
                                 <div class="otr-route-chevron"><svg width="8" height="13" viewBox="0 0 8 13" fill="none"><path d="M1 1l6 5.5L1 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
@@ -2728,12 +2779,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                         <div class="otr-add-stop">
                             <div class="otr-add-stop-icon"><i class="fas fa-plus"></i></div>
-                            <div class="otr-add-stop-text">Добавить остановку</div>
+                            <div class="otr-add-stop-text">${_t('add_stop')}</div>
                             <div class="otr-add-stop-chevron"><svg width="8" height="13" viewBox="0 0 8 13" fill="none"><path d="M1 1l6 5.5L1 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
                         </div>
                         <div class="otr-help-row">
                             <div class="otr-help-icon"><i class="fas fa-headset"></i></div>
-                            <div class="otr-help-text">Нужна помощь</div>
+                            <div class="otr-help-text">${_t('otr_need_help')}</div>
                             <div class="otr-help-chevron"><svg width="8" height="13" viewBox="0 0 8 13" fill="none"><path d="M1 1l6 5.5L1 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
                         </div>
                         <div class="otr-payment-row">
@@ -2741,20 +2792,20 @@ document.addEventListener('DOMContentLoaded', function() {
                                 ${(info.payment === 'cash' || !info.payment) ? '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="1" y="4" width="18" height="12" rx="2" stroke="#34c759" stroke-width="1.5"/><path d="M1 8h18" stroke="#34c759" stroke-width="1.5"/><rect x="3" y="11" width="5" height="2" rx="1" fill="#34c759"/></svg>' : '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="1" y="4" width="18" height="12" rx="2" stroke="#007aff" stroke-width="1.5"/><path d="M1 7h18" stroke="#007aff" stroke-width="2"/></svg>'}
                             </div>
                             <div class="otr-payment-text">
-                                <div class="otr-payment-main" id="otrPayMain">Оплата ${payLabel}: ${price}</div>
+                                <div class="otr-payment-main" id="otrPayMain">${_t('payment_label')}: ${payLabel} · ${price}</div>
                                 <div class="otr-payment-sub" id="otrPaySub"></div>
                             </div>
-                            <button class="otr-payment-change">Изменить</button>
+                            <button class="otr-payment-change">${_t('otr_change')}</button>
                         </div>
                         <div class="otr-share-loc-row">
                             <div class="otr-share-loc-icon"><i class="fas fa-location-crosshairs"></i></div>
-                            <div class="otr-share-loc-text">Показать водителю, где я</div>
+                            <div class="otr-share-loc-text">${_t('otr_share_location')}</div>
                             <button class="otr-toggle" id="otrShareToggle" onclick="this.classList.toggle('on')"></button>
                         </div>
                         <div class="otr-carrier-row">
                             <div class="otr-carrier-icon"><i class="fas fa-circle-info"></i></div>
                             <div class="otr-carrier-wrap">
-                                <div class="otr-carrier-label">Перевозчик и детали</div>
+                                <div class="otr-carrier-label">${_t('otr_carrier_label')}</div>
                                 <div class="otr-carrier-name">Timofeyev Transfer</div>
                             </div>
                             <div class="otr-carrier-chevron"><svg width="8" height="13" viewBox="0 0 8 13" fill="none"><path d="M1 1l6 5.5L1 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
@@ -2763,7 +2814,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
                 <!-- FOOTER: отмена -->
                 <div class="otr-footer" id="otrFooter">
-                    <button class="otr-cancel-btn" onclick="cancelActiveOrder(${orderId})">Отменить поездку</button>
+                    <button class="otr-cancel-btn" onclick="cancelActiveOrder(${orderId})">${_t('otr_cancel_trip')}</button>
                 </div>
             </div>`;
         }
@@ -2950,7 +3001,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 el = document.createElement('div');
                 el.id = 'otrNetError';
                 el.className = 'otr-net-error';
-                el.textContent = '⚠️ Нет связи с сервером…';
+                el.textContent = window.t ? window.t('no_server') : '⚠️ No server connection…';
                 document.body.appendChild(el);
             }
             el.style.display = 'block';
@@ -2966,7 +3017,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (btn) {
                 btn.disabled = false;
                 const txt = document.getElementById('orderButtonText');
-                if (txt) txt.textContent = 'Заказать трансфер';
+                if (txt) txt.textContent = window.t ? window.t('order_btn') : 'Book transfer';
             }
         }
 
@@ -3031,38 +3082,43 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         function showDriverFoundFlash(order) {
+            const _t = window.t || (k=>k);
             const carStr = [order.car_make,order.car_model,order.car_color].filter(Boolean).join(' ');
+            const driverName = order.driver_name || _t('driver_default');
             _showFlash(
                 `<i class="fas fa-check" style="color:#34c759;font-size:32px"></i>`,
-                'Водитель найден!',
-                `${order.driver_name || 'Водитель'} едет к вам${carStr ? '<br><span style="font-size:13px;color:rgba(60,60,67,.6)">' + carStr + '</span>' : ''}`,
+                _t('driver_found_title'),
+                `${_t('driver_on_way').replace('{name}', driverName)}${carStr ? '<br><span style="font-size:13px;color:rgba(60,60,67,.6)">' + carStr + '</span>' : ''}`,
                 'rgba(52,199,89,.2)'
             );
         }
 
         function showArrivingFlash() {
+            const _t = window.t || (k=>k);
             _showFlash(
                 `<i class="fas fa-map-marker-alt" style="color:#ffd84d;font-size:32px"></i>`,
-                'Водитель на месте!',
-                'Выходите — водитель ждёт вас',
+                _t('driver_arrived_title'),
+                _t('driver_arrived_sub'),
                 'rgba(255,216,77,.2)'
             );
         }
 
         function showInProgressFlash() {
+            const _t = window.t || (k=>k);
             _showFlash(
                 `<i class="fas fa-route" style="color:#007aff;font-size:32px"></i>`,
-                'Поездка началась!',
-                'Хорошей дороги 🚗',
+                _t('trip_started_title'),
+                _t('trip_started_sub'),
                 'rgba(0,122,255,.2)'
             );
         }
 
         function showCompletedFlash() {
+            const _t = window.t || (k=>k);
             _showFlash(
                 `<i class="fas fa-flag-checkered" style="color:#34c759;font-size:32px"></i>`,
-                'Поездка завершена!',
-                'Надеемся, вам понравилось путешествие',
+                _t('status_completed'),
+                _t('status_completed_sub'),
                 'rgba(52,199,89,.2)'
             );
         }
@@ -3077,15 +3133,18 @@ document.addEventListener('DOMContentLoaded', function() {
             const footer     = document.getElementById('otrFooter');
             if (!body) return;
 
-            const cfg = ORDER_STATUS_CFG[order.status] || { text: order.status, sub: '', icon:'fa-circle', color:'#ffd84d' };
-            // Яндекс Go: в заголовке показываем "Через ~X мин приедет"
-            let statusText = cfg.text;
+            const cfg = ORDER_STATUS_CFG[order.status] || { key: order.status, subKey: '', icon:'fa-circle', color:'#ffd84d' };
+            // Статус в заголовке
+            let statusText = window.t ? window.t(cfg.key) : cfg.key;
             if (order.status === 'accepted' && _etaMinutes) {
-                statusText = _etaMinutes <= 1 ? 'Водитель рядом!' : `Через ~${_etaMinutes} мин приедет`;
+                statusText = _etaMinutes <= 1
+                    ? (window.t ? window.t('status_arriving') : 'Driver nearby!')
+                    : (window.t ? window.t('status_accepted_eta').replace('{n}', _etaMinutes) : `~${_etaMinutes} min`);
             }
             if (statusMain) statusMain.textContent = statusText;
             if (statusSub)  statusSub.textContent  = order.status === 'cancelled'
-                ? (order.cancel_reason || 'Заказ был отменён') : cfg.sub;
+                ? (order.cancel_reason || (window.t ? window.t('status_cancelled_reason') : 'Order was cancelled'))
+                : (window.t ? window.t(cfg.subKey) : cfg.subKey);
 
             // ETA справа — скрываем (Яндекс Go встраивает ETA в заголовок)
             if (etaRight) {
@@ -3097,7 +3156,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const etaText  = document.getElementById('otrEtaText');
             if (etaBadge && etaText) {
                 if (_etaMinutes && ['accepted','arriving'].includes(order.status)) {
-                    etaText.textContent = _etaMinutes <= 1 ? 'Водитель рядом!' : `Прибудет через ~${_etaMinutes} мин`;
+                    etaText.textContent = _etaMinutes <= 1 ? (window.t ? window.t('driver_near') : 'Driver nearby!') : (window.t ? window.t('arriving_eta').replace('{n}', _etaMinutes) : `Arriving in ~${_etaMinutes} min`);
                     etaBadge.style.display = 'block';
                 } else {
                     etaBadge.style.display = 'none';
@@ -3121,7 +3180,7 @@ document.addEventListener('DOMContentLoaded', function() {
             body.dataset.lastStatus = order.status;
 
             const price    = order.price ? Number(order.price).toLocaleString('ru-RU') + ' ₸' : '—';
-            const payLabel = order.payment_method === 'cash' ? 'наличными' : 'картой';
+            const payLabel = order.payment_method === 'cash' ? (window.t ? window.t('pay_cash_label') : 'cash') : (window.t ? window.t('pay_card_label') : 'card');
 
             // ── Блок водителя (Яндекс Go стиль) ──
             let driverBlock = '';
@@ -3129,7 +3188,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 const r      = parseFloat(order.driver_rating) || 0;
                 const carStr = [order.car_make, order.car_model].filter(Boolean).join(' ');
                 const carColor = carColorFromString(order.car_color);
-                const initial = (order.driver_name || 'В').charAt(0).toUpperCase();
+                const initial = (order.driver_name || (window.t ? window.t('driver_default') : 'D')).charAt(0).toUpperCase();
                 const starsFull = Math.round(r);
 
                 let starsHtml = '';
@@ -3143,7 +3202,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div class="otr-driver-row">
                         <div class="otr-driver-avatar">${initial}</div>
                         <div class="otr-driver-info">
-                            <div class="otr-driver-name">${order.driver_name || 'Водитель'} ${r ? '<span class="otr-rating-num">★' + r.toFixed(2) + '</span>' : ''}</div>
+                            <div class="otr-driver-name">${order.driver_name || (window.t?window.t('driver_default'):'Driver')} ${r ? '<span class="otr-rating-num">★' + r.toFixed(2) + '</span>' : ''}</div>
                             ${(carStr || order.car_color) ? `<div class="otr-car-row" style="margin-top:3px;padding:0;">
                                 <div class="otr-car-color-dot" style="background:${carColor}"></div>
                                 <div class="otr-car-model">${carStr}${order.car_color ? ', ' + order.car_color : ''}</div>
@@ -3154,38 +3213,40 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                     </div>
                     ${order.car_number ? `<div class="otr-plate-big">${order.car_number}</div>` : ''}
-                    <!-- 3 КНОПКИ: Связаться, Безопасность, Поделиться -->
                     <div class="otr-action-row">
-                        ${order.driver_phone ? `<a href="tel:${order.driver_phone}" class="otr-action-btn otr-btn-call"><i class="fas fa-phone"></i><span>Связаться</span></a>` : `<button class="otr-action-btn otr-btn-call" style="opacity:.4" disabled><i class="fas fa-phone"></i><span>Связаться</span></button>`}
-                        <button class="otr-action-btn otr-btn-safety"><i class="fas fa-shield-halved"></i><span>Безопасность</span></button>
-                        <button class="otr-action-btn otr-btn-share" onclick="if(navigator.share)navigator.share({title:'Timofeyev Transfer',text:'Слежу за поездкой №${orderId}'})"><i class="fas fa-share-nodes"></i><span>Поделиться</span></button>
+                        ${order.driver_phone ? `<a href="tel:${order.driver_phone}" class="otr-action-btn otr-btn-call"><i class="fas fa-phone"></i><span>${window.t?window.t('otr_contact'):'Contact'}</span></a>` : `<button class="otr-action-btn otr-btn-call" style="opacity:.4" disabled><i class="fas fa-phone"></i><span>${window.t?window.t('otr_contact'):'Contact'}</span></button>`}
+                        <button class="otr-action-btn otr-btn-safety"><i class="fas fa-shield-halved"></i><span>${window.t?window.t('otr_safety'):'Safety'}</span></button>
+                        <button class="otr-action-btn otr-btn-share" onclick="if(navigator.share)navigator.share({title:'Timofeyev Transfer',text:'${window.t?window.t('otr_share_text'):'Tracking ride'} №${orderId}'})"><i class="fas fa-share-nodes"></i><span>${window.t?window.t('otr_share'):'Share'}</span></button>
                     </div>
                 </div>`;
             }
 
             // ── Поиск (только pending) ──
+            const _t = window.t || (k=>k);
             const searchBlock = order.status === 'pending' ? `
                 <div class="otr-search-wrap">
                     <div class="otr-search-ring"><i class="fas fa-taxi otr-search-car"></i></div>
-                    <div class="otr-search-title">Ищем водителя…</div>
-                    <div class="otr-search-sub">Обычно это занимает меньше минуты</div>
+                    <div class="otr-search-title">${_t('otr_searching')}</div>
+                    <div class="otr-search-sub">${_t('otr_searching_sub')}</div>
                 </div>` : '';
 
             // ── Рейтинг (completed) ──
             const ratingBlock = order.status === 'completed' ? `
                 <div class="otr-sep" style="margin-bottom:0"></div>
                 <div class="otr-rating-card">
-                    <div class="otr-rating-title">Как прошла поездка?</div>
+                    <div class="otr-rating-title">${_t('otr_rating_title')}</div>
                     <div class="otr-stars-input" id="otrStarsInput">
                         ${[1,2,3,4,5].map(i=>`<button class="otr-star-btn" onclick="selectRatingStar(${i})">★</button>`).join('')}
                     </div>
-                    <button class="otr-rate-btn" onclick="submitOrderRating(${orderId})">Оценить поездку</button>
+                    <button class="otr-rate-btn" onclick="submitOrderRating(${orderId})">${_t('otr_rate_btn')}</button>
                 </div>` : '';
 
             // ── ETA label ──
             const etaLabel = _etaMinutes && ['accepted','arriving'].includes(order.status)
-                ? `Подача в ~${_etaMinutes} мин`
-                : 'Подача';
+                ? _t('otr_pickup_eta').replace('{n}', _etaMinutes)
+                : _t('otr_pickup');
+
+            const payMethodLabel = order.payment_method === 'cash' ? _t('cash') : _t('card');
 
             body.innerHTML = `
             ${searchBlock}
@@ -3208,7 +3269,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         <i class="fas fa-flag"></i>
                     </div>
                     <div class="otr-route-text-wrap">
-                        <div class="otr-route-label">Прибытие</div>
+                        <div class="otr-route-label">${_t('otr_arrival')}</div>
                         <div class="otr-route-addr">${order.to_address || '—'}</div>
                     </div>
                     <div class="otr-route-chevron"><svg width="8" height="13" viewBox="0 0 8 13" fill="none"><path d="M1 1l6 5.5L1 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
@@ -3217,13 +3278,13 @@ document.addEventListener('DOMContentLoaded', function() {
             <!-- ДОБАВИТЬ ОСТАНОВКУ -->
             <div class="otr-add-stop">
                 <div class="otr-add-stop-icon"><i class="fas fa-plus"></i></div>
-                <div class="otr-add-stop-text">Добавить остановку</div>
+                <div class="otr-add-stop-text">${_t('add_stop')}</div>
                 <div class="otr-add-stop-chevron"><svg width="8" height="13" viewBox="0 0 8 13" fill="none"><path d="M1 1l6 5.5L1 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
             </div>
             <!-- НУЖНА ПОМОЩЬ -->
             <div class="otr-help-row">
                 <div class="otr-help-icon"><i class="fas fa-headset"></i></div>
-                <div class="otr-help-text">Нужна помощь</div>
+                <div class="otr-help-text">${_t('otr_need_help')}</div>
                 <div class="otr-help-chevron"><svg width="8" height="13" viewBox="0 0 8 13" fill="none"><path d="M1 1l6 5.5L1 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
             </div>
             <!-- ОПЛАТА -->
@@ -3232,22 +3293,22 @@ document.addEventListener('DOMContentLoaded', function() {
                     ${order.payment_method === 'cash' ? '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="1" y="4" width="18" height="12" rx="2" stroke="#34c759" stroke-width="1.5"/><path d="M1 8h18" stroke="#34c759" stroke-width="1.5"/><rect x="3" y="11" width="5" height="2" rx="1" fill="#34c759"/></svg>' : '<svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="1" y="4" width="18" height="12" rx="2" stroke="#007aff" stroke-width="1.5"/><path d="M1 7h18" stroke="#007aff" stroke-width="2"/></svg>'}
                 </div>
                 <div class="otr-payment-text">
-                    <div class="otr-payment-main">Оплата ${payLabel}: ${price}</div>
+                    <div class="otr-payment-main">${_t('payment_label')}: ${payMethodLabel} · ${price}</div>
                     <div class="otr-payment-sub"></div>
                 </div>
-                <button class="otr-payment-change">Изменить</button>
+                <button class="otr-payment-change">${_t('otr_change')}</button>
             </div>
             <!-- ПОКАЗАТЬ ВОДИТЕЛЮ ГДЕ Я -->
             <div class="otr-share-loc-row">
                 <div class="otr-share-loc-icon"><i class="fas fa-location-crosshairs"></i></div>
-                <div class="otr-share-loc-text">Показать водителю, где я</div>
+                <div class="otr-share-loc-text">${_t('otr_share_location')}</div>
                 <button class="otr-toggle" id="otrShareToggle" onclick="this.classList.toggle('on')"></button>
             </div>
             <!-- ПЕРЕВОЗЧИК -->
             <div class="otr-carrier-row">
                 <div class="otr-carrier-icon"><i class="fas fa-circle-info"></i></div>
                 <div class="otr-carrier-wrap">
-                    <div class="otr-carrier-label">Перевозчик и детали</div>
+                    <div class="otr-carrier-label">${_t('otr_carrier_label')}</div>
                     <div class="otr-carrier-name">Timofeyev Transfer</div>
                 </div>
                 <div class="otr-carrier-chevron"><svg width="8" height="13" viewBox="0 0 8 13" fill="none"><path d="M1 1l6 5.5L1 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
@@ -3257,10 +3318,10 @@ document.addEventListener('DOMContentLoaded', function() {
             // Footer
             if (footer) {
                 if (['completed','cancelled'].includes(order.status)) {
-                    footer.innerHTML = `<button class="otr-done-btn" onclick="closeOrderTracking()">Закрыть</button>`;
+                    footer.innerHTML = `<button class="otr-done-btn" onclick="closeOrderTracking()">${_t('otr_close')}</button>`;
                     hideActiveOrderCard();
                 } else if (['pending','accepted'].includes(order.status)) {
-                    footer.innerHTML = `<button class="otr-cancel-btn" onclick="cancelActiveOrder(${orderId})">Отменить поездку</button>`;
+                    footer.innerHTML = `<button class="otr-cancel-btn" onclick="cancelActiveOrder(${orderId})">${_t('otr_cancel_trip')}</button>`;
                 } else {
                     footer.innerHTML = '';
                 }
@@ -3288,7 +3349,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (order.from_lat) {
                     _trackingMap.geoObjects.add(new ymaps.Placemark(
                         [parseFloat(order.from_lat), parseFloat(order.from_lng)],
-                        { hintContent: 'Точка подачи' },
+                        { hintContent: (window.t ? window.t('map_pickup_point') : 'Pickup point') },
                         { preset: 'islands#greenCircleDotIcon' }
                     ));
                 }
@@ -3349,7 +3410,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         const etaRight = document.getElementById('otrEtaRight');
                         if (etaRight) etaRight.style.display = 'block';
                         const etaText = document.getElementById('otrEtaText');
-                        if (etaText) etaText.textContent = _etaMinutes <= 1 ? 'Водитель рядом!' : `Прибудет через ~${_etaMinutes} мин`;
+                        if (etaText) etaText.textContent = _etaMinutes <= 1 ? (window.t ? window.t('driver_near') : 'Driver nearby!') : (window.t ? window.t('arriving_eta').replace('{n}', _etaMinutes) : `Arriving in ~${_etaMinutes} min`);
                         const etaBadge = document.getElementById('otrEtaBadge');
                         if (etaBadge) etaBadge.style.display = 'block';
                     }
@@ -3550,10 +3611,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         (order.car_make   ? ' · ' + order.car_make   : '') +
                         (order.car_number ? ' · ' + order.car_number : '');
                 } else {
-                    sub.textContent = cfg.sub || 'Нажмите чтобы открыть';
+                    sub.textContent = cfg.sub || (window.t ? window.t('notif_tap_open') : 'Tap to open');
                 }
             }
-            if (eta) eta.textContent = _etaMinutes && _etaMinutes > 0 ? '~' + _etaMinutes + ' мин' : '';
+            if (eta) eta.textContent = _etaMinutes && _etaMinutes > 0 ? (window.t ? window.t('eta_min').replace('{n}', _etaMinutes) : '~' + _etaMinutes + ' min') : '';
             if (ico) ico.classList.toggle('aoc-pulse', order.status === 'pending');
             if (['completed','cancelled'].includes(order.status)) {
                 setTimeout(hideActiveOrderCard, 1500);
@@ -3569,25 +3630,25 @@ document.addEventListener('DOMContentLoaded', function() {
         };
         window.submitOrderRating = async function(orderId) {
             const rating = window._selectedOrderRating;
-            if (!rating) { alert('Пожалуйста, выберите оценку'); return; }
+            if (!rating) { alert(window.t ? window.t('rating_required') : 'Please select a rating'); return; }
             try {
                 await TF.orders.rate(orderId, rating, '');
                 const sec = document.querySelector('.otr-rating-card');
                 if (sec) sec.innerHTML = '<div style="color:#34c759;text-align:center;padding:20px;font-size:15px;font-weight:600"><i class="fas fa-check-circle" style="font-size:28px;display:block;margin-bottom:10px;color:#34c759"></i>Спасибо за оценку!</div>';
-            } catch(e) { alert(e.message || 'Ошибка'); }
+            } catch(e) { alert(e.message || (window.t ? window.t('auth_error_generic') : 'Error')); }
         };
 
         window.cancelActiveOrder = async function(orderId) {
-            if (!confirm('Отменить заказ?')) return;
+            if (!confirm(window.t ? window.t('cancel_order_confirm') : 'Cancel this order?')) return;
             try {
-                await TF.orders.cancel(orderId, 'Отменён клиентом');
+                await TF.orders.cancel(orderId, window.t ? window.t('cancel_order_reason') : 'Cancelled by client');
                 if (_trackingInterval) { clearInterval(_trackingInterval); _trackingInterval = null; }
                 _trackingOrderId = null;
                 _lastTrackedStatus = null;
                 resetOrderButton();
                 hideActiveOrderCard();
                 setTimeout(() => window.closeOrderTracking && window.closeOrderTracking(), 1000);
-            } catch(e) { alert(e.message || 'Не удалось отменить заказ'); }
+            } catch(e) { alert(e.message || (window.t ? window.t('cancel_order_failed') : 'Could not cancel order')); }
         };
 
         function formatPrice(price) {
@@ -3616,7 +3677,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (_priceIsCalculating || animationFrame !== null) {
                 btn.disabled = true;
                 btn.style.opacity = '0.6';
-                btn.title = 'Подождите, цена пересчитывается…';
+                btn.title = window.t ? window.t('price_recalc_wait') : 'Please wait, recalculating price…';
             } else {
                 btn.disabled = false;
                 btn.style.opacity = '';
@@ -3742,6 +3803,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 return Math.floor(realVH() * 0.88);
             }
 
+            // Пересчёт высоты без изменения состояния панели
+            window._panelRecalcHeight = function(animate) {
+                if (!isMobile()) return;
+                if (panel.classList.contains('collapsed')) {
+                    applyCollapsed(animate);
+                } else {
+                    applyExpanded(animate);
+                }
+            };
             function applyCollapsed(animate) {
                 panel.classList.add('collapsed');
                 // Немедленно скрываем transition у кнопок и прячем их в правильную позицию
@@ -3772,7 +3842,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     ? 'height 0.3s cubic-bezier(0.25,0.8,0.25,1)'
                     : 'none';
                 panel.style.height = h + 'px';
-                syncUI(h, false, false); // анимация скрытия кнопок через CSS transition
+                syncUI(h, false, !animate);
                 if (!animate) requestAnimationFrame(() => { panel.style.transition = ''; });
             }
 
@@ -3946,7 +4016,7 @@ function toggleTheme() {
     var chk = document.getElementById('hsThemeToggleCheck');
     if (chk) chk.checked = isLight;
     var label = document.getElementById('hsDrawerThemeLabel');
-    if (label) label.textContent = isLight ? 'Светлая тема включена' : 'Тёмная тема включена';
+    if (label) label.textContent = isLight ? (window.t ? window.t('theme_light_on') : 'Light mode on') : (window.t ? window.t('theme_dark_on') : 'Dark mode on');
 
     localStorage.setItem('theme', isLight ? 'light' : 'dark');
 }
@@ -3965,8 +4035,18 @@ document.addEventListener('DOMContentLoaded', function() {
     // Синхронизируем drawer при загрузке
     var chk = document.getElementById('hsThemeToggleCheck');
     if (chk) chk.checked = isLight;
+    // Тема-лейбл — устанавливается через applyTranslations после load
+    // Здесь ставим заглушку на основе языка из localStorage
     var label = document.getElementById('hsDrawerThemeLabel');
-    if (label) label.textContent = isLight ? 'Светлая тема включена' : 'Тёмная тема включена';
+    if (label) {
+        const lang = localStorage.getItem('tf_lang') || 'ru';
+        const themeTexts = {
+            ru: { light: 'Светлая тема включена', dark: 'Тёмная тема включена' },
+            en: { light: 'Light mode on',          dark: 'Dark mode on' },
+        };
+        const texts = themeTexts[lang] || themeTexts.ru;
+        label.textContent = isLight ? texts.light : texts.dark;
+    }
 });
 /* ================================================================
    ГЛАВНЫЙ ЭКРАН — логика
@@ -4153,9 +4233,10 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateDrawerThemeLabel() {
         var label = document.getElementById('hsDrawerThemeLabel');
         if (!label) return;
+        const _t = window.t || (k=>k);
         label.textContent = document.body.classList.contains('light-theme')
-            ? 'Светлая тема включена'
-            : 'Тёмная тема включена';
+            ? _t('theme_light_on')
+            : _t('theme_dark_on');
         var chk = document.getElementById('hsThemeToggleCheck');
         if (chk) chk.checked = document.body.classList.contains('light-theme');
     }
@@ -4200,66 +4281,102 @@ window.closeDriverScreen = function() {
     if (screen) screen.classList.remove('is-open');
 };
 
-window.openDriverApplication = async function() {
-    // 1. Проверяем авторизацию
-    if (!TF.auth.isLoggedIn()) {
-        closeDriverScreen();
-        setTimeout(function() { openAuthScreen(); }, 300);
-        return;
-    }
+        // ─── Driver Application Modal ─────────────────────────
+        let _drvSelectedTariffType = 'sedan';
 
-    var user = TF.auth.getUser();
+        function openDrvAppModal() {
+            document.getElementById('drvAppOverlay').classList.add('active');
+            document.getElementById('drvAppSheet').classList.add('active');
+            document.body.style.overflow = 'hidden';
+            // Выбор тарифа чипами
+            document.querySelectorAll('.drvapp-tariff-chip').forEach(chip => {
+                chip.addEventListener('click', function() {
+                    document.querySelectorAll('.drvapp-tariff-chip').forEach(c => c.classList.remove('active'));
+                    this.classList.add('active');
+                    _drvSelectedTariffType = this.dataset.type;
+                });
+            });
+        }
+        function closeDrvAppModal() {
+            document.getElementById('drvAppOverlay').classList.remove('active');
+            document.getElementById('drvAppSheet').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        window.closeDrvAppModal = closeDrvAppModal;
 
-    // 2. Если уже одобренный водитель — переключаем режим (не редиректим автоматически)
-    if (user.role === 'driver') {
-        try {
-            var me = await TF.auth.me();
-            if (me.driver && me.driver.status === 'approved') {
-                closeDriverScreen();
-                if (typeof switchAppMode === 'function') switchAppMode('driver');
+        window.submitDriverApplication = async function() {
+            const make    = document.getElementById('drvCarMake').value.trim();
+            const model   = document.getElementById('drvCarModel').value.trim();
+            const year    = document.getElementById('drvCarYear').value.trim();
+            const color   = document.getElementById('drvCarColor').value.trim();
+            const number  = document.getElementById('drvCarNumber').value.trim().toUpperCase();
+            const license = document.getElementById('drvLicense').value.trim();
+            const errEl   = document.getElementById('drvAppError');
+
+            if (!make || !model) {
+                errEl.textContent = window.t ? window.t('drv_error_fields') : 'Please enter car make and model';
+                errEl.style.display = 'block';
                 return;
             }
-        } catch(e) {}
-    }
+            errEl.style.display = 'none';
 
-    // 3. Блокируем кнопку
-    var btn = document.querySelector('.drv-cta-btn');
-    if (btn) { btn.disabled = true; btn.querySelector('.drv-cta-main').textContent = 'Отправляем...'; }
+            const btn = document.getElementById('drvAppSubmitBtn');
+            btn.disabled = true; btn.textContent = window.t ? window.t('drv_submitting') : 'Submitting...';
 
-    try {
-        // 4. Отправляем заявку на API (данные авто менеджер уточнит по звонку)
-        await TF.drivers.apply({});
-
-        // 5. Показываем успех
-        var overlay = document.getElementById('drvModalOverlay');
-        if (overlay) overlay.classList.add('is-open');
-
-        // 6. Обновляем кнопку — заявка отправлена
-        if (btn) {
-            btn.disabled = true;
-            btn.querySelector('.drv-cta-main').textContent = 'Заявка на рассмотрении';
-            btn.querySelector('.drv-cta-sub').textContent = 'Мы вам перезвоним';
-            btn.style.opacity = '0.6';
-        }
-    } catch (err) {
-        // Если уже подавал заявку — тоже показываем статус
-        if (err.status === 400 || err.message && err.message.includes('заявка')) {
-            if (btn) {
-                btn.disabled = true;
-                btn.querySelector('.drv-cta-main').textContent = 'Заявка уже отправлена';
-                btn.querySelector('.drv-cta-sub').textContent = 'Ожидайте звонка менеджера';
-                btn.style.opacity = '0.6';
+            try {
+                await TF.drivers.apply({
+                    car_make:         make,
+                    car_model:        model,
+                    car_year:         year || null,
+                    car_color:        color || null,
+                    car_number:       number || null,
+                    car_class:        'comfort',
+                    car_tariff_type:  _drvSelectedTariffType,
+                    car_display_name: make + ' ' + model,
+                    license_number:   license || null,
+                });
+                closeDrvAppModal();
+                // Показываем успех
+                const overlay = document.getElementById('drvModalOverlay');
+                if (overlay) overlay.classList.add('is-open');
+                // Обновляем кнопку на экране водителя
+                const ctaBtn = document.querySelector('.drv-cta-btn');
+                if (ctaBtn) {
+                    ctaBtn.disabled = true;
+                    ctaBtn.querySelector('.drv-cta-main').textContent = window.t ? window.t('drv_pending_main') : 'Application under review';
+                    ctaBtn.querySelector('.drv-cta-sub').textContent = window.t ? window.t('drv_pending_sub_text') : "We'll call you back";
+                    ctaBtn.style.opacity = '0.6';
+                }
+            } catch(err) {
+                if (err.message && err.message.includes('заявка')) {
+                    errEl.textContent = window.t ? window.t('drv_already_sent') : 'Application already submitted';
+                } else {
+                    errEl.textContent = err.message || (window.t ? window.t('drv_error_later') : 'Error. Please try again later.');
+                }
+                errEl.style.display = 'block';
+                btn.disabled = false; btn.textContent = window.t ? window.t('drvapp_submit') : 'Submit application';
             }
-        } else {
-            alert(err.message || 'Ошибка. Попробуйте позже.');
-            if (btn) {
-                btn.disabled = false;
-                btn.querySelector('.drv-cta-main').textContent = 'Оставить заявку';
-                btn.querySelector('.drv-cta-sub').textContent = 'Вам перезвонят';
+        };
+
+        window.openDriverApplication = async function() {
+            if (!TF.auth.isLoggedIn()) {
+                closeDriverScreen();
+                setTimeout(function() { openAuthScreen(); }, 300);
+                return;
             }
-        }
-    }
-};
+            var user = TF.auth.getUser();
+            if (user.role === 'driver') {
+                try {
+                    var me = await TF.auth.me();
+                    if (me.driver && me.driver.status === 'approved') {
+                        closeDriverScreen();
+                        if (typeof switchAppMode === 'function') switchAppMode('driver');
+                        return;
+                    }
+                } catch(e) {}
+            }
+            openDrvAppModal();
+        };
 
 window.closeDrvModal = function() {
     var overlay = document.getElementById('drvModalOverlay');
@@ -4289,9 +4406,9 @@ window.openDriverScreen = function() {
                     var btn = document.querySelector('.drv-cta-btn');
                     if (btn && me.driver) {
                         var statusMap = {
-                            pending:  { main: 'Заявка на рассмотрении', sub: 'Мы вам перезвоним' },
-                            approved: { main: 'Переключиться в режим водителя', sub: '' },
-                            rejected: { main: 'Подать заявку повторно', sub: 'Обратитесь в поддержку' }
+                            pending:  { main: window.t ? window.t('drv_pending_main') : 'Application under review',   sub: window.t ? window.t('drv_pending_sub_text') : "We'll call you back" },
+                            approved: { main: window.t ? window.t('drv_approved_main') : 'Switch to driver mode',     sub: '' },
+                            rejected: { main: window.t ? window.t('drv_rejected_main') : 'Submit again',              sub: window.t ? window.t('drv_rejected_sub') : 'Contact support' }
                         };
                         var s = statusMap[me.driver.status];
                         if (s) {
@@ -4429,7 +4546,7 @@ window.switchAppMode = async function(mode) {
     // автоматически очистит admin_token (см. DOMContentLoaded в начале файла).
     if (mode === 'admin') {
         var token = localStorage.getItem('tf_token');
-        if (!token) { alert('Войдите в аккаунт'); return; }
+        if (!token) { alert(window.t ? window.t('mode_login_required') : 'Please sign in'); return; }
         localStorage.setItem('tf_is_admin', '1');
         closeHsMenu && closeHsMenu();
         try {
@@ -4467,7 +4584,7 @@ window.switchAppMode = async function(mode) {
         var prevRole = stored && stored.role ? stored.role : 'client';
         if (tabClient) { tabClient.style.background = prevRole === 'client' ? '#fc3f1e' : 'transparent'; tabClient.style.color = prevRole === 'client' ? '#fff' : '#8e8e93'; }
         if (tabDriver) { tabDriver.style.background = prevRole === 'driver' ? '#fc3f1e' : 'transparent'; tabDriver.style.color = prevRole === 'driver' ? '#fff' : '#8e8e93'; }
-        alert(e.message || 'Не удалось переключить режим. Попробуйте ещё раз.');
+        alert(e.message || (window.t ? window.t('mode_switch_error') : 'Could not switch mode. Please try again.'));
     }
 };
 // ============================================================
@@ -4579,7 +4696,7 @@ document.addEventListener('DOMContentLoaded', function() {
             var json = await res.json();
  
             if (!json.success || !json.data.url) {
-                showSocialError(provider, json.message || 'Провайдер недоступен');
+                showSocialError(provider, json.message || (window.t ? window.t('social_unavailable') : 'Provider unavailable'));
                 return;
             }
  
@@ -4587,7 +4704,7 @@ document.addEventListener('DOMContentLoaded', function() {
             openSocialPopup(json.data.url, provider);
  
         } catch (e) {
-            showSocialError(provider, 'Ошибка соединения. Попробуйте позже.');
+            showSocialError(provider, window.t ? window.t('social_conn_error') : 'Connection error. Please try again later.');
         } finally {
             setSocialBtnLoading(provider, false);
         }
@@ -4636,7 +4753,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // ── Обработать результат OAuth ────────────────────────────
     async function handleSocialResult(data) {
         if (data.error || !data.data) {
-            showAuthError(data.error || 'Вход не выполнен');
+            showAuthError(data.error || (window.t ? window.t('auth_signin_failed') : 'Sign in failed'));
             return;
         }
  
@@ -4666,7 +4783,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (phoneBlock) phoneBlock.style.display = 'none';
         if (otpBlock)   otpBlock.style.display   = 'none';
         if (nameBlock)  nameBlock.style.display   = '';
-        if (title)      title.innerHTML = 'Как вас зовут?';
+        if (title)      title.innerHTML = window.t ? window.t('auth_name_title') : "What's your name?";
  
         // Переопределяем submitName чтобы учесть социальный вход
         window._socialAuthPending = result;
@@ -4687,7 +4804,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (typeof window.closeAuthScreen === 'function') window.closeAuthScreen();
  
         // Показываем уведомление
-        showSocialToast('Добро пожаловать! Вы вошли через соцсеть.');
+        showSocialToast(window.t ? window.t('social_welcome') : 'Welcome! You signed in via social network.');
  
         // Перезагружаем страницу чтобы применить авторизацию
         setTimeout(function() { window.location.reload(); }, 800);
@@ -4754,13 +4871,687 @@ document.addEventListener('DOMContentLoaded', function() {
     }
  
     function showSocialToast(msg) {
-        // Используем существующий toast если есть, иначе alert
         if (typeof window.showToast === 'function') {
             window.showToast(msg, 'success');
         } else if (typeof window._tfToast === 'function') {
             window._tfToast(msg);
         }
-        // Тихо — не alert
     }
- 
+
+})();
+
+/* ═══════════════════════════════════════════════════════════
+   СИСТЕМА ПЕРЕВОДОВ RU / EN — полное покрытие страницы
+   ═══════════════════════════════════════════════════════════ */
+(function() {
+
+    const TRANSLATIONS = {
+        ru: {
+            // Навигация
+            nav_home:            'Главная',
+            nav_routes:          'Маршруты',
+            nav_history:         'История',
+            nav_profile:         'Профиль',
+            signin:              'Войти',
+            // Главный экран
+            home_relay:          'Перегон авто',
+            home_transfer:       'Трансфер',
+            home_tours:          'Туры',
+            home_become_driver:  'Стать водителем',
+            home_search:         'Введите ваш адрес',
+            recent_title:        'Адреса',
+            min:                 'мин',
+            // Тарифы (табы) — без эмодзи
+            sedan:               'Седан',
+            suv:                 'Внедорожник',
+            sport:               'Спорткар',
+            limousine:           'Лимузин',
+            bus:                 'Автобус',
+            minibus:             'Микроавтобус',
+            helicopter:          'Вертолёт',
+            jet:                 'Бизнес джет',
+            trailer:             'Перегон авто',
+            // Тарифы (главный экран, с эмодзи)
+            sedan_short:         'Седан',
+            suv_short:           'Внедорожник',
+            sport_short:         'Спорткар',
+            limousine_short:     'Лимузин',
+            bus_short:           'Автобус',
+            minibus_short:       'Микроавтобус',
+            helicopter_short:    'Вертолёт',
+            jet_short:           'Бизнес джет',
+            no_cars:             'Нет доступных автомобилей',
+            // Панель заказа
+            panel_title:         'Заказ трансфера',
+            from_placeholder:    'Откуда',
+            to_placeholder:      'Куда?',
+            address_a:           'Адрес точки А',
+            address_b:           'Адрес точки Б',
+            add_stop:            '+ Добавить остановку',
+            order_btn:           'Заказать трансфер',
+            comment_placeholder: 'Комментарий водителю',
+            payment_label:       'Оплата',
+            cash:                'Наличными',
+            phone_label:         'Номер телефона',
+            // Дата/время
+            now:                 'Прямо сейчас',
+            date:                'Дата',
+            time:                'Время',
+            // Поиск и карта
+            search_placeholder:  'Куда поедете?',
+            map_btn:             'Карта',
+            mpb_title:           'Точка назначения',
+            mpb_hint:            'Переместите карту, чтобы выбрать адрес',
+            mpb_moving:          'Переместите карту...',
+            mpb_confirm:         'Готово',
+            loc_loading:         'Определяем ваше местоположение',
+            loc_hint:            'Разрешите доступ для автоматического заполнения адреса',
+            // Оплата
+            payment_modal_title: 'Способ оплаты',
+            card_modal_title:    'Добавить карту',
+            card_form_title:     'Введите данные карты',
+            card_number_label:   'Номер карты',
+            card_expiry_label:   'Действует до',
+            cancel:              'Отмена',
+            // Меню drawer
+            drawer_login_btn:    'Войти или зарегистрироваться',
+            drawer_auth_hint:    'У вас будет доступ к заказам и избранному',
+            menu_notif:          'Включите уведомления',
+            menu_notif_sub:      'Нажмите чтобы включить',
+            menu_discounts:      'Скидки и подарки',
+            menu_promo:          'Ввести промокод',
+            menu_payment:        'Способы оплаты',
+            menu_support:        'Поддержка',
+            menu_work:           'Работа водителем',
+            menu_business:       'Бизнес-аккаунт',
+            menu_family:         'Семейный аккаунт',
+            menu_security:       'Безопасность',
+            menu_settings:       'Настройки',
+            menu_theme_on:       'Тёмная тема включена',
+            menu_theme_off:      'Тёмная тема выключена',
+            menu_lang:           'Язык / Language',
+            menu_admin:          'Панель администратора',
+            mode_label:          'Режим работы',
+            mode_passenger:      'Пассажир',
+            mode_driver:         'Водитель',
+            // Экран водителя
+            drv_title:           'Работа водителем<br>с Timofeyev',
+            drv_per_month:       'в месяц',
+            drv_earn_label:      '— столько получает водитель',
+            drv_also:            'А ещё можно:',
+            drv_b1:              'Выходить на линию только в удобное время',
+            drv_b2:              'Выполнять заказы на своём авто либо взять машину в парке',
+            drv_b3:              'Получать деньги сразу в поездках за наличные',
+            drv_apply:           'Оставить заявку',
+            drv_callback:        'Вам перезвонят',
+            drv_login:           'Войти или зарегистрироваться',
+            drv_legal:           'Отправляя заявку, вы соглашаетесь с условиями оферты.',
+            drv_modal_title:     'Заявка отправлена!',
+            drv_modal_text:      'Наш менеджер свяжется с вами в ближайшее время.',
+            drv_modal_btn:       'Отлично',
+            // Форма заявки водителя
+            drvapp_title:        'Заявка водителя',
+            drvapp_make:         'Марка авто',
+            drvapp_model:        'Модель',
+            drvapp_year:         'Год выпуска',
+            drvapp_color:        'Цвет',
+            drvapp_color_ph:     'Чёрный',
+            drvapp_plate:        'Гос. номер',
+            drvapp_type:         'Тип транспорта',
+            drvapp_license:      'Номер ВУ (необязательно)',
+            drvapp_submit:       'Отправить заявку',
+            drvapp_hint:         'После проверки данных менеджер свяжется с вами',
+            // Авторизация
+            auth_title:          'Введите номер<br>телефона',
+            auth_subtitle:       'Чтобы войти или зарегистрироваться',
+            auth_btn_login:      'Войти',
+            auth_btn_confirm:    'Подтвердить',
+            auth_resend:         'Повторить через 60 сек',
+            auth_name_ph:        'Ваше имя',
+            auth_btn_continue:   'Продолжить',
+            auth_btn_skip:       'Пропустить',
+            auth_biometric:      'По лицу или отпечатку',
+            auth_legal_prefix:   'Продолжая, вы соглашаетесь с',
+            auth_legal_terms:    'условиями использования',
+            auth_legal_and:      'и',
+            auth_legal_privacy:  'политикой конфиденциальности',
+            // Экран трекинга заказа
+            otr_status_label:    'Статус заказа',
+            otr_searching:       'Ищем водителя…',
+            otr_searching_sub:   'Обычно это занимает меньше минуты',
+            otr_pickup:          'Подача',
+            otr_pickup_eta:      'Подача в ~{n} мин',
+            otr_arrival:         'Прибытие',
+            otr_need_help:       'Нужна помощь',
+            otr_share_location:  'Показать водителю, где я',
+            otr_carrier_label:   'Перевозчик и детали',
+            otr_contact:         'Связаться',
+            otr_safety:          'Безопасность',
+            otr_share:           'Поделиться',
+            otr_share_text:      'Слежу за поездкой',
+            otr_change:          'Изменить',
+            otr_cancel_trip:     'Отменить поездку',
+            otr_close:           'Закрыть',
+            otr_rating_title:    'Как прошла поездка?',
+            otr_rate_btn:        'Оценить поездку',
+            driver_default:      'Водитель',
+            card:                'Картой',
+            // Статусы заказа
+            status_pending:          'Ищем водителя…',
+            status_pending_sub:      'Ожидайте — назначаем водителя',
+            status_accepted:         'Через ~4 мин приедет',
+            status_accepted_sub:     'Водитель выехал к точке подачи',
+            status_accepted_eta:     'Через ~{n} мин приедет',
+            status_arriving:         'Водитель на месте!',
+            status_arriving_sub:     'Выходите — водитель ждёт вас',
+            status_in_progress:      'Поездка началась',
+            status_in_progress_sub:  'Хорошей поездки!',
+            status_completed:        'Поездка завершена',
+            status_completed_sub:    'Надеемся, поездка понравилась',
+            status_cancelled:        'Заказ отменён',
+            status_cancelled_reason: 'Заказ был отменён',
+            // Рейтинг / отмена / прочее
+            rating_required:         'Пожалуйста, выберите оценку',
+            cancel_order_confirm:    'Отменить заказ?',
+            cancel_order_reason:     'Отменён клиентом',
+            cancel_order_failed:     'Не удалось отменить заказ',
+            price_recalc_wait:       'Подождите, цена пересчитывается…',
+            auth_signin_failed:      'Вход не выполнен',
+            // Карта (масштаб расстояния)
+            dist_m:                  'м',
+            dist_km:                 'км',
+            // Кнопки логина/логаута
+            signin_btn:              'Войти',
+            logout_btn:              'Выйти',
+            // Авторизация — динамические состояния
+            auth_sending:            'Отправка...',
+            auth_checking:           'Проверяем...',
+            auth_sms_error:          'Ошибка отправки SMS',
+            auth_wrong_code:         'Неверный код',
+            auth_otp_title:          'Введите код<br>из SMS',
+            auth_otp_sent:           'Отправлен на {phone}',
+            auth_name_title:         'Как вас зовут?',
+            auth_name_sub:           'Чтобы водитель знал, как к вам обращаться',
+            auth_resend_timer:       'Повторить через {n} сек',
+            auth_resend_now:         'Отправить ещё раз',
+            auth_error_generic:      'Ошибка',
+            // Drawer — незалогиненный
+            drawer_login_inline:     'Войти или зарегистрироваться',
+            drawer_hint_inline:      'У вас будет доступ к заказам и избранному',
+            // Поиск
+            search_empty:            'Ничего не найдено',
+            // Карта — выбор точки
+            mpb_from_title:          'Точка отправления',
+            mpb_to_title:            'Точка назначения',
+            mpb_stop_title:          'Остановка {n}',
+            stop_placeholder:        'Остановка {n}',
+            remove_stop:             'Удалить остановку',
+            map_select:              'Выбрать на карте',
+            // Геолокация
+            loc_error:               'Не удалось определить местоположение. Разрешите доступ к геолокации.',
+            // Адресные поля
+            from_label:              'Откуда',
+            to_label:                'Куда',
+            // Оплата — строки для трекинга
+            pay_cash_label:          'наличными',
+            pay_card_label:          'картой',
+            // Карточки оплаты — ошибки
+            card_num_error:          'Номер карты должен содержать 16 цифр',
+            card_exp_error:          'Введите срок действия в формате ММ/ГГ',
+            card_delete_confirm:     'Удалить карту?',
+            // Заказ — ошибки и кнопки
+            order_error_address:     'Пожалуйста, укажите точки отправления и назначения',
+            order_error_price:       'Пожалуйста, дождитесь расчёта стоимости',
+            order_error_calculating: 'Пожалуйста, дождитесь окончания расчёта стоимости',
+            order_creating:          'Создаём заказ…',
+            order_transfer_label:    'Трансфер',
+            order_error_failed:      'Не удалось создать заказ. Попробуйте ещё раз.',
+            // Трекинг — уведомления
+            driver_found_title:      'Водитель найден!',
+            driver_on_way:           '{name} едет к вам',
+            driver_arrived_title:    'Водитель на месте!',
+            driver_arrived_sub:      'Выходите — водитель ждёт вас',
+            trip_started_title:      'Поездка началась!',
+            trip_started_sub:        'Хорошей дороги 🚗',
+            driver_near:             'Водитель рядом!',
+            arriving_eta:            'Прибудет через ~{n} мин',
+            no_server:               '⚠️ Нет связи с сервером…',
+            notif_tap_open:          'Нажмите чтобы открыть',
+            eta_min:                 '~{n} мин',
+            // Тема
+            theme_dark_on:           'Тёмная тема включена',
+            theme_light_on:          'Светлая тема включена',
+            // Заявка водителя
+            drv_error_fields:        'Укажите марку и модель автомобиля',
+            drv_submitting:          'Отправляем...',
+            drv_already_sent:        'Заявка уже была отправлена ранее',
+            drv_error_later:         'Ошибка. Попробуйте позже.',
+            drv_pending_main:        'Заявка на рассмотрении',
+            drv_pending_sub_text:    'Мы вам перезвоним',
+            drv_approved_main:       'Переключиться в режим водителя',
+            drv_rejected_main:       'Подать заявку повторно',
+            drv_rejected_sub:        'Обратитесь в поддержку',
+            // Переключатель режимов
+            mode_login_required:     'Войдите в аккаунт',
+            mode_switch_error:       'Не удалось переключить режим. Попробуйте ещё раз.',
+            // Соцсеть
+            social_welcome:          'Добро пожаловать! Вы вошли через соцсеть.',
+            social_unavailable:      'Провайдер недоступен',
+            social_conn_error:       'Ошибка соединения. Попробуйте позже.',
+            // Маркеры карты
+            map_pickup_hint:         'Отправление',
+            map_dest_hint:           'Назначение',
+            map_pickup_point:        'Точка подачи',
+            map_stop_hint:           'Остановка {n}',
+            // Телефон
+            phone_label:             'Номер телефона',
+        },
+        en: {
+            nav_home:            'Home',
+            nav_routes:          'Routes',
+            nav_history:         'History',
+            nav_profile:         'Profile',
+            signin:              'Sign in',
+            home_relay:          'Car delivery',
+            home_transfer:       'Transfer',
+            home_tours:          'Tours',
+            home_become_driver:  'Become a driver',
+            home_search:         'Enter your address',
+            recent_title:        'Addresses',
+            min:                 'min',
+            sedan:               'Sedan',
+            suv:                 'SUV',
+            sport:               'Sportscar',
+            limousine:           'Limousine',
+            bus:                 'Bus',
+            minibus:             'Minibus',
+            helicopter:          'Helicopter',
+            jet:                 'Private jet',
+            trailer:             'Car delivery',
+            sedan_short:         'Sedan',
+            suv_short:           'SUV',
+            sport_short:         'Sportscar',
+            limousine_short:     'Limousine',
+            bus_short:           'Bus',
+            minibus_short:       'Minibus',
+            helicopter_short:    'Helicopter',
+            jet_short:           'Private jet',
+            no_cars:             'No available vehicles',
+            panel_title:         'Book a transfer',
+            from_placeholder:    'Pickup address',
+            to_placeholder:      'Destination?',
+            address_a:           'Point A',
+            address_b:           'Point B',
+            add_stop:            '+ Add stop',
+            order_btn:           'Book transfer',
+            comment_placeholder: 'Comment to driver',
+            payment_label:       'Payment',
+            cash:                'Cash',
+            phone_label:         'Phone number',
+            now:                 'Right now',
+            date:                'Date',
+            time:                'Time',
+            search_placeholder:  'Where to?',
+            map_btn:             'Map',
+            mpb_title:           'Select destination',
+            mpb_hint:            'Move the map to select address',
+            mpb_moving:          'Move the map...',
+            mpb_confirm:         'Done',
+            loc_loading:         'Detecting your location',
+            loc_hint:            'Allow access to auto-fill your address',
+            payment_modal_title: 'Payment method',
+            card_modal_title:    'Add card',
+            card_form_title:     'Enter card details',
+            card_number_label:   'Card number',
+            card_expiry_label:   'Expiry date',
+            cancel:              'Cancel',
+            drawer_login_btn:    'Sign in or register',
+            drawer_auth_hint:    'Access your orders and favourites',
+            menu_notif:          'Enable notifications',
+            menu_notif_sub:      'Tap to enable',
+            menu_discounts:      'Discounts & gifts',
+            menu_promo:          'Enter promo code',
+            menu_payment:        'Payment methods',
+            menu_support:        'Support',
+            menu_work:           'Drive with us',
+            menu_business:       'Business account',
+            menu_family:         'Family account',
+            menu_security:       'Safety',
+            menu_settings:       'Settings',
+            menu_theme_on:       'Dark mode on',
+            menu_theme_off:      'Dark mode off',
+            menu_lang:           'Language / Язык',
+            menu_admin:          'Admin panel',
+            mode_label:          'Work mode',
+            mode_passenger:      'Passenger',
+            mode_driver:         'Driver',
+            drv_title:           'Drive with<br>Timofeyev',
+            drv_per_month:       'per month',
+            drv_earn_label:      '— average driver earnings',
+            drv_also:            'You can also:',
+            drv_b1:              'Go online only when it suits you',
+            drv_b2:              'Use your own car or take one from our fleet',
+            drv_b3:              'Get paid instantly in cash per ride',
+            drv_apply:           'Apply now',
+            drv_callback:        'We\'ll call you back',
+            drv_login:           'Sign in or register',
+            drv_legal:           'By submitting, you agree to the terms of the offer.',
+            drv_modal_title:     'Application sent!',
+            drv_modal_text:      'Our manager will contact you shortly.',
+            drv_modal_btn:       'Great',
+            drvapp_title:        'Driver application',
+            drvapp_make:         'Car brand',
+            drvapp_model:        'Model',
+            drvapp_year:         'Year',
+            drvapp_color:        'Color',
+            drvapp_color_ph:     'Black',
+            drvapp_plate:        'Plate number',
+            drvapp_type:         'Vehicle type',
+            drvapp_license:      'Driver\'s license (optional)',
+            drvapp_submit:       'Submit application',
+            drvapp_hint:         'After verification our manager will contact you',
+            auth_title:          'Enter your<br>phone number',
+            auth_subtitle:       'To sign in or register',
+            auth_btn_login:      'Sign in',
+            auth_btn_confirm:    'Confirm',
+            auth_resend:         'Resend in 60 sec',
+            auth_name_ph:        'Your name',
+            auth_btn_continue:   'Continue',
+            auth_btn_skip:       'Skip',
+            auth_biometric:      'Face ID or fingerprint',
+            auth_legal_prefix:   'By continuing, you agree to our',
+            auth_legal_terms:    'terms of use',
+            auth_legal_and:      'and',
+            auth_legal_privacy:  'privacy policy',
+            // Order tracking screen
+            otr_status_label:    'Order status',
+            otr_searching:       'Looking for a driver…',
+            otr_searching_sub:   'This usually takes less than a minute',
+            otr_pickup:          'Pickup',
+            otr_pickup_eta:      'Pickup in ~{n} min',
+            otr_arrival:         'Destination',
+            otr_need_help:       'Need help',
+            otr_share_location:  'Show driver where I am',
+            otr_carrier_label:   'Carrier & details',
+            otr_contact:         'Contact',
+            otr_safety:          'Safety',
+            otr_share:           'Share',
+            otr_share_text:      'Tracking ride',
+            otr_change:          'Change',
+            otr_cancel_trip:     'Cancel ride',
+            otr_close:           'Close',
+            otr_rating_title:    'How was your ride?',
+            otr_rate_btn:        'Rate the ride',
+            driver_default:      'Driver',
+            card:                'Card',
+            // Order statuses
+            status_pending:          'Looking for a driver…',
+            status_pending_sub:      'Please wait — assigning a driver',
+            status_accepted:         'Arriving in ~4 min',
+            status_accepted_sub:     'Driver is on the way',
+            status_accepted_eta:     'Arriving in ~{n} min',
+            status_arriving:         'Driver is here!',
+            status_arriving_sub:     'Come out — driver is waiting',
+            status_in_progress:      'Ride started',
+            status_in_progress_sub:  'Have a great ride!',
+            status_completed:        'Ride completed',
+            status_completed_sub:    'Hope you enjoyed the ride',
+            status_cancelled:        'Order cancelled',
+            status_cancelled_reason: 'The order was cancelled',
+            // Rating / cancel / misc
+            rating_required:         'Please select a rating',
+            cancel_order_confirm:    'Cancel this order?',
+            cancel_order_reason:     'Cancelled by client',
+            cancel_order_failed:     'Could not cancel order',
+            price_recalc_wait:       'Please wait, recalculating price…',
+            auth_signin_failed:      'Sign in failed',
+            // Distance units
+            dist_m:                  'm',
+            dist_km:                 'km',
+            // Login / logout buttons
+            signin_btn:              'Sign in',
+            logout_btn:              'Sign out',
+            // Auth — dynamic states
+            auth_sending:            'Sending...',
+            auth_checking:           'Checking...',
+            auth_sms_error:          'Failed to send SMS',
+            auth_wrong_code:         'Invalid code',
+            auth_otp_title:          'Enter the<br>SMS code',
+            auth_otp_sent:           'Sent to {phone}',
+            auth_name_title:         'What\'s your name?',
+            auth_name_sub:           'So your driver knows how to address you',
+            auth_resend_timer:       'Resend in {n} sec',
+            auth_resend_now:         'Resend code',
+            auth_error_generic:      'Error',
+            // Drawer — logged out
+            drawer_login_inline:     'Sign in or register',
+            drawer_hint_inline:      'Access your orders and favourites',
+            // Search
+            search_empty:            'Nothing found',
+            // Map — point selection
+            mpb_from_title:          'Departure point',
+            mpb_to_title:            'Destination point',
+            mpb_stop_title:          'Stop {n}',
+            stop_placeholder:        'Stop {n}',
+            remove_stop:             'Remove stop',
+            map_select:              'Select on map',
+            // Geolocation
+            loc_error:               'Could not detect location. Please allow location access.',
+            // Address fields
+            from_label:              'From',
+            to_label:                'To',
+            // Payment labels for tracking
+            pay_cash_label:          'cash',
+            pay_card_label:          'card',
+            // Payment card errors
+            card_num_error:          'Card number must be 16 digits',
+            card_exp_error:          'Enter expiry date in MM/YY format',
+            card_delete_confirm:     'Delete card?',
+            // Order — errors and buttons
+            order_error_address:     'Please enter pickup and destination addresses',
+            order_error_price:       'Please wait for price calculation',
+            order_error_calculating: 'Please wait for price calculation to finish',
+            order_creating:          'Creating order…',
+            order_transfer_label:    'Transfer',
+            order_error_failed:      'Could not create order. Please try again.',
+            // Tracking — flash notifications
+            driver_found_title:      'Driver found!',
+            driver_on_way:           '{name} is on the way',
+            driver_arrived_title:    'Driver is here!',
+            driver_arrived_sub:      'Come out — driver is waiting',
+            trip_started_title:      'Ride started!',
+            trip_started_sub:        'Have a great ride! 🚗',
+            driver_near:             'Driver nearby!',
+            arriving_eta:            'Arriving in ~{n} min',
+            no_server:               '⚠️ No server connection…',
+            notif_tap_open:          'Tap to open',
+            eta_min:                 '~{n} min',
+            // Theme
+            theme_dark_on:           'Dark mode on',
+            theme_light_on:          'Light mode on',
+            // Driver application
+            drv_error_fields:        'Please enter car make and model',
+            drv_submitting:          'Submitting...',
+            drv_already_sent:        'Application already submitted',
+            drv_error_later:         'Error. Please try again later.',
+            drv_pending_main:        'Application under review',
+            drv_pending_sub_text:    'We\'ll call you back',
+            drv_approved_main:       'Switch to driver mode',
+            drv_rejected_main:       'Submit again',
+            drv_rejected_sub:        'Contact support',
+            // Mode switcher
+            mode_login_required:     'Please sign in',
+            mode_switch_error:       'Could not switch mode. Please try again.',
+            // Social auth
+            social_welcome:          'Welcome! You signed in via social network.',
+            social_unavailable:      'Provider unavailable',
+            social_conn_error:       'Connection error. Please try again later.',
+            // Map markers
+            map_pickup_hint:         'Departure',
+            map_dest_hint:           'Destination',
+            map_pickup_point:        'Pickup point',
+            map_stop_hint:           'Stop {n}',
+        }
+    };
+
+    let currentLang = localStorage.getItem('tf_lang') || 'ru';
+    window.t = (key) => (TRANSLATIONS[currentLang] || TRANSLATIONS.ru)[key] || key;
+
+    function applyTranslations() {
+        const T = TRANSLATIONS[currentLang] || TRANSLATIONS.ru;
+
+        // 1. Все [data-i18n] — текстовое содержимое (поддержка innerHTML для <br>)
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.dataset.i18n;
+            if (!T[key]) return;
+            if (T[key].includes('<br>')) {
+                el.innerHTML = T[key];
+            } else {
+                el.textContent = T[key];
+            }
+        });
+
+        // 2. Все [data-i18n-placeholder] — placeholder
+        document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+            const key = el.dataset.i18nPlaceholder;
+            if (T[key]) el.placeholder = T[key];
+        });
+
+        // 3. Табы тарифов (генерируются JS, ищем по data-id)
+        document.querySelectorAll('.tariff-tab[data-id]').forEach(tab => {
+            const key = tab.dataset.id;
+            if (T[key]) tab.textContent = T[key];
+        });
+        // 4. Тёмная тема label
+        const themeLabel = document.getElementById('hsDrawerThemeLabel');
+        if (themeLabel) {
+            const isLight = document.body.classList.contains('light-theme');
+            themeLabel.textContent = isLight ? T.theme_light_on : T.theme_dark_on;
+        }
+
+        // 5. Поиск
+        const srchInput = document.getElementById('srchInput');
+        if (srchInput) srchInput.placeholder = T.search_placeholder;
+
+        // 6. Кнопки языка
+        document.getElementById('hsLangRu')?.classList.toggle('active', currentLang === 'ru');
+        document.getElementById('hsLangEn')?.classList.toggle('active', currentLang === 'en');
+
+        // 7. Дата/время — пилюля если не выбрано расписание
+        const pillLabel = document.getElementById('datetimePillLabel');
+        if (pillLabel && !pillLabel.classList.contains('has-schedule')) {
+            pillLabel.textContent = T.now;
+        }
+        const dtReset = document.querySelector('.datetime-reset');
+        if (dtReset) dtReset.textContent = T.now;
+
+        // 8. Кнопка "Заказать" — обновляем если не в процессе заказа
+        const orderBtnTxt = document.getElementById('orderButtonText');
+        if (orderBtnTxt && orderBtnTxt.textContent !== T.order_creating) {
+            orderBtnTxt.textContent = T.order_btn;
+        }
+
+        // 9. Drawer — обновляем auth-блок (logout/login кнопка)
+        if (typeof TF !== 'undefined' && typeof TF.updateHeaderAuth === 'function') {
+            TF.updateHeaderAuth();
+        }
+    }
+
+    window.setLanguage = function(lang) {
+        if (!TRANSLATIONS[lang]) return;
+        currentLang = lang;
+        localStorage.setItem('tf_lang', lang);
+        applyTranslations();
+    };
+
+    // При загрузке и после DOMContentLoaded
+    document.addEventListener('DOMContentLoaded', applyTranslations);
+    // Повторно после рендера тарифных табов (они создаются JS чуть позже)
+    window.addEventListener('load', applyTranslations);
+
+})();
+
+/* ═══════════════════════════════════════════════════════════
+   DATETIME PICKER — дата и время подачи
+   ═══════════════════════════════════════════════════════════ */
+(function() {
+
+    let _pickerOpen = false;
+
+    window.toggleDatetimePicker = function() {
+        _pickerOpen = !_pickerOpen;
+        const pill   = document.getElementById('datetimePill');
+        const picker = document.getElementById('datetimePicker');
+        if (!pill || !picker) return;
+        pill.classList.toggle('open', _pickerOpen);
+        picker.classList.toggle('open', _pickerOpen);
+
+        // Ставим сегодня и текущее время по умолчанию при первом открытии
+        if (_pickerOpen) {
+            const dateEl = document.getElementById('scheduleDate');
+            const timeEl = document.getElementById('scheduleTime');
+            if (dateEl && !dateEl.value) {
+                const now = new Date();
+                dateEl.value = now.toISOString().slice(0, 10);
+            }
+            if (timeEl && !timeEl.value) {
+                const now  = new Date();
+                now.setMinutes(now.getMinutes() + 30); // +30 минут от сейчас
+                timeEl.value = now.toTimeString().slice(0, 5);
+            }
+            // Слушаем изменения
+            document.getElementById('scheduleDate')?.addEventListener('change', updatePillLabel);
+            document.getElementById('scheduleTime')?.addEventListener('change', updatePillLabel);
+            updatePillLabel();
+        }
+    };
+
+    function updatePillLabel() {
+        const dateEl  = document.getElementById('scheduleDate');
+        const timeEl  = document.getElementById('scheduleTime');
+        const labelEl = document.getElementById('datetimePillLabel');
+        const resetEl = document.querySelector('.datetime-reset');
+        if (!dateEl || !timeEl || !labelEl) return;
+
+        const d = dateEl.value;
+        const tt = timeEl.value;
+
+        if (d && tt) {
+            const dateObj = new Date(d + 'T' + tt);
+            const opts    = { day: 'numeric', month: 'short' };
+            const lang    = localStorage.getItem('tf_lang') || 'ru';
+            const dateStr = dateObj.toLocaleDateString(lang === 'en' ? 'en-GB' : 'ru-RU', opts);
+            labelEl.textContent = dateStr + ', ' + tt;
+            labelEl.classList.add('has-schedule');
+            if (resetEl) resetEl._hasSchedule = true;
+        }
+    }
+
+    window.resetDatetime = function() {
+        const dateEl  = document.getElementById('scheduleDate');
+        const timeEl  = document.getElementById('scheduleTime');
+        const labelEl = document.getElementById('datetimePillLabel');
+        const resetEl = document.querySelector('.datetime-reset');
+        if (dateEl)  dateEl.value  = '';
+        if (timeEl)  timeEl.value  = '';
+        if (labelEl) {
+            const lang = localStorage.getItem('tf_lang') || 'ru';
+            labelEl.textContent = lang === 'en' ? (TRANSLATIONS.en?.now || 'Right now') : (TRANSLATIONS.ru?.now || 'Прямо сейчас');
+            labelEl.classList.remove('has-schedule');
+        }
+        if (resetEl) resetEl._hasSchedule = false;
+        // Закрываем пикер
+        _pickerOpen = false;
+        document.getElementById('datetimePill')?.classList.remove('open');
+        document.getElementById('datetimePicker')?.classList.remove('open');
+    };
+
+    // Получить выбранное расписание для передачи в заказ
+    window.getScheduledDatetime = function() {
+        const d  = document.getElementById('scheduleDate')?.value;
+        const tt = document.getElementById('scheduleTime')?.value;
+        if (d && tt) return d + 'T' + tt + ':00';
+        return null;
+    };
+
 })();

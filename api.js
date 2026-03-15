@@ -109,12 +109,14 @@ const TF = (function () {
     // DRIVERS
     // ═══════════════════════════════════════════════════════════
     const drivers = {
-        apply:          (data) => POST('drivers/apply', data),
-        me:             ()     => GET('drivers/me'),
-        update:         (data) => PUT('drivers/me', data),
-        updateLocation: (lat, lng) => PATCH('drivers/location', { lat, lng }),
-        setOnline:      (online)   => PATCH('drivers/status', { is_online: online }),
-        availableOrders: () => GET('drivers/orders'),
+        apply:           (data)        => POST('drivers/apply', data),
+        me:              ()            => GET('drivers/me'),
+        update:          (data)        => PUT('drivers/me', data),
+        updateLocation:  (lat, lng)    => PATCH('drivers/location', { lat, lng }),
+        setOnline:       (online)      => PATCH('drivers/status', { is_online: online }),
+        availableOrders: ()            => GET('drivers/orders'),
+        // Список доступных авто по типу тарифа (для клиента)
+        availableByTariff: (tariffType) => GET('drivers/available', { tariff_type: tariffType }),
     };
 
     // ═══════════════════════════════════════════════════════════
@@ -153,6 +155,15 @@ const TF = (function () {
     // ═══════════════════════════════════════════════════════════
     function updateHeaderAuth(user) {
         user = user || getUser();
+        const _t = window.t || ((k) => {
+            // Аварийный fallback если вдруг вызов до инициализации переводов
+            const lang = localStorage.getItem('tf_lang') || 'ru';
+            const fb = {
+                ru: { signin_btn: 'Войти', logout_btn: 'Выйти', drawer_login_inline: 'Войти или зарегистрироваться', drawer_hint_inline: 'У вас будет доступ к заказам и избранному' },
+                en: { signin_btn: 'Sign in', logout_btn: 'Sign out', drawer_login_inline: 'Sign in or register', drawer_hint_inline: 'Access your orders and favourites' },
+            };
+            return (fb[lang] || fb.ru)[k] || k;
+        });
 
         // Кнопка "Войти" в топбаре
         const loginBtn = document.querySelector('.hs-login-btn');
@@ -161,7 +172,7 @@ const TF = (function () {
                 loginBtn.innerHTML = `<i class="fas fa-user-circle"></i> ${user.name || user.phone}`;
                 loginBtn.onclick = () => openProfilePanel();
             } else {
-                loginBtn.innerHTML = `<i class="fas fa-arrow-right-to-bracket"></i> Войти`;
+                loginBtn.innerHTML = `<i class="fas fa-arrow-right-to-bracket"></i> <span data-i18n="signin_btn">${_t('signin_btn')}</span>`;
                 loginBtn.onclick = () => window.openAuthScreen();
             }
         }
@@ -174,15 +185,15 @@ const TF = (function () {
                     <div class="hs-drawer-user-name">${user.name || user.phone}</div>
                     <div class="hs-drawer-user-phone" style="color:var(--clr-hint);font-size:13px;">${user.phone || ''}</div>
                     <button class="hs-drawer-login-btn" style="margin-top:8px;background:#ff4444;" onclick="TF.auth.logout().then(() => window.closeHsMenu())">
-                        Выйти
+                        <span data-i18n="logout_btn">${_t('logout_btn')}</span>
                     </button>
                 `;
             } else {
                 drawerAuth.innerHTML = `
                     <button class="hs-drawer-login-btn" onclick="window.openAuthScreen()">
-                        Войти или зарегистрироваться
+                        <span data-i18n="drawer_login_inline">${_t('drawer_login_inline')}</span>
                     </button>
-                    <p class="hs-drawer-auth-hint">У вас будет доступ к заказам и избранному</p>
+                    <p class="hs-drawer-auth-hint"><span data-i18n="drawer_hint_inline">${_t('drawer_hint_inline')}</span></p>
                 `;
             }
         }
@@ -201,8 +212,9 @@ const TF = (function () {
 
     // ═══════════════════════════════════════════════════════════
     // Инициализация: восстанавливаем сессию при загрузке
+    // window.load гарантирует что window.t уже определён (script.js выполнен)
     // ═══════════════════════════════════════════════════════════
-    document.addEventListener('DOMContentLoaded', function () {
+    window.addEventListener('load', function () {
         if (isLoggedIn()) updateHeaderAuth();
     });
 
@@ -243,15 +255,16 @@ const TF = (function () {
         const title = document.querySelector('.auth-title');
         const sub   = document.querySelector('.auth-subtitle');
         if (title && sub) {
+            const _t = window.t || (k => k);
             if (state === STATE.OTP) {
-                title.innerHTML = 'Введите код<br>из SMS';
-                sub.textContent = `Отправлен на ${_phone}`;
+                title.innerHTML = _t('auth_otp_title');
+                sub.textContent = _t('auth_otp_sent').replace('{phone}', _phone);
             } else if (state === STATE.NAME) {
-                title.innerHTML = 'Как вас зовут?';
-                sub.textContent = 'Чтобы водитель знал, как к вам обращаться';
+                title.innerHTML = _t('auth_name_title');
+                sub.textContent = _t('auth_name_sub');
             } else {
-                title.innerHTML = 'Введите номер<br>телефона';
-                sub.textContent = 'Чтобы войти или зарегистрироваться';
+                title.innerHTML = _t('auth_title');
+                sub.textContent = _t('auth_subtitle');
             }
         }
     }
@@ -267,7 +280,7 @@ const TF = (function () {
         _phone = '+7' + raw.slice(-10);
 
         const btn = document.querySelector('.auth-submit-btn');
-        if (btn) { btn.disabled = true; btn.textContent = 'Отправка...'; }
+        if (btn) { btn.disabled = true; btn.textContent = window.t ? window.t('auth_sending') : 'Sending...'; }
 
         try {
             const data = await TF.auth.sendOtp(_phone);
@@ -279,9 +292,9 @@ const TF = (function () {
                 if (f) f.focus();
             }, 100);
         } catch (err) {
-            showAuthError(err.message || 'Ошибка отправки SMS');
+            showAuthError(err.message || (window.t ? window.t('auth_sms_error') : 'Failed to send SMS'));
         } finally {
-            if (btn) { btn.disabled = false; btn.textContent = 'Войти'; }
+            if (btn) { btn.disabled = false; btn.textContent = window.t ? window.t('auth_btn_login') : 'Sign in'; }
         }
     };
 
@@ -291,7 +304,7 @@ const TF = (function () {
         if (code.length < 6) { shakeWrap('.auth-otp-inputs'); return; }
 
         const btn = document.getElementById('otpSubmitBtn');
-        if (btn) { btn.disabled = true; btn.textContent = 'Проверяем...'; }
+        if (btn) { btn.disabled = true; btn.textContent = window.t ? window.t('auth_checking') : 'Checking...'; }
 
         try {
             const data = await TF.auth.verifyOtp(_phone, code);
@@ -303,10 +316,10 @@ const TF = (function () {
                 finishAuth(data.user);
             }
         } catch (err) {
-            showAuthError(err.message || 'Неверный код');
+            showAuthError(err.message || (window.t ? window.t('auth_wrong_code') : 'Invalid code'));
             clearOtpInputs();
         } finally {
-            if (btn) { btn.disabled = false; btn.textContent = 'Подтвердить'; }
+            if (btn) { btn.disabled = false; btn.textContent = window.t ? window.t('auth_btn_confirm') : 'Confirm'; }
         }
     };
 
@@ -360,11 +373,11 @@ const TF = (function () {
             btn.disabled = true;
             _resendTimer = setInterval(() => {
                 left--;
-                btn.textContent = `Повторить через ${left} сек`;
+                btn.textContent = (window.t ? window.t('auth_resend_timer') : 'Resend in {n} sec').replace('{n}', left);
                 if (left <= 0) {
                     clearResendTimer();
                     btn.disabled    = false;
-                    btn.textContent = 'Отправить ещё раз';
+                    btn.textContent = window.t ? window.t('auth_resend_now') : 'Resend code';
                 }
             }, 1000);
         }
@@ -380,7 +393,7 @@ const TF = (function () {
             startResendTimer(data?.expires_in || 300);
             clearOtpInputs();
         } catch (err) {
-            showAuthError(err.message || 'Ошибка');
+            showAuthError(err.message || (window.t ? window.t('auth_error_generic') : 'Error'));
         }
     };
 

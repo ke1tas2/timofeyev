@@ -256,7 +256,7 @@
             <div class="hs-topbar-right">
                 <button class="hs-login-btn" onclick="openAuthScreen()">
                     <i class="fas fa-arrow-right-to-bracket"></i>
-                    Войти
+                    <span data-i18n="signin">Войти</span>
                 </button>
             </div>
         </div>
@@ -270,32 +270,32 @@
                 <!-- Перегон авто -->
                 <div class="hs-card hs-card-relay" onclick="openCalculator()">
                     <div class="hs-card-inner">
-                        <img class="hs-card-img hs-card-img--keys" src="./assets/car-keys.png" alt="Перегон авто">
-                        <div class="hs-card-label">Перегон авто</div>
+                        <img class="hs-card-img hs-card-img--keys" src="./assets/car-keys.png" alt="">
+                        <div class="hs-card-label" data-i18n="home_relay">Перегон авто</div>
                     </div>
                 </div>
 
                 <!-- Трансфер -->
                 <div class="hs-card hs-card-transfer" onclick="openCalculator()">
                     <div class="hs-card-inner">
-                        <img class="hs-card-img hs-card-img--sedan" src="./assets/sedan.png" alt="Трансфер">
-                        <div class="hs-card-label">Трансфер</div>
+                        <img class="hs-card-img hs-card-img--sedan" src="./assets/sedan.png" alt="">
+                        <div class="hs-card-label" data-i18n="home_transfer">Трансфер</div>
                     </div>
                 </div>
 
                 <!-- Туры -->
                 <div class="hs-card hs-card-tours" onclick="openCalculator()">
                     <div class="hs-card-inner">
-                        <img class="hs-card-img hs-card-img--heli" src="./assets/helicopter-black.png" alt="Туры">
-                        <div class="hs-card-label">Туры</div>
+                        <img class="hs-card-img hs-card-img--heli" src="./assets/helicopter-black.png" alt="">
+                        <div class="hs-card-label" data-i18n="home_tours">Туры</div>
                     </div>
                 </div>
 
                 <!-- Стать водителем -->
                 <div class="hs-card hs-card-driver" onclick="openCalculator()">
                     <div class="hs-card-inner">
-                        <img class="hs-card-img hs-card-img--suv" src="./assets/suv.png" alt="Стать водителем">
-                        <div class="hs-card-label">Стать водителем</div>
+                        <img class="hs-card-img hs-card-img--suv" src="./assets/suv.png" alt="">
+                        <div class="hs-card-label" data-i18n="home_become_driver">Стать водителем</div>
                     </div>
                 </div>
 
@@ -306,66 +306,48 @@
                 <div class="hs-tariff-strip" id="hsTariffStrip">
 
                     <div class="hs-tariff-chip active" onclick="openCalculator()">
-                        <div class="hs-tariff-img-wrap">
-                            <img src="./assets/car-keys.png" alt="Перегон авто">
-                        </div>
-                        <span>Перегон авто</span>
+                        
+                        <span data-i18n="home_relay">Перегон авто</span>
                     </div>
 
                     <div class="hs-tariff-chip" onclick="openCalculator()">
-                        <div class="hs-tariff-img-wrap">
-                            <img src="./assets/sedan.png" alt="Седан">
-                        </div>
-                        <span>Седан</span>
+                        
+                        <span data-i18n="sedan_short">Седан</span>
                     </div>
 
                     <div class="hs-tariff-chip" onclick="openCalculator()">
-                        <div class="hs-tariff-img-wrap">
-                            <img src="./assets/suv.png" alt="Внедорожник">
-                        </div>
-                        <span>Внедорожник</span>
+                        
+                        <span data-i18n="suv_short">Внедорожник</span>
                     </div>
 
                     <div class="hs-tariff-chip" onclick="openCalculator()">
-                        <div class="hs-tariff-img-wrap">
-                            <img src="./assets/sportcar.png" alt="Спорткар">
-                        </div>
-                        <span>Спорткар</span>
+                        
+                        <span data-i18n="sport_short">Спорткар</span>
                     </div>
 
                     <div class="hs-tariff-chip" onclick="openCalculator()">
-                        <div class="hs-tariff-img-wrap">
-                            <img src="./assets/microbus.png" alt="Микроавтобус">
-                        </div>
-                        <span>Микроавтобус</span>
+                        
+                        <span data-i18n="minibus_short">Микроавтобус</span>
                     </div>
 
                     <div class="hs-tariff-chip" onclick="openCalculator()">
-                        <div class="hs-tariff-img-wrap">
-                            <img src="./assets/limousine-black.png" alt="Лимузин">
-                        </div>
-                        <span>Лимузин</span>
+                        
+                        <span data-i18n="limousine_short">Лимузин</span>
                     </div>
 
                     <div class="hs-tariff-chip" onclick="openCalculator()">
-                        <div class="hs-tariff-img-wrap">
-                            <img src="./assets/bus.png" alt="Автобус">
-                        </div>
-                        <span>Автобус</span>
+                        
+                        <span data-i18n="bus_short">Автобус</span>
                     </div>
 
                     <div class="hs-tariff-chip" onclick="openCalculator()">
-                        <div class="hs-tariff-img-wrap">
-                            <img src="./assets/helicopter-black.png" alt="Вертолёт">
-                        </div>
-                        <span>Вертолёт</span>
+                        
+                        <span data-i18n="helicopter_short">Вертолёт</span>
                     </div>
 
                     <div class="hs-tariff-chip" onclick="openCalculator()">
-                        <div class="hs-tariff-img-wrap">
-                            <img src="./assets/plane.png" alt="Бизнес джет">
-                        </div>
-                        <span>Бизнес джет</span>
+                        
+                        <span data-i18n="jet_short">Бизнес джет</span>
                     </div>
 
                 </div>
@@ -380,12 +362,12 @@
             <!-- ── Строка поиска ── -->
             <div class="hs-search-bar" onclick="openCalculator()">
                 <i class="fas fa-search hs-search-icon"></i>
-                <span class="hs-search-placeholder">Введите ваш адрес</span>
+                <span class="hs-search-placeholder" data-i18n="home_search">Введите ваш адрес</span>
             </div>
 
             <!-- ── Последние адреса ── -->
             <div class="hs-recent-section">
-                <div class="hs-section-title">Адреса</div>
+                <div class="hs-section-title" data-i18n="recent_title">Адреса</div>
                 <div class="hs-recent-list">
                     <div class="hs-recent-item" onclick="openCalculator()">
                         <div class="hs-recent-icon"><i class="fas fa-map-marker-alt"></i></div>
@@ -393,7 +375,7 @@
                             <div class="hs-recent-main">Таира Жарокова 245</div>
                             <div class="hs-recent-sub">Алматы</div>
                         </div>
-                        <div class="hs-recent-time">25 мин</div>
+                        <div class="hs-recent-time">25 <span data-i18n="min">мин</span></div>
                     </div>
                     <div class="hs-recent-item" onclick="openCalculator()">
                         <div class="hs-recent-icon"><i class="fas fa-map-marker-alt"></i></div>
@@ -401,7 +383,7 @@
                             <div class="hs-recent-main">мкр-н Баянаул 31/3</div>
                             <div class="hs-recent-sub">Алматы</div>
                         </div>
-                        <div class="hs-recent-time">29 мин</div>
+                        <div class="hs-recent-time">29 <span data-i18n="min">мин</span></div>
                     </div>
                     <div class="hs-recent-item" onclick="openCalculator()">
                         <div class="hs-recent-icon"><i class="fas fa-clock"></i></div>
@@ -409,7 +391,7 @@
                             <div class="hs-recent-main">Проспект Достык 5</div>
                             <div class="hs-recent-sub">Алматы</div>
                         </div>
-                        <div class="hs-recent-time">35 мин</div>
+                        <div class="hs-recent-time">35 <span data-i18n="min">мин</span></div>
                     </div>
                 </div>
             </div>
@@ -420,19 +402,19 @@
         <div class="hs-bottom-nav">
             <div class="hs-nav-item active">
                 <i class="fas fa-home"></i>
-                <span>Главная</span>
+                <span data-i18n="nav_home">Главная</span>
             </div>
             <div class="hs-nav-item">
                 <i class="fas fa-route"></i>
-                <span>Маршруты</span>
+                <span data-i18n="nav_routes">Маршруты</span>
             </div>
             <div class="hs-nav-item">
                 <i class="fas fa-history"></i>
-                <span>История</span>
+                <span data-i18n="nav_history">История</span>
             </div>
             <div class="hs-nav-item">
                 <i class="fas fa-user-circle"></i>
-                <span>Профиль</span>
+                <span data-i18n="nav_profile">Профиль</span>
             </div>
         </div>
 
@@ -459,10 +441,10 @@
 
         <!-- ── Кнопка входа ── -->
         <div class="hs-drawer-auth">
-            <button class="hs-drawer-login-btn" onclick="openAuthScreen()">
+            <button class="hs-drawer-login-btn" onclick="openAuthScreen()" data-i18n="drawer_login_btn">
                 Войти или зарегистрироваться
             </button>
-            <p class="hs-drawer-auth-hint">У вас будет доступ к заказам и избранному</p>
+            <p class="hs-drawer-auth-hint" data-i18n="drawer_auth_hint">У вас будет доступ к заказам и избранному</p>
         </div>
 
         <!-- ── Список пунктов меню ── -->
@@ -475,8 +457,8 @@
                     <span class="hs-di-badge" id="menuNotifBadge"></span>
                 </div>
                 <div class="hs-drawer-item-text">
-                    <span class="hs-di-title" id="notif-btn-title">Включите уведомления</span>
-                    <span class="hs-di-subtitle" id="notif-btn-subtitle" style="display:none;">Нажмите чтобы включить</span>
+                    <span class="hs-di-title" id="notif-btn-title" data-i18n="menu_notif">Включите уведомления</span>
+                    <span class="hs-di-subtitle" id="notif-btn-subtitle" style="display:none;" data-i18n="menu_notif_sub">Нажмите чтобы включить</span>
                 </div>
                 <i class="fas fa-chevron-right hs-drawer-chevron" id="notif-btn-chevron"></i>
             </div>
@@ -487,8 +469,8 @@
                         <i class="fas fa-percent"></i>
                     </div>
                     <div class="hs-drawer-item-text">
-                        <span class="hs-di-title">Скидки и подарки</span>
-                        <span class="hs-di-subtitle">Ввести промокод</span>
+                        <span class="hs-di-title" data-i18n="menu_discounts">Скидки и подарки</span>
+                        <span class="hs-di-subtitle" data-i18n="menu_promo">Ввести промокод</span>
                     </div>
                     <i class="fas fa-chevron-right hs-drawer-chevron"></i>
                 </div>
@@ -498,7 +480,7 @@
                         <i class="fas fa-credit-card"></i>
                     </div>
                     <div class="hs-drawer-item-text">
-                        <span class="hs-di-title">Способы оплаты</span>
+                        <span class="hs-di-title" data-i18n="menu_payment">Способы оплаты</span>
                     </div>
                     <i class="fas fa-chevron-right hs-drawer-chevron"></i>
                 </div>
@@ -511,7 +493,7 @@
                         <i class="fas fa-headset"></i>
                     </div>
                     <div class="hs-drawer-item-text">
-                        <span class="hs-di-title">Поддержка</span>
+                        <span class="hs-di-title" data-i18n="menu_support">Поддержка</span>
                     </div>
                     <i class="fas fa-chevron-right hs-drawer-chevron"></i>
                 </div>
@@ -521,17 +503,17 @@
             <!-- Переключатель Пассажир ↔ Водитель (только для одобренных водителей) -->
             <div class="hs-drawer-group" id="hsModeSwitcherGroup" style="display:none">
                 <div style="padding:14px 16px 12px">
-                    <div style="font-size:11px;color:#8e8e93;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;margin-bottom:10px">
+                    <div style="font-size:11px;color:#8e8e93;text-transform:uppercase;letter-spacing:0.5px;font-weight:600;margin-bottom:10px" data-i18n="mode_label">
                         Режим работы
                     </div>
                     <div style="display:flex;background:rgba(255,255,255,0.06);border-radius:12px;padding:3px;gap:3px">
                         <button id="hsModeTabClient" onclick="switchAppMode('client')"
                             style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:10px 8px;border:none;border-radius:10px;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;transition:all 0.2s;background:#fc3f1e;color:#fff">
-                            <i class="fas fa-user"></i> Пассажир
+                            <i class="fas fa-user"></i> <span data-i18n="mode_passenger">Пассажир</span>
                         </button>
                         <button id="hsModeTabDriver" onclick="switchAppMode('driver')"
                             style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:10px 8px;border:none;border-radius:10px;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;transition:all 0.2s;background:transparent;color:#8e8e93">
-                            <i class="fas fa-car"></i> Водитель
+                            <i class="fas fa-car"></i> <span data-i18n="mode_driver">Водитель</span>
                         </button>
                     </div>
                 </div>
@@ -544,7 +526,7 @@
                         <i class="fas fa-car-side"></i>
                     </div>
                     <div class="hs-drawer-item-text">
-                        <span class="hs-di-title hs-di-title--dark">Работа водителем</span>
+                        <span class="hs-di-title hs-di-title--dark" data-i18n="menu_work">Работа водителем</span>
                     </div>
                     <i class="fas fa-chevron-right hs-drawer-chevron hs-drawer-chevron--dark"></i>
                 </div>
@@ -557,7 +539,7 @@
                         <i class="fas fa-shield-halved"></i>
                     </div>
                     <div class="hs-drawer-item-text">
-                        <span class="hs-di-title hs-di-title--admin">Панель администратора</span>
+                        <span class="hs-di-title hs-di-title--admin" data-i18n="menu_admin">Панель администратора</span>
                     </div>
                     <i class="fas fa-chevron-right hs-drawer-chevron" style="color:#fff;opacity:0.6"></i>
                 </div>
@@ -570,7 +552,7 @@
                         <i class="fas fa-briefcase"></i>
                     </div>
                     <div class="hs-drawer-item-text">
-                        <span class="hs-di-title">Бизнес-аккаунт</span>
+                        <span class="hs-di-title" data-i18n="menu_business">Бизнес-аккаунт</span>
                     </div>
                     <i class="fas fa-chevron-right hs-drawer-chevron"></i>
                 </div>
@@ -580,7 +562,7 @@
                         <i class="fas fa-user-group"></i>
                     </div>
                     <div class="hs-drawer-item-text">
-                        <span class="hs-di-title">Семейный аккаунт</span>
+                        <span class="hs-di-title" data-i18n="menu_family">Семейный аккаунт</span>
                     </div>
                     <i class="fas fa-chevron-right hs-drawer-chevron"></i>
                 </div>
@@ -590,7 +572,7 @@
                         <i class="fas fa-shield-halved"></i>
                     </div>
                     <div class="hs-drawer-item-text">
-                        <span class="hs-di-title">Безопасность</span>
+                        <span class="hs-di-title" data-i18n="menu_security">Безопасность</span>
                     </div>
                     <i class="fas fa-chevron-right hs-drawer-chevron"></i>
                 </div>
@@ -600,7 +582,7 @@
                         <i class="fas fa-gear"></i>
                     </div>
                     <div class="hs-drawer-item-text">
-                        <span class="hs-di-title">Настройки</span>
+                        <span class="hs-di-title" data-i18n="menu_settings">Настройки</span>
                     </div>
                     <i class="fas fa-chevron-right hs-drawer-chevron"></i>
                 </div>
@@ -620,6 +602,22 @@
                             <input type="checkbox" id="hsThemeToggleCheck" onchange="toggleTheme()">
                             <span class="hs-drawer-toggle-slider"></span>
                         </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Группа 7: Язык / Language -->
+            <div class="hs-drawer-group">
+                <div class="hs-drawer-item hs-drawer-item--notap">
+                    <div class="hs-drawer-item-icon hs-di-lang">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <div class="hs-drawer-item-text">
+                        <span class="hs-di-title" id="hsLangLabel">Язык / Language</span>
+                    </div>
+                    <div class="hs-lang-switcher" id="hsLangSwitcher">
+                        <button class="hs-lang-btn active" id="hsLangRu" onclick="setLanguage('ru')">RU</button>
+                        <button class="hs-lang-btn" id="hsLangEn" onclick="setLanguage('en')">EN</button>
                     </div>
                 </div>
             </div>
@@ -652,48 +650,46 @@
 
             <!-- ── Герой ── -->
             <div class="drv-hero">
-                <h1 class="drv-hero-title">Работа водителем<br>с Timofeyev</h1>
+                <h1 class="drv-hero-title" data-i18n="drv_title">Работа водителем<br>с Timofeyev</h1>
             </div>
 
             <!-- ── Заработок ── -->
             <div class="drv-earn-card">
                 <div class="drv-earn-amount">
-                    100 000 ₸ в месяц
+                    100 000 ₸ <span data-i18n="drv_per_month">в месяц</span>
                 </div>
-                <div class="drv-earn-label">— столько получает водитель</div>
+                <div class="drv-earn-label" data-i18n="drv_earn_label">— столько получает водитель</div>
             </div>
 
             <!-- ── Преимущества ── -->
             <div class="drv-section">
-                <div class="drv-section-title">А ещё можно:</div>
+                <div class="drv-section-title" data-i18n="drv_also">А ещё можно:</div>
                 <div class="drv-benefits">
                     <div class="drv-benefit-item">
                         <span class="drv-benefit-dash">—</span>
-                        <span>Выходить на линию только в удобное время</span>
+                        <span data-i18n="drv_b1">Выходить на линию только в удобное время</span>
                     </div>
                     <div class="drv-benefit-item">
                         <span class="drv-benefit-dash">—</span>
-                        <span>Выполнять заказы на своём авто либо взять машину в парке</span>
+                        <span data-i18n="drv_b2">Выполнять заказы на своём авто либо взять машину в парке</span>
                     </div>
                     <div class="drv-benefit-item">
                         <span class="drv-benefit-dash">—</span>
-                        <span>Получать деньги сразу в поездках за наличные</span>
+                        <span data-i18n="drv_b3">Получать деньги сразу в поездках за наличные</span>
                     </div>
                 </div>
             </div>
-
-
 
         </div><!-- /drv-body -->
 
         <!-- ── Фиксированный футер ── -->
         <div class="drv-footer">
             <button class="drv-cta-btn" onclick="openDriverApplication()">
-                <span class="drv-cta-main">Оставить заявку</span>
-                <span class="drv-cta-sub">Вам перезвонят</span>
+                <span class="drv-cta-main" data-i18n="drv_apply">Оставить заявку</span>
+                <span class="drv-cta-sub" data-i18n="drv_callback">Вам перезвонят</span>
             </button>
-            <button class="drv-login-link" onclick="openAuthScreen()">Войти или зарегистрироваться</button>
-            <p class="drv-legal">
+            <button class="drv-login-link" onclick="openAuthScreen()" data-i18n="drv_login">Войти или зарегистрироваться</button>
+            <p class="drv-legal" data-i18n="drv_legal">
                 Отправляя заявку, вы соглашаетесь с <a href="javascript:void(0)" class="drv-legal-link">условиями оферты</a>.
                 Сотрудничество с партнёрами сервиса. Условия индивидуальны,
                 за подробной информацией обратитесь к партнёрам.
@@ -708,9 +704,9 @@
     <div class="drv-modal-overlay" id="drvModalOverlay" onclick="closeDrvModal()">
         <div class="drv-modal" onclick="event.stopPropagation()">
             <div class="drv-modal-icon"><i class="fas fa-check-circle"></i></div>
-            <div class="drv-modal-title">Заявка отправлена!</div>
-            <div class="drv-modal-text">Наш менеджер свяжется с вами в ближайшее время.</div>
-            <button class="drv-modal-btn" onclick="closeDrvModal()">Отлично</button>
+            <div class="drv-modal-title" data-i18n="drv_modal_title">Заявка отправлена!</div>
+            <div class="drv-modal-text" data-i18n="drv_modal_text">Наш менеджер свяжется с вами в ближайшее время.</div>
+            <button class="drv-modal-btn" onclick="closeDrvModal()" data-i18n="drv_modal_btn">Отлично</button>
         </div>
     </div>
 
@@ -738,8 +734,8 @@
         <!-- Основной контент -->
         <div class="auth-body">
 
-            <h1 class="auth-title">Введите номер<br>телефона</h1>
-            <p class="auth-subtitle">Чтобы войти или зарегистрироваться</p>
+            <h1 class="auth-title" data-i18n="auth_title">Введите номер<br>телефона</h1>
+            <p class="auth-subtitle" data-i18n="auth_subtitle">Чтобы войти или зарегистрироваться</p>
 
             <!-- Сообщение об ошибке -->
             <div id="authErrorMsg" class="auth-error-msg" style="display:none;"></div>
@@ -784,7 +780,7 @@
                     <button class="auth-social-btn auth-social-mail" title="Mail.ru"><i class="fas fa-at"></i></button>
                 </div>
 
-                <button class="auth-submit-btn" onclick="submitPhone()">Войти</button>
+                <button class="auth-submit-btn" onclick="submitPhone()" data-i18n="auth_btn_login">Войти</button>
 
                 <button class="auth-bio-btn">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -794,7 +790,7 @@
                         <path d="M12 10v4M12 16v1"/>
                         <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
                     </svg>
-                    По лицу или отпечатку
+                    <span data-i18n="auth_biometric">По лицу или отпечатку</span>
                 </button>
             </div>
 
@@ -815,9 +811,9 @@
                         maxlength="1" oninput="onOtpInput(this,5)" onkeydown="onOtpKeydown(this,5,event)">
                 </div>
 
-                <button class="auth-submit-btn" id="otpSubmitBtn" onclick="submitOtp()">Подтвердить</button>
+                <button class="auth-submit-btn" id="otpSubmitBtn" onclick="submitOtp()" data-i18n="auth_btn_confirm">Подтвердить</button>
 
-                <button class="auth-resend-btn" id="otpResendBtn" onclick="resendOtp()" disabled>
+                <button class="auth-resend-btn" id="otpResendBtn" onclick="resendOtp()" disabled data-i18n="auth_resend">
                     Повторить через 60 сек
                 </button>
             </div>
@@ -829,19 +825,20 @@
                         type="text"
                         id="authNameInput"
                         class="auth-name-input"
+                        data-i18n-placeholder="auth_name_ph"
                         placeholder="Ваше имя"
                         maxlength="60"
                         onkeydown="if(event.key==='Enter') submitName()"
                     >
                 </div>
-                <button class="auth-submit-btn" onclick="submitName()">Продолжить</button>
-                <button class="auth-more-btn" onclick="submitName()">Пропустить</button>
+                <button class="auth-submit-btn" onclick="submitName()" data-i18n="auth_btn_continue">Продолжить</button>
+                <button class="auth-more-btn" onclick="submitName()" data-i18n="auth_btn_skip">Пропустить</button>
             </div>
 
             <p class="auth-legal">
-                Продолжая, вы соглашаетесь с
-                <a href="javascript:void(0)">условиями использования</a>
-                и <a href="javascript:void(0)">политикой конфиденциальности</a>
+                <span data-i18n="auth_legal_prefix">Продолжая, вы соглашаетесь с</span>
+                <a href="javascript:void(0)" data-i18n="auth_legal_terms">условиями использования</a>
+                <span data-i18n="auth_legal_and">и</span> <a href="javascript:void(0)" data-i18n="auth_legal_privacy">политикой конфиденциальности</a>
             </p>
 
         </div><!-- /auth-body -->
@@ -857,8 +854,8 @@
 
         <div class="location-loading" id="locationLoading">
             <i class="fas fa-location-crosshairs"></i>
-            <div class="loading-text">Определяем ваше местоположение</div>
-            <div class="loading-subtext">Разрешите доступ для автоматического заполнения адреса</div>
+            <div class="loading-text" data-i18n="loc_loading">Определяем ваше местоположение</div>
+            <div class="loading-subtext" data-i18n="loc_hint">Разрешите доступ для автоматического заполнения адреса</div>
         </div>
 
         <!-- Кнопка меню (верхний левый угол) -->
@@ -872,7 +869,7 @@
             <div class="panel-top">
                 <div class="panel-header" id="panelHeader">
                     <div class="panel-handle"></div>
-                    <div class="panel-header-title">Заказ трансфера</div>
+                    <div class="panel-header-title" data-i18n="panel_title">Заказ трансфера</div>
                 </div>
                 <!-- Поля ввода адресов -->
                 <div class="address-selector">
@@ -884,8 +881,8 @@
                             </svg>
                         </div>
                         <div class="address-input-container">
-                            <input type="text" class="address-input" id="fromInput" placeholder="Откуда" autocomplete="off" readonly>
-                            <span class="address-hint">Адрес точки А</span>
+                            <input type="text" class="address-input" id="fromInput" placeholder="Откуда" autocomplete="off" readonly data-i18n-placeholder="from_placeholder">
+                            <span class="address-hint" data-i18n="address_a">Адрес точки А</span>
                         </div>
                         <button class="clear-button" id="clearFrom" style="display: none;">
                             <i class="fas fa-times"></i>
@@ -906,8 +903,8 @@
                             </svg>
                         </div>
                         <div class="address-input-container">
-                            <input type="text" class="address-input" id="toInput" placeholder="Куда?" autocomplete="off" readonly>
-                            <span class="address-hint">Адрес точки Б</span>
+                            <input type="text" class="address-input" id="toInput" placeholder="Куда?" autocomplete="off" readonly data-i18n-placeholder="to_placeholder">
+                            <span class="address-hint" data-i18n="address_b">Адрес точки Б</span>
                         </div>
                         <button class="clear-button" id="clearTo" style="display: none;">
                             <i class="fas fa-times"></i>
@@ -924,158 +921,63 @@
                     <div class="add-stop-icon">
                         <i class="fas fa-plus"></i>
                     </div>
-                    <div class="add-stop-text">Добавить остановку</div>
+                    <div class="add-stop-text" data-i18n="add_stop">Добавить остановку</div>
                 </div>
 
-                <!-- Тарифы -->
+                <!-- ── Новый тарифный блок: табы + карточки машин ── -->
                 <div class="tariff-section">
-                    <div class="tariff-grid" id="tariffGrid">
-                        <!-- Тарифы будут сгенерированы JavaScript -->
-                    </div>
-                </div>
 
-                <!-- Выбор класса транспорта (основная карточка, как на референсе) -->
-                <div class="transport-class-section transport-class-main">
-                    <div class="transport-class-title">Выберите класс транспорта:</div>
-                    <div class="transport-class-options">
-                        <div class="transport-class-option active" data-class="comfort">
-                            <div class="transport-class-label">comfort</div>
-                        </div>
-                        <div class="transport-class-option" data-class="business">
-                            <div class="transport-class-label">business</div>
-                        </div>
-                        <div class="transport-class-option" data-class="premium">
-                            <div class="transport-class-label">premium</div>
+                    <!-- Верхние табы: Седан / Внедорожник / ... -->
+                    <div class="tariff-tabs-wrap">
+                        <div class="tariff-tabs" id="tariffTabs">
+                            <!-- генерируется JS -->
                         </div>
                     </div>
+
+                    <!-- Карточки конкретных машин -->
+                    <div class="tariff-cars" id="tariffCars">
+                        <!-- генерируется JS -->
+                    </div>
+
                 </div>
 
                 <!-- Скрытый элемент цены для отправки формы -->
                 <span id="priceAmount" style="display:none;">—</span>
 
-                <!-- Дополнительные опции -->
-                <div class="options-section">
-
-
-                    <div class="option-item">
-                        <div class="option-info">
-                            <div class="option-icon">
-                                <i class="fas fa-paw"></i>
-                            </div>
-                            <div class="option-text">
-                                <div class="option-name">Перевозка животного</div>
-                            </div>
-                        </div>
-                        <label class="yandex-toggle">
-                            <input type="checkbox" id="animalOption" onchange="updatePrice()">
-                            <span class="yandex-toggle-slider"></span>
-                        </label>
+                <!-- Дата и время подачи -->
+                <div class="datetime-section" id="datetimeSection">
+                    <div class="datetime-pill" id="datetimePill" onclick="toggleDatetimePicker()">
+                        <i class="fas fa-clock datetime-pill-icon"></i>
+                        <span class="datetime-pill-label" id="datetimePillLabel" data-i18n="now">Прямо сейчас</span>
+                        <i class="fas fa-chevron-down datetime-pill-arrow" id="datetimePillArrow"></i>
                     </div>
-
-                    <div class="option-item">
-                        <div class="option-info">
-                            <div class="option-icon">
-                                <i class="fas fa-skiing"></i>
+                    <div class="datetime-picker" id="datetimePicker">
+                        <div class="datetime-picker-row">
+                            <div class="datetime-picker-field">
+                                <label class="datetime-picker-label" data-i18n="date">Дата</label>
+                                <input type="date" class="datetime-picker-input" id="scheduleDate">
                             </div>
-                            <div class="option-text">
-                                <div class="option-name">Лыжи / сноуборд</div>
+                            <div class="datetime-picker-field">
+                                <label class="datetime-picker-label" data-i18n="time">Время</label>
+                                <input type="time" class="datetime-picker-input" id="scheduleTime">
                             </div>
                         </div>
-                        <label class="yandex-toggle">
-                            <input type="checkbox" id="skiOption" onchange="updatePrice()">
-                            <span class="yandex-toggle-slider"></span>
-                        </label>
+                        <button class="datetime-reset" onclick="resetDatetime()" data-i18n="now">Прямо сейчас</button>
                     </div>
+                </div>
 
-                    <div class="option-item">
-                        <div class="option-info">
-                            <div class="option-icon">
-                                <i class="fas fa-wheelchair"></i>
-                            </div>
-                            <div class="option-text">
-                                <div class="option-name">Инвалидное кресло</div>
-                            </div>
-                        </div>
-                        <label class="yandex-toggle">
-                            <input type="checkbox" id="wheelchairOption" onchange="updatePrice()">
-                            <span class="yandex-toggle-slider"></span>
-                        </label>
-                    </div>
-
-                    <!-- Новые дополнительные опции -->
-                    <div class="option-item">
-                        <div class="option-info">
-                            <div class="option-icon">
-                                <i class="fas fa-baby-carriage"></i>
-                            </div>
-                            <div class="option-text">
-                                <div class="option-name">Детское кресло</div>
-                            </div>
-                        </div>
-                        <label class="yandex-toggle">
-                            <input type="checkbox" id="childSeatOption" onchange="updatePrice()">
-                            <span class="yandex-toggle-slider"></span>
-                        </label>
-                    </div>
-
-                    <div class="option-item">
-                        <div class="option-info">
-                            <div class="option-icon">
-                                <i class="fas fa-car"></i>
-                            </div>
-                            <div class="option-text">
-                                <div class="option-name">Помогите найти машину</div>
-                            </div>
-                        </div>
-                        <label class="yandex-toggle">
-                            <input type="checkbox" id="findCarOption" onchange="updatePrice()">
-                            <span class="yandex-toggle-slider"></span>
-                        </label>
-                    </div>
-
-                    <div class="option-item">
-                        <div class="option-info">
-                            <div class="option-icon">
-                                <i class="fas fa-comment-alt"></i>
-                            </div>
-                            <div class="option-text">
-                                <div class="option-name">Общаюсь только текстом</div>
-                            </div>
-                        </div>
-                        <label class="yandex-toggle">
-                            <input type="checkbox" id="textOnlyOption" onchange="updatePrice()">
-                            <span class="yandex-toggle-slider"></span>
-                        </label>
-                    </div>
-
-                    <div class="option-item">
-                        <div class="option-info">
-                            <div class="option-icon">
-                                <i class="fas fa-ear-deaf"></i>
-                            </div>
-                            <div class="option-text">
-                                <div class="option-name">Не говорю, но слышу</div>
-                            </div>
-                        </div>
-                        <label class="yandex-toggle">
-                            <input type="checkbox" id="dontSpeakOption" onchange="updatePrice()">
-                            <span class="yandex-toggle-slider"></span>
-                        </label>
-                    </div>
-
-                    <div class="option-item">
-                        <div class="option-info">
-                            <div class="option-icon">
-                                <i class="fas fa-bicycle"></i>
-                            </div>
-                            <div class="option-text">
-                                <div class="option-name">Велосипед</div>
-                            </div>
-                        </div>
-                        <label class="yandex-toggle">
-                            <input type="checkbox" id="bicycleOption" onchange="updatePrice()">
-                            <span class="yandex-toggle-slider"></span>
-                        </label>
+                <!-- Комментарий водителю -->
+                <div class="comment-section">
+                    <div class="comment-wrap">
+                        <i class="fas fa-comment-dots comment-icon"></i>
+                        <input
+                            type="text"
+                            id="driverComment"
+                            class="comment-input"
+                            placeholder="Комментарий водителю"
+                            data-i18n-placeholder="comment_placeholder"
+                            maxlength="200"
+                        >
                     </div>
                 </div>
 
@@ -1088,8 +990,8 @@
                                 <i class="fas fa-money-bill-wave"></i>
                             </div>
                             <div class="payment-text">
-                                <div class="payment-label">Оплата</div>
-                                <div class="payment-value" id="paymentValue">Наличными</div>
+                                <div class="payment-label" data-i18n="payment_label">Оплата</div>
+                                <div class="payment-value" id="paymentValue" data-i18n="cash">Наличными</div>
                             </div>
                         </div>
                         <div class="payment-arrow">
@@ -1100,7 +1002,7 @@
 
                 <!-- Номер телефона -->
                 <div class="phone-input-section">
-                    <div class="phone-label">Номер телефона</div>
+                    <div class="phone-label" data-i18n="phone_label">Номер телефона</div>
                     <div class="phone-input-wrapper">
                         <i class="fas fa-phone phone-input-icon"></i>
                         <input
@@ -1135,7 +1037,7 @@
                     <!-- Кнопка заказа -->
                     <div class="order-section">
                         <button id="orderButton" class="order-button" onclick="orderTaxi()">
-                            <span id="orderButtonText">Заказать трансфер</span>
+                            <span id="orderButtonText" data-i18n="order_btn">Заказать трансфер</span>
                         </button>
                     </div>
                 </div>
@@ -1161,7 +1063,7 @@
                         <div class="srch-addr-ico srch-addr-ico-a">
                             <i class="fas fa-walking"></i>
                         </div>
-                        <span class="srch-addr-text" id="srchLabelA">Откуда</span>
+                        <span class="srch-addr-text" id="srchLabelA" data-i18n="from_placeholder">Откуда</span>
                     </div>
 
                     <div class="srch-divider"></div>
@@ -1176,7 +1078,7 @@
                             <i class="fas fa-times-circle"></i>
                         </button>
                         <div class="srch-sep"></div>
-                        <button class="srch-map-btn" id="srchMapBtn">Карта</button>
+                        <button class="srch-map-btn" id="srchMapBtn" data-i18n="map_btn">Карта</button>
                     </div>
                 </div>
             </div>
@@ -1199,19 +1101,19 @@
                 </button>
             </div>
 
-            <div class="mpb-panel-title">Точка назначения</div>
+            <div class="mpb-panel-title" data-i18n="mpb_title">Точка назначения</div>
 
             <div class="mpb-address-card">
                 <div class="mpb-address-icon">
                     <i class="fas fa-map-marker-alt"></i>
                 </div>
                 <div class="mpb-address-text">
-                    <div class="mpb-dest-subtitle">Переместите карту, чтобы выбрать адрес</div>
-                    <div class="mpb-dest-address mpb-addr-b" id="mpbAddrB">Переместите карту...</div>
+                    <div class="mpb-dest-subtitle" data-i18n="mpb_hint">Переместите карту, чтобы выбрать адрес</div>
+                    <div class="mpb-dest-address mpb-addr-b" id="mpbAddrB" data-i18n="mpb_moving">Переместите карту...</div>
                 </div>
             </div>
 
-            <button class="mpb-confirm-btn" id="mpbConfirmBtn">Готово</button>
+            <button class="mpb-confirm-btn" id="mpbConfirmBtn" data-i18n="mpb_confirm">Готово</button>
         </div>
 
         <div id="map"></div>
@@ -1237,7 +1139,7 @@
     <div class="payment-overlay" id="paymentOverlay">
         <div class="payment-modal" id="paymentModal">
             <div class="payment-modal-header">
-                <div class="payment-modal-title">Способ оплаты</div>
+                <div class="payment-modal-title" data-i18n="payment_modal_title">Способ оплаты</div>
                 <button class="payment-modal-close" onclick="closePaymentModal()">
                     <i class="fas fa-times"></i>
                 </button>
@@ -1252,22 +1154,22 @@
     <div class="payment-overlay" id="addCardOverlay">
         <div class="payment-modal">
             <div class="payment-modal-header">
-                <div class="payment-modal-title">Добавить карту</div>
+                <div class="payment-modal-title" data-i18n="card_modal_title">Добавить карту</div>
                 <button class="payment-modal-close" onclick="closeAddCardModal()">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
             <div class="add-card-form">
-                <div class="form-title">Введите данные карты</div>
+                <div class="form-title" data-i18n="card_form_title">Введите данные карты</div>
 
                 <div class="form-group">
-                    <label class="form-label">Номер карты</label>
+                    <label class="form-label" data-i18n="card_number_label">Номер карты</label>
                     <input type="text" class="form-input" id="cardNumber" placeholder="0000 0000 0000 0000" maxlength="19">
                 </div>
 
                 <div class="form-row">
                     <div class="form-col">
-                        <label class="form-label">Действует до</label>
+                        <label class="form-label" data-i18n="card_expiry_label">Действует до</label>
                         <input type="text" class="form-input" id="cardExpiry" placeholder="ММ/ГГ" maxlength="5">
                     </div>
                     <div class="form-col">
@@ -1277,10 +1179,79 @@
                 </div>
 
                 <div class="form-actions">
-                    <button class="form-button secondary" onclick="closeAddCardModal()">Отмена</button>
-                    <button class="form-button primary" onclick="saveCard()">Добавить карту</button>
+                    <button class="form-button secondary" onclick="closeAddCardModal()" data-i18n="cancel">Отмена</button>
+                    <button class="form-button primary" onclick="saveCard()" data-i18n="card_modal_title">Добавить карту</button>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- ═══ Модальное окно заявки водителя ═══ -->
+    <div class="drvapp-overlay" id="drvAppOverlay" onclick="closeDrvAppModal()"></div>
+    <div class="drvapp-sheet" id="drvAppSheet">
+        <div class="drvapp-handle"></div>
+        <div class="drvapp-header">
+            <div class="drvapp-title" data-i18n="drvapp_title">Заявка водителя</div>
+            <button class="drvapp-close" onclick="closeDrvAppModal()"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="drvapp-body">
+            <div class="drvapp-error" id="drvAppError" style="display:none;"></div>
+
+            <!-- Марка и модель -->
+            <div class="drvapp-row">
+                <div class="drvapp-field">
+                    <label class="drvapp-label" data-i18n="drvapp_make">Марка авто</label>
+                    <input class="drvapp-input" id="drvCarMake" type="text" placeholder="Toyota">
+                </div>
+                <div class="drvapp-field">
+                    <label class="drvapp-label" data-i18n="drvapp_model">Модель</label>
+                    <input class="drvapp-input" id="drvCarModel" type="text" placeholder="Land Cruiser 200">
+                </div>
+            </div>
+
+            <!-- Год и цвет -->
+            <div class="drvapp-row">
+                <div class="drvapp-field">
+                    <label class="drvapp-label" data-i18n="drvapp_year">Год выпуска</label>
+                    <input class="drvapp-input" id="drvCarYear" type="number" placeholder="2022" min="2000" max="2030">
+                </div>
+                <div class="drvapp-field">
+                    <label class="drvapp-label" data-i18n="drvapp_color">Цвет</label>
+                    <input class="drvapp-input" id="drvCarColor" type="text" data-i18n-placeholder="drvapp_color_ph">
+                </div>
+            </div>
+
+            <!-- Гос. номер -->
+            <div class="drvapp-field">
+                <label class="drvapp-label" data-i18n="drvapp_plate">Гос. номер</label>
+                <input class="drvapp-input" id="drvCarNumber" type="text" placeholder="777 AAA 01" style="text-transform:uppercase;">
+            </div>
+
+            <!-- Тип тарифа -->
+            <div class="drvapp-field">
+                <label class="drvapp-label" data-i18n="drvapp_type">Тип транспорта</label>
+                <div class="drvapp-tariff-grid" id="drvTariffGrid">
+                    <div class="drvapp-tariff-chip active" data-type="sedan" data-i18n="sedan">🚗 Седан</div>
+                    <div class="drvapp-tariff-chip" data-type="suv" data-i18n="suv">🚙 Внедорожник</div>
+                    <div class="drvapp-tariff-chip" data-type="sport" data-i18n="sport">🏎️ Спорткар</div>
+                    <div class="drvapp-tariff-chip" data-type="limousine" data-i18n="limousine">🛻 Лимузин</div>
+                    <div class="drvapp-tariff-chip" data-type="minibus" data-i18n="minibus">🚐 Микроавтобус</div>
+                    <div class="drvapp-tariff-chip" data-type="bus" data-i18n="bus">🚌 Автобус</div>
+                    <div class="drvapp-tariff-chip" data-type="helicopter" data-i18n="helicopter">🚁 Вертолёт</div>
+                    <div class="drvapp-tariff-chip" data-type="jet" data-i18n="jet">✈️ Бизнес-джет</div>
+                </div>
+            </div>
+
+            <!-- Водительское удостоверение -->
+            <div class="drvapp-field">
+                <label class="drvapp-label" data-i18n="drvapp_license">Номер ВУ (необязательно)</label>
+                <input class="drvapp-input" id="drvLicense" type="text" placeholder="AB 123456">
+            </div>
+
+            <button class="drvapp-submit" id="drvAppSubmitBtn" onclick="submitDriverApplication()" data-i18n="drvapp_submit">
+                Отправить заявку
+            </button>
+            <p class="drvapp-hint" data-i18n="drvapp_hint">После проверки данных менеджер свяжется с вами</p>
         </div>
     </div>
 

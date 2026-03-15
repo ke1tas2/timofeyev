@@ -2282,7 +2282,8 @@ body #allrecords > div:not(:has(#tilda-calculator-wrapper)) {
             .panel.collapsed .add-stop,
             .panel.collapsed .transport-class-section,
             .panel.collapsed .payment-section,
-            .panel.collapsed .phone-input-section {
+            .panel.collapsed .phone-input-section,
+            .panel.collapsed .comment-section {
                 display: none;
             }
 
@@ -3823,16 +3824,16 @@ body.light-theme .srch-item-main { color: #1a1a1a; }
 
 .hs-tariff-chip {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
-    gap: 6px;
+    gap: 0;
     flex-shrink: 0;
     cursor: pointer;
     -webkit-tap-highlight-color: transparent;
-    padding: 12px 14px 10px;
+    padding: 10px 16px;
     background: #383838;
     border-radius: 16px;
-    min-width: 80px;
+    min-width: unset;
     border: 2px solid rgba(255,255,255,0.06);
     transition: border-color 0.2s, background 0.2s, transform 0.2s;
 }
@@ -3849,24 +3850,14 @@ body.light-theme .srch-item-main { color: #1a1a1a; }
 
 .hs-tariff-chip:active { opacity: 0.85; }
 
+/* Скрываем обёртку с картинкой авто в чипах (только текст) */
 .hs-tariff-img-wrap {
-    width: 52px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.hs-tariff-img-wrap img {
-    max-width: 100%;
-    max-height: 100%;
-    object-fit: contain;
-    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5));
+    display: none !important;
 }
 
 .hs-tariff-chip span {
-    font-size: 12px;
-    color: rgba(255,255,255,0.6);
+    font-size: 13px;
+    color: rgba(255,255,255,0.7);
     text-align: center;
     white-space: nowrap;
     font-weight: 500;
@@ -5463,3 +5454,1004 @@ body.light-theme .auth-more-btn {
 .light-theme .auth-name-input:focus {
     border-color: #141414;
 }
+
+/* ═══════════════════════════════════════════════════════
+   ПОДМЕНЮ ВЫБОРА КОНКРЕТНОГО АВТОМОБИЛЯ
+   ═══════════════════════════════════════════════════════ */
+
+.car-submenu {
+    margin: 0 14px 10px;
+    background: #ffffff;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid rgba(0,0,0,0.07);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    animation: carSubmenuIn 0.22s ease both;
+}
+
+@keyframes carSubmenuIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.car-submenu-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(0,0,0,0.4);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 10px 14px 6px;
+}
+
+.car-submenu-list {
+    display: flex;
+    flex-direction: column;
+}
+
+.car-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 11px 14px;
+    cursor: pointer;
+    border-top: 1px solid rgba(0,0,0,0.05);
+    transition: background 0.15s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.car-item:first-child {
+    border-top: none;
+}
+
+.car-item:active {
+    background: rgba(0,0,0,0.04);
+}
+
+.car-item.active {
+    background: rgba(255, 216, 77, 0.12);
+}
+
+.car-item-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.car-item-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #141414;
+    line-height: 1.2;
+}
+
+.car-item-seats {
+    font-size: 12px;
+    color: rgba(0,0,0,0.45);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.car-item-seats i {
+    font-size: 10px;
+}
+
+.car-item-check {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid rgba(0,0,0,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+}
+
+.car-item-check i {
+    font-size: 10px;
+    color: transparent;
+    transition: color 0.2s ease;
+}
+
+.car-item.active .car-item-check {
+    background: #ffd84d;
+    border-color: #ffd84d;
+}
+
+.car-item.active .car-item-check i {
+    color: #141414;
+}
+
+.car-item.active .car-item-name {
+    color: #141414;
+}
+
+/* Тёмная тема */
+body:not(.light-theme) .car-submenu {
+    background: #2a2a2a;
+    border-color: rgba(255,255,255,0.08);
+    box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+
+body:not(.light-theme) .car-submenu-title {
+    color: rgba(255,255,255,0.35);
+}
+
+body:not(.light-theme) .car-item {
+    border-top-color: rgba(255,255,255,0.06);
+}
+
+body:not(.light-theme) .car-item:active {
+    background: rgba(255,255,255,0.05);
+}
+
+body:not(.light-theme) .car-item.active {
+    background: rgba(255,216,77,0.1);
+}
+
+body:not(.light-theme) .car-item-name {
+    color: rgba(255,255,255,0.9);
+}
+
+body:not(.light-theme) .car-item-seats {
+    color: rgba(255,255,255,0.4);
+}
+
+body:not(.light-theme) .car-item-check {
+    border-color: rgba(255,255,255,0.2);
+}
+
+body:not(.light-theme) .car-item.active .car-item-name {
+    color: #ffd84d;
+}
+
+/* Скрываем подменю в свёрнутом режиме */
+@media (max-width: 768px) {
+    .panel.collapsed .car-submenu {
+        display: none !important;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════
+   CAR PICKER — bottom sheet выбора автомобиля
+   ═══════════════════════════════════════════════════════ */
+
+.carpicker-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    z-index: 9000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.28s ease;
+}
+.carpicker-overlay.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.carpicker-sheet {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    z-index: 9001;
+    background: #1e1e1e;
+    border-radius: 20px 20px 0 0;
+    padding-bottom: env(safe-area-inset-bottom, 16px);
+    transform: translateY(100%);
+    transition: transform 0.32s cubic-bezier(0.32,0.72,0,1);
+    max-height: 75vh;
+    display: flex;
+    flex-direction: column;
+}
+.carpicker-sheet.active {
+    transform: translateY(0);
+}
+
+.carpicker-handle {
+    width: 36px;
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(255,255,255,0.18);
+    margin: 12px auto 4px;
+    flex-shrink: 0;
+}
+
+.carpicker-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 20px 12px;
+    flex-shrink: 0;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+}
+
+.carpicker-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.01em;
+}
+
+.carpicker-close {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+    border: none;
+    color: rgba(255,255,255,0.6);
+    font-size: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.carpicker-list {
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    flex: 1;
+    padding: 6px 0 8px;
+}
+
+.carpicker-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 20px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.15s;
+    position: relative;
+}
+.carpicker-item::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 20px; right: 20px;
+    height: 1px;
+    background: rgba(255,255,255,0.06);
+}
+.carpicker-item:last-child::after { display: none; }
+
+.carpicker-item:active {
+    background: rgba(255,255,255,0.05);
+}
+.carpicker-item.active {
+    background: rgba(255,216,77,0.08);
+}
+
+.carpicker-item-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.07);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    font-size: 20px;
+}
+.carpicker-item.active .carpicker-item-icon {
+    background: rgba(255,216,77,0.15);
+}
+
+.carpicker-item-info {
+    flex: 1;
+    min-width: 0;
+}
+.carpicker-item-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.92);
+    line-height: 1.2;
+}
+.carpicker-item.active .carpicker-item-name {
+    color: #ffd84d;
+}
+.carpicker-item-meta {
+    font-size: 12px;
+    color: rgba(255,255,255,0.38);
+    margin-top: 3px;
+}
+
+.carpicker-item-check {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.18s ease;
+}
+.carpicker-item-check i {
+    font-size: 10px;
+    color: transparent;
+    transition: color 0.18s;
+}
+.carpicker-item.active .carpicker-item-check {
+    background: #ffd84d;
+    border-color: #ffd84d;
+}
+.carpicker-item.active .carpicker-item-check i {
+    color: #141414;
+}
+
+/* Светлая тема */
+body.light-theme .carpicker-sheet {
+    background: #f5f5f5;
+}
+body.light-theme .carpicker-handle {
+    background: rgba(0,0,0,0.15);
+}
+body.light-theme .carpicker-header {
+    border-bottom-color: rgba(0,0,0,0.07);
+}
+body.light-theme .carpicker-title {
+    color: #141414;
+}
+body.light-theme .carpicker-close {
+    background: rgba(0,0,0,0.07);
+    color: rgba(0,0,0,0.5);
+}
+body.light-theme .carpicker-item::after {
+    background: rgba(0,0,0,0.06);
+}
+body.light-theme .carpicker-item:active {
+    background: rgba(0,0,0,0.04);
+}
+body.light-theme .carpicker-item.active {
+    background: rgba(201,162,39,0.1);
+}
+body.light-theme .carpicker-item-icon {
+    background: rgba(0,0,0,0.06);
+}
+body.light-theme .carpicker-item-name {
+    color: #141414;
+}
+body.light-theme .carpicker-item.active .carpicker-item-name {
+    color: #b8860b;
+}
+body.light-theme .carpicker-item-meta {
+    color: rgba(0,0,0,0.4);
+}
+body.light-theme .carpicker-item-check {
+    border-color: rgba(0,0,0,0.15);
+}
+
+/* ═══════════════════════════════════════════════════════
+   ПЛАШКА ВЫБРАННОГО АВТОМОБИЛЯ
+   ═══════════════════════════════════════════════════════ */
+
+.selected-car-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    padding: 9px 12px;
+    background: rgba(255,216,77,0.1);
+    border: 1px solid rgba(255,216,77,0.25);
+    border-radius: 10px;
+    animation: badgeIn 0.22s ease both;
+}
+
+@keyframes badgeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.selected-car-badge-icon {
+    font-size: 13px;
+    color: #ffd84d;
+    flex-shrink: 0;
+}
+
+.selected-car-badge-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.9);
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.selected-car-badge-change {
+    font-size: 12px;
+    font-weight: 500;
+    color: #ffd84d;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    flex-shrink: 0;
+    -webkit-tap-highlight-color: transparent;
+    opacity: 0.85;
+}
+.selected-car-badge-change:active { opacity: 0.5; }
+
+/* Светлая тема */
+body.light-theme .selected-car-badge {
+    background: rgba(201,162,39,0.08);
+    border-color: rgba(201,162,39,0.3);
+}
+body.light-theme .selected-car-badge-name {
+    color: #141414;
+}
+body.light-theme .selected-car-badge-change {
+    color: #b8860b;
+}
+
+/* ═══════════════════════════════════════════════════════
+   ФОРМА ЗАЯВКИ ВОДИТЕЛЯ (bottom sheet)
+   ═══════════════════════════════════════════════════════ */
+
+.drvapp-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 9100;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.28s ease;
+}
+.drvapp-overlay.active { opacity: 1; pointer-events: auto; }
+
+.drvapp-sheet {
+    position: fixed; left: 0; right: 0; bottom: 0;
+    z-index: 9101;
+    background: #1e1e1e;
+    border-radius: 20px 20px 0 0;
+    transform: translateY(100%);
+    transition: transform 0.32s cubic-bezier(0.32,0.72,0,1);
+    max-height: 90vh;
+    display: flex; flex-direction: column;
+    padding-bottom: env(safe-area-inset-bottom, 16px);
+}
+.drvapp-sheet.active { transform: translateY(0); }
+
+.drvapp-handle {
+    width: 36px; height: 4px;
+    border-radius: 2px;
+    background: rgba(255,255,255,0.18);
+    margin: 12px auto 4px;
+    flex-shrink: 0;
+}
+
+.drvapp-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 20px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    flex-shrink: 0;
+}
+.drvapp-title {
+    font-size: 17px; font-weight: 700; color: #fff;
+}
+.drvapp-close {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: rgba(255,255,255,0.1); border: none;
+    color: rgba(255,255,255,0.6); font-size: 13px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+}
+
+.drvapp-body {
+    overflow-y: auto; -webkit-overflow-scrolling: touch;
+    flex: 1; padding: 16px 20px 24px;
+    display: flex; flex-direction: column; gap: 14px;
+}
+
+.drvapp-error {
+    background: rgba(255,69,58,0.12);
+    border: 1px solid rgba(255,69,58,0.3);
+    border-radius: 10px; padding: 10px 14px;
+    font-size: 13px; color: #ff453a;
+}
+
+.drvapp-row {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+}
+
+.drvapp-field {
+    display: flex; flex-direction: column; gap: 6px;
+}
+
+.drvapp-label {
+    font-size: 11px; font-weight: 600;
+    color: rgba(255,255,255,0.4);
+    text-transform: uppercase; letter-spacing: 0.07em;
+}
+
+.drvapp-input {
+    background: #2a2a2a;
+    border: 1.5px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: 15px; color: #fff;
+    transition: border-color 0.2s;
+    width: 100%;
+}
+.drvapp-input:focus { border-color: #ffd84d; outline: none; }
+.drvapp-input::placeholder { color: rgba(255,255,255,0.25); }
+
+/* Сетка выбора тарифа */
+.drvapp-tariff-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+}
+
+.drvapp-tariff-chip {
+    padding: 10px 12px;
+    background: #2a2a2a;
+    border: 1.5px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    font-size: 13px; font-weight: 500;
+    color: rgba(255,255,255,0.6);
+    text-align: center; cursor: pointer;
+    transition: all 0.18s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+.drvapp-tariff-chip:active { transform: scale(0.96); }
+.drvapp-tariff-chip.active {
+    background: rgba(255,216,77,0.12);
+    border-color: rgba(255,216,77,0.4);
+    color: #ffd84d; font-weight: 600;
+}
+
+.drvapp-submit {
+    width: 100%; padding: 16px;
+    background: #ffd84d; color: #111;
+    font-size: 16px; font-weight: 700;
+    border-radius: 14px; border: none;
+    cursor: pointer; margin-top: 4px;
+    transition: opacity 0.2s, transform 0.1s;
+}
+.drvapp-submit:active { transform: scale(0.98); }
+.drvapp-submit:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.drvapp-hint {
+    font-size: 12px; color: rgba(255,255,255,0.3);
+    text-align: center; line-height: 1.5;
+}
+
+/* Светлая тема */
+body.light-theme .drvapp-sheet { background: #f5f5f5; }
+body.light-theme .drvapp-title { color: #141414; }
+body.light-theme .drvapp-input {
+    background: #fff; border-color: rgba(0,0,0,0.12); color: #141414;
+}
+body.light-theme .drvapp-tariff-chip {
+    background: #fff; border-color: rgba(0,0,0,0.1); color: rgba(0,0,0,0.55);
+}
+body.light-theme .drvapp-tariff-chip.active {
+    background: rgba(201,162,39,0.1); border-color: rgba(201,162,39,0.4); color: #b8860b;
+}
+
+/* ═══════════════════════════════════════════════════════
+   НОВЫЙ ТАРИФНЫЙ БЛОК — стиль Яндекс Go
+   ═══════════════════════════════════════════════════════ */
+
+/* ── Табы категорий ── */
+.tariff-tabs-wrap {
+    overflow: hidden;
+    margin: 0 -14px;
+    padding: 0 14px;
+}
+
+.tariff-tabs {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 4px 0 8px;
+}
+.tariff-tabs::-webkit-scrollbar { display: none; }
+
+.tariff-tab {
+    flex-shrink: 0;
+    padding: 7px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.55);
+    background: rgba(255,255,255,0.07);
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+    -webkit-tap-highlight-color: transparent;
+    transition: background 0.18s, color 0.18s;
+}
+.tariff-tab:active { opacity: 0.75; }
+.tariff-tab.active {
+    background: #fff;
+    color: #141414;
+    font-weight: 600;
+}
+
+/* ── Карточки машин ── */
+.tariff-cars {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    padding: 4px 0 6px;
+    margin: 0 -14px;
+    padding-left: 14px;
+    padding-right: 14px;
+}
+.tariff-cars::-webkit-scrollbar { display: none; }
+
+.tariff-car-card {
+    flex-shrink: 0;
+    width: 100px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 14px;
+    padding: 8px 8px 8px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    -webkit-tap-highlight-color: transparent;
+    transition: border-color 0.18s, background 0.18s;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    position: relative;
+}
+.tariff-car-card:active { opacity: 0.8; }
+.tariff-car-card.active {
+    border-color: rgba(255,216,77,0.6);
+    background: rgba(255,216,77,0.08);
+}
+
+/* Картинка авто */
+.tariff-car-img {
+    width: 100%;
+    height: 38px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.tariff-car-img img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4));
+}
+
+/* Время подачи */
+.tariff-car-eta {
+    font-size: 10px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.45);
+}
+
+/* Название машины */
+.tariff-car-name {
+    font-size: 11px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.92);
+    line-height: 1.2;
+}
+.tariff-car-card.active .tariff-car-name {
+    color: #ffd84d;
+}
+
+/* Цена */
+.tariff-car-price {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent-primary, #ffd84d);
+    margin-top: 0;
+}
+.tariff-car-price.has-value::before { content: ''; }
+.tariff-car-price:not(.has-value)::before {
+    content: 'от ';
+    font-weight: 400;
+    font-size: 10px;
+    color: rgba(255,255,255,0.4);
+}
+
+/* Онлайн-бейдж для реальных водителей */
+.tariff-car-online {
+    position: absolute;
+    top: 8px; right: 8px;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #34c759;
+    border: 1.5px solid rgba(0,0,0,0.3);
+}
+
+/* Рейтинг */
+.tariff-car-rating {
+    font-size: 11px;
+    color: rgba(255,255,255,0.4);
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+.tariff-car-rating i { font-size: 9px; color: #ffd84d; }
+
+/* Светлая тема */
+body.light-theme .tariff-tab {
+    color: rgba(0,0,0,0.5);
+    background: rgba(0,0,0,0.06);
+}
+body.light-theme .tariff-tab.active {
+    background: #141414;
+    color: #fff;
+}
+body.light-theme .tariff-car-card {
+    background: rgba(0,0,0,0.04);
+    border-color: transparent;
+}
+body.light-theme .tariff-car-card.active {
+    border-color: rgba(184,134,11,0.5);
+    background: rgba(201,162,39,0.08);
+}
+body.light-theme .tariff-car-name { color: #141414; }
+body.light-theme .tariff-car-card.active .tariff-car-name { color: #b8860b; }
+body.light-theme .tariff-car-eta { color: rgba(0,0,0,0.4); }
+
+/* Skeleton-загрузка */
+.tariff-car-skeleton {
+    flex-shrink: 0;
+    width: 120px; height: 120px;
+    border-radius: 16px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s infinite;
+}
+@keyframes shimmer {
+    0%   { background-position: -200% 0; }
+    100% { background-position:  200% 0; }
+}
+
+/* ═══════════════════════════════════════════════════════
+   ПОЛЕ КОММЕНТАРИЯ ВОДИТЕЛЮ
+   ═══════════════════════════════════════════════════════ */
+
+.comment-section {
+    padding: 4px 0 2px;
+}
+
+.comment-wrap {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255,255,255,0.06);
+    border: 1.5px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 14px 16px;
+    transition: border-color 0.2s;
+}
+
+.comment-wrap:focus-within {
+    border-color: rgba(255,216,77,0.45);
+    background: rgba(255,216,77,0.04);
+}
+
+.comment-icon {
+    font-size: 16px;
+    color: rgba(255,255,255,0.35);
+    flex-shrink: 0;
+    transition: color 0.2s;
+}
+
+.comment-wrap:focus-within .comment-icon {
+    color: #ffd84d;
+}
+
+.comment-input {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    font-size: 15px;
+    font-weight: 400;
+    color: var(--text, #f0f0f0);
+    font-family: inherit;
+}
+
+.comment-input::placeholder {
+    color: rgba(255,255,255,0.35);
+}
+
+/* Светлая тема */
+body.light-theme .comment-wrap {
+    background: rgba(0,0,0,0.04);
+    border-color: rgba(0,0,0,0.1);
+}
+body.light-theme .comment-wrap:focus-within {
+    border-color: rgba(184,134,11,0.4);
+    background: rgba(201,162,39,0.04);
+}
+body.light-theme .comment-icon { color: rgba(0,0,0,0.3); }
+body.light-theme .comment-wrap:focus-within .comment-icon { color: #b8860b; }
+body.light-theme .comment-input { color: #141414; }
+body.light-theme .comment-input::placeholder { color: rgba(0,0,0,0.3); }
+
+/* ═══════════════════════════════════════════════════════
+   БЛОК ДАТЫ И ВРЕМЕНИ ПОДАЧИ
+   ═══════════════════════════════════════════════════════ */
+
+.datetime-section { padding: 2px 0; }
+
+/* Пилюля "Прямо сейчас" */
+.datetime-pill {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255,255,255,0.06);
+    border: 1.5px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    -webkit-tap-highlight-color: transparent;
+}
+.datetime-pill:active { opacity: 0.8; }
+.datetime-pill.open {
+    border-color: rgba(255,216,77,0.4);
+    background: rgba(255,216,77,0.05);
+    border-radius: 16px 16px 0 0;
+    border-bottom-color: transparent;
+}
+
+.datetime-pill-icon { font-size: 15px; color: rgba(255,255,255,0.4); flex-shrink: 0; }
+.datetime-pill.open .datetime-pill-icon { color: #ffd84d; }
+
+.datetime-pill-label {
+    flex: 1;
+    font-size: 15px;
+    color: rgba(255,255,255,0.85);
+    font-weight: 400;
+}
+.datetime-pill.open .datetime-pill-label { color: #ffd84d; font-weight: 500; }
+.datetime-pill-label.has-schedule { color: #ffd84d; font-weight: 600; }
+
+.datetime-pill-arrow {
+    font-size: 12px;
+    color: rgba(255,255,255,0.3);
+    transition: transform 0.25s ease;
+}
+.datetime-pill.open .datetime-pill-arrow { transform: rotate(180deg); color: #ffd84d; }
+
+/* Раскрывающийся пикер */
+.datetime-picker {
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+    background: rgba(255,216,77,0.04);
+    border: 1.5px solid rgba(255,216,77,0.3);
+    border-top: none;
+    border-radius: 0 0 16px 16px;
+    padding: 14px 16px 16px;
+}
+.datetime-picker.open { display: flex; }
+
+.datetime-picker-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.datetime-picker-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.datetime-picker-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.35);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+}
+
+.datetime-picker-input {
+    background: rgba(255,255,255,0.08);
+    border: 1.5px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 10px 12px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #fff;
+    font-family: inherit;
+    outline: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+.datetime-picker-input:focus { border-color: rgba(255,216,77,0.5); }
+.datetime-picker-input::-webkit-calendar-picker-indicator {
+    filter: invert(1) opacity(0.4);
+    cursor: pointer;
+}
+
+.datetime-reset {
+    background: rgba(255,255,255,0.08);
+    border: 1.5px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255,255,255,0.5);
+    font-family: inherit;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.18s;
+}
+.datetime-reset:active { opacity: 0.7; }
+
+/* Скрыть в collapsed */
+.panel.collapsed .datetime-section { display: none; }
+
+/* Светлая тема */
+body.light-theme .datetime-pill {
+    background: rgba(0,0,0,0.04);
+    border-color: rgba(0,0,0,0.1);
+}
+body.light-theme .datetime-pill.open {
+    border-color: rgba(184,134,11,0.35);
+    background: rgba(201,162,39,0.05);
+}
+body.light-theme .datetime-pill-icon { color: rgba(0,0,0,0.3); }
+body.light-theme .datetime-pill.open .datetime-pill-icon { color: #b8860b; }
+body.light-theme .datetime-pill-label { color: rgba(0,0,0,0.8); }
+body.light-theme .datetime-pill.open .datetime-pill-label { color: #b8860b; }
+body.light-theme .datetime-picker {
+    background: rgba(201,162,39,0.04);
+    border-color: rgba(184,134,11,0.25);
+}
+body.light-theme .datetime-picker-input {
+    background: #fff;
+    border-color: rgba(0,0,0,0.1);
+    color: #141414;
+}
+body.light-theme .datetime-reset {
+    background: rgba(0,0,0,0.05);
+    border-color: rgba(0,0,0,0.1);
+    color: rgba(0,0,0,0.4);
+}
+
+/* ═══════════════════════════════════════════════════════
+   ПЕРЕКЛЮЧАТЕЛЬ ЯЗЫКА В МЕНЮ
+   ═══════════════════════════════════════════════════════ */
+
+.hs-di-lang { background: rgba(52,120,246,0.15) !important; color: #3478f6 !important; }
+
+.hs-lang-switcher {
+    display: flex;
+    background: rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 3px;
+    gap: 2px;
+    flex-shrink: 0;
+}
+
+.hs-lang-btn {
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: inherit;
+    border: none;
+    cursor: pointer;
+    transition: all 0.18s;
+    color: rgba(255,255,255,0.4);
+    background: transparent;
+    letter-spacing: 0.03em;
+}
+.hs-lang-btn.active {
+    background: #fff;
+    color: #141414;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+
+body.light-theme .hs-lang-switcher { background: rgba(0,0,0,0.07); }
+body.light-theme .hs-lang-btn { color: rgba(0,0,0,0.35); }
+body.light-theme .hs-lang-btn.active { background: #141414; color: #fff; }
